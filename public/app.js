@@ -2,6 +2,7 @@ const WORKER = window.WORKER_URL;
 let CURRICULUM = null;
 let PROGRESS = null;
 let FOCUS_LEVEL = null;
+let READONLY = false;
 
 async function loadCurriculum() {
   const res = await fetch("curriculum.json");
@@ -9,11 +10,20 @@ async function loadCurriculum() {
   return res.json();
 }
 
-async function loadMe() {
+async function loadProgress() {
+  const params = new URLSearchParams(window.location.search);
+  const as = params.get("as");
+  if (as) {
+    const res = await fetch(WORKER + "/api/user/" + encodeURIComponent(as), { credentials: "include" });
+    if (res.status === 401) return { unauthenticated: true };
+    if (res.status === 403) return { forbidden: true };
+    if (!res.ok) throw new Error("loadProgress(as) failed: " + res.status);
+    return { progress: await res.json(), readonly: true, viewingUsername: as };
+  }
   const res = await fetch(WORKER + "/api/me", { credentials: "include" });
-  if (res.status === 401) return null;
+  if (res.status === 401) return { unauthenticated: true };
   if (!res.ok) throw new Error("loadMe failed: " + res.status);
-  return res.json();
+  return { progress: await res.json(), readonly: false };
 }
 
 function isLevelComplete(level) {
@@ -104,6 +114,7 @@ function renderFocusCard() {
 }
 
 async function toggleTask(taskId) {
+  if (READONLY) return;
   const currentlyDone = PROGRESS.tasks[taskId]?.done === true;
   const newDone = !currentlyDone;
   // Optimistic
@@ -133,17 +144,28 @@ async function toggleTask(taskId) {
 
 async function init() {
   CURRICULUM = await loadCurriculum();
-  const me = await loadMe();
-  if (!me) {
+  const result = await loadProgress();
+  if (result.unauthenticated) {
     document.getElementById("signed-out").classList.remove("hidden");
     document.getElementById("signin-link").href = WORKER + "/auth/login";
     return;
   }
-  PROGRESS = me;
+  if (result.forbidden) {
+    document.body.innerHTML = "<pre style='padding:24px;color:#b91c1c'>Forbidden — admins only.</pre>";
+    return;
+  }
+  PROGRESS = result.progress;
+  READONLY = result.readonly;
   FOCUS_LEVEL = computeCurrentLevel();
   document.getElementById("signed-in").classList.remove("hidden");
-  document.getElementById("greeting-title").textContent =
-    "Welcome back, " + (PROGRESS.display_name || PROGRESS.github_username);
+
+  const title = READONLY
+    ? "Viewing " + (PROGRESS.display_name || PROGRESS.github_username)
+    : "Welcome back, " + (PROGRESS.display_name || PROGRESS.github_username);
+  document.getElementById("greeting-title").textContent = title;
+
+  if (READONLY) document.body.classList.add("readonly");
+
   const lvl = CURRICULUM.levels.find((l) => l.id === FOCUS_LEVEL);
   document.getElementById("greeting-sub").textContent = "Currently at " + lvl.title;
   renderTotals();

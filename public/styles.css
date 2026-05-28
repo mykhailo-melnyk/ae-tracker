@@ -266,3 +266,6 @@ body {
   font-weight: 600;
 }
 .signin-btn:hover { background: #1e293b; }
+
+body.readonly .check { cursor: default; opacity: 0.7; }
+body.readonly .task .check:hover { background: inherit; }

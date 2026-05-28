@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AE Tracker — Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">AE Tracker <span class="tag admin">ADMIN</span></div>
+    <div class="user"><span id="who"></span></div>
+  </div>
+
+  <div id="not-admin" class="container hidden">
+    <p style="padding:60px;text-align:center;color:#64748b">
+      You do not have access to the dashboard.
+      <a href="tracker.html">Go to your tracker →</a>
+    </p>
+  </div>
+
+  <div id="admin" class="container hidden">
+    <div class="page-head">
+      <div><h1>Business unit progress</h1><div class="sub">All engineers in the AE pilot · self-reported</div></div>
+      <div class="as-of" id="as-of"></div>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <div class="two-col">
+      <div class="card"><h3>Current level distribution</h3><div class="bars" id="bars"></div></div>
+      <div class="card"><h3>Task completion rate</h3><div id="task-rates"></div></div>
+    </div>
+    <div class="card">
+      <h3>Engineers</h3>
+      <div class="toolbar">
+        <input class="search" id="search" placeholder="🔍 Search by name or GitHub handle…">
+        <div class="filter-pill active" data-filter="all">All</div>
+        <div class="filter-pill" data-filter="L1">L1</div>
+        <div class="filter-pill" data-filter="L2">L2</div>
+        <div class="filter-pill" data-filter="L3">L3</div>
+        <div class="filter-pill" data-filter="L4">L4+</div>
+        <div class="filter-pill" data-filter="stalled">Stalled</div>
+      </div>
+      <table class="engineers"><thead><tr>
+        <th>Engineer</th><th>Current</th><th>Completion</th><th>Last active</th><th></th>
+      </tr></thead><tbody id="engineers-body"></tbody></table>
+    </div>
+  </div>
+
+  <script>window.WORKER_URL = "http://localhost:8787";</script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

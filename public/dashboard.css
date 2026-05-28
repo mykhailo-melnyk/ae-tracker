@@ -1,0 +1,208 @@
+/* dashboard.css — dashboard-specific styles (shared shell comes from styles.css) */
+
+/* ---- Admin tag variant ---- */
+.topbar .brand .tag.admin {
+  background: #7c3aed;
+}
+
+/* ---- Page header ---- */
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 20px;
+}
+.page-head h1 { font-size: 22px; }
+.page-head .sub { color: #64748b; font-size: 13px; margin-top: 2px; }
+.as-of { color: #94a3b8; font-size: 12px; }
+
+/* ---- KPI cards row ---- */
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.kpi {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.kpi .lbl {
+  font-size: 11px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.kpi .val { font-size: 28px; font-weight: 700; color: #0f172a; }
+.kpi .delta { font-size: 12px; color: #16a34a; margin-top: 4px; font-weight: 600; }
+.kpi .delta.flat { color: #64748b; }
+
+/* ---- Two-column section ---- */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* ---- Card ---- */
+.card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px 22px;
+}
+.card h3 { font-size: 14px; margin-bottom: 4px; }
+.card .card-sub { color: #64748b; font-size: 12.5px; margin-bottom: 16px; }
+
+/* ---- Bar chart (level distribution) ---- */
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  height: 180px;
+  padding: 0 6px;
+  margin-bottom: 8px;
+}
+.bar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+}
+.bar .bar-val { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+.bar .bar-fill {
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  background: #2563eb;
+  min-height: 4px;
+  position: relative;
+}
+.bar:nth-child(1) .bar-fill { background: #16a34a; }
+.bar:nth-child(2) .bar-fill { background: #2563eb; }
+.bar:nth-child(3) .bar-fill { background: #0891b2; }
+.bar:nth-child(4) .bar-fill { background: #7c3aed; }
+.bar:nth-child(5) .bar-fill { background: #db2777; }
+.bar .bar-lbl { font-size: 11px; color: #64748b; margin-top: 8px; text-align: center; }
+.bar .bar-lbl strong { display: block; color: #0f172a; font-size: 12px; }
+
+/* ---- Per-task completion list ---- */
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 0;
+  font-size: 12.5px;
+}
+.task-row .tid {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 44px;
+  text-align: center;
+}
+.task-row .tname { flex: 1; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.task-row .tbar { flex: 0 0 130px; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+.task-row .tbar > div { height: 100%; background: #2563eb; }
+.task-row .tpct { color: #475569; font-weight: 600; min-width: 44px; text-align: right; }
+
+/* ---- Engineer table toolbar ---- */
+.toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.search {
+  flex: 1;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #94a3b8;
+}
+.filter-pill {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12.5px;
+  color: #475569;
+  cursor: pointer;
+}
+.filter-pill.active { background: #0f172a; color: white; border-color: #0f172a; }
+
+/* ---- Engineer table ---- */
+table.engineers {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+table.engineers th {
+  text-align: left;
+  padding: 10px 12px;
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-bottom: 1px solid #e2e8f0;
+}
+table.engineers th:last-child { text-align: right; }
+table.engineers td {
+  padding: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+table.engineers tr:hover td { background: #f8fafc; }
+table.engineers tr:last-child td { border-bottom: none; }
+
+/* ---- Engineer identity cell ---- */
+.who { display: flex; align-items: center; gap: 10px; }
+.who .avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  color: white;
+  font-weight: 700;
+  font-size: 11px;
+  display: flex; align-items: center; justify-content: center;
+}
+.who .name { font-weight: 600; color: #0f172a; }
+.who .handle { font-size: 11.5px; color: #94a3b8; }
+
+/* ---- Level chip ---- */
+.level-chip {
+  display: inline-block;
+  background: #eff6ff;
+  color: #1e40af;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.level-chip.L1 { background: #f0fdf4; color: #166534; }
+.level-chip.L2 { background: #eff6ff; color: #1e40af; }
+.level-chip.L3 { background: #ecfeff; color: #0e7490; }
+.level-chip.L4 { background: #f5f3ff; color: #5b21b6; }
+.level-chip.L5 { background: #fdf2f8; color: #9d174d; }
+
+/* ---- Completion percentage cell ---- */
+.pct-cell { display: flex; align-items: center; gap: 10px; min-width: 140px; }
+.pct-cell .pct-bar { flex: 1; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+.pct-cell .pct-bar > div { background: #16a34a; height: 100%; }
+.pct-cell .pct-num { font-weight: 600; font-size: 12px; color: #1e293b; min-width: 36px; text-align: right; }
+
+/* ---- Last active cell ---- */
+.last-active { color: #64748b; font-size: 12px; }
+.last-active.stale { color: #d97706; font-weight: 600; }

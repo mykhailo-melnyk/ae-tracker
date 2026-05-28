@@ -27,3 +27,24 @@ export async function readJsonFile<T = unknown>(
   const decoded = atob(body.content.replace(/\n/g, ""));
   return { sha: body.sha, data: JSON.parse(decoded) as T };
 }
+
+export async function writeJsonFile(
+  cfg: RepoConfig,
+  path: string,
+  data: unknown,
+  sha: string | null,
+  message: string,
+  fetchFn: typeof fetch = fetch,
+): Promise<{ sha: string }> {
+  const content = btoa(JSON.stringify(data, null, 2));
+  const body: Record<string, unknown> = { message, content };
+  if (sha) body.sha = sha;
+  const res = await fetchFn(`${API}/repos/${cfg.owner}/${cfg.repo}/contents/${path}`, {
+    method: "PUT",
+    headers: { ...headers(cfg.token), "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`writeJsonFile ${res.status}: ${await res.text()}`);
+  const out = await res.json() as { content: { sha: string } };
+  return { sha: out.content.sha };
+}

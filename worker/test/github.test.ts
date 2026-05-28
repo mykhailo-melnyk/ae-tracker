@@ -1,6 +1,6 @@
 // worker/test/github.test.ts
 import { describe, it, expect } from "vitest";
-import { readJsonFile } from "../src/github";
+import { readJsonFile, writeJsonFile } from "../src/github";
 
 const cfg = { owner: "mykhailo-melnyk", repo: "ae-tracker-data", token: "tok" };
 
@@ -25,5 +25,36 @@ describe("readJsonFile", () => {
   it("throws on other errors", async () => {
     const fetchMock = (async () => new Response("server error", { status: 500 })) as typeof fetch;
     await expect(readJsonFile(cfg, "progress/x.json", fetchMock)).rejects.toThrow();
+  });
+});
+
+describe("writeJsonFile", () => {
+  it("PUTs content with the SHA when updating", async () => {
+    let captured: { url: string; init: RequestInit } | null = null;
+    const fetchMock = (async (url: string, init: RequestInit) => {
+      captured = { url, init };
+      return new Response(JSON.stringify({ content: { sha: "new-sha" } }), { status: 200 });
+    }) as typeof fetch;
+
+    await writeJsonFile(cfg, "progress/mykhailo-melnyk.json", { tasks: {} }, "old-sha", "msg", fetchMock);
+
+    expect(captured!.init.method).toBe("PUT");
+    const body = JSON.parse(captured!.init.body as string);
+    expect(body.sha).toBe("old-sha");
+    expect(body.message).toBe("msg");
+    const decoded = atob(body.content);
+    expect(JSON.parse(decoded)).toEqual({ tasks: {} });
+  });
+
+  it("omits SHA when creating a new file", async () => {
+    let capturedBody: any = null;
+    const fetchMock = (async (url: string, init: RequestInit) => {
+      capturedBody = JSON.parse(init.body as string);
+      return new Response(JSON.stringify({ content: { sha: "new-sha" } }), { status: 201 });
+    }) as typeof fetch;
+
+    await writeJsonFile(cfg, "progress/new.json", { tasks: {} }, null, "create", fetchMock);
+
+    expect(capturedBody.sha).toBeUndefined();
   });
 });

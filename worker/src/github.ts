@@ -48,3 +48,19 @@ export async function writeJsonFile(
   const out = await res.json() as { content: { sha: string } };
   return { sha: out.content.sha };
 }
+
+export interface DirEntry { name: string; path: string; }
+
+export async function listDirectory(
+  cfg: RepoConfig,
+  path: string,
+  fetchFn: typeof fetch = fetch,
+): Promise<DirEntry[]> {
+  const res = await fetchFn(`${API}/repos/${cfg.owner}/${cfg.repo}/contents/${path}`, {
+    headers: headers(cfg.token),
+  });
+  if (!res.ok) throw new Error(`listDirectory ${res.status}`);
+  const body = await res.json() as Array<{ name: string; type: string; path: string }>;
+  return body.filter((e) => e.type === "file" && e.name.endsWith(".json"))
+             .map((e) => ({ name: e.name, path: e.path }));
+}

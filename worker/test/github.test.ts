@@ -1,6 +1,6 @@
 // worker/test/github.test.ts
 import { describe, it, expect } from "vitest";
-import { readJsonFile, writeJsonFile } from "../src/github";
+import { readJsonFile, writeJsonFile, listDirectory } from "../src/github";
 
 const cfg = { owner: "mykhailo-melnyk", repo: "ae-tracker-data", token: "tok" };
 
@@ -56,5 +56,19 @@ describe("writeJsonFile", () => {
     await writeJsonFile(cfg, "progress/new.json", { tasks: {} }, null, "create", fetchMock);
 
     expect(capturedBody.sha).toBeUndefined();
+  });
+});
+
+describe("listDirectory", () => {
+  it("returns file names with .json suffix only", async () => {
+    const fetchMock = (async () => new Response(JSON.stringify([
+      { name: "mykhailo-melnyk.json", type: "file", path: "progress/mykhailo-melnyk.json" },
+      { name: "anna.json", type: "file", path: "progress/anna.json" },
+      { name: "README.md", type: "file", path: "progress/README.md" },
+      { name: "subdir", type: "dir", path: "progress/subdir" },
+    ]), { headers: { "content-type": "application/json" } })) as typeof fetch;
+
+    const result = await listDirectory(cfg, "progress", fetchMock);
+    expect(result.map((f) => f.name).sort()).toEqual(["anna.json", "mykhailo-melnyk.json"]);
   });
 });

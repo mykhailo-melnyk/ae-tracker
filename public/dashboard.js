@@ -106,6 +106,9 @@ async function init() {
   if (!AGG) return;
   document.getElementById("admin").classList.remove("hidden");
   document.getElementById("as-of").textContent = "As of " + new Date(AGG.as_of).toLocaleString();
+  // Topbar: sign-out link (admin identity is implicit from session — no need to fetch /api/me)
+  document.getElementById("who").innerHTML =
+    `<a class="signout-link" href="${WORKER}/auth/logout">Sign out</a>`;
   renderKpis(); renderBars(); renderTaskRates(); renderTable();
   wireFilters();
 }

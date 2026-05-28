@@ -269,3 +269,23 @@ body {
 
 body.readonly .check { cursor: default; opacity: 0.7; }
 body.readonly .task .check:hover { background: inherit; }
+
+.user .user-name {
+  font-size: 13px;
+  color: #475569;
+  font-weight: 500;
+}
+.user .signout-link {
+  font-size: 13px;
+  color: #64748b;
+  text-decoration: none;
+  padding: 4px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  margin-left: 10px;
+}
+.user .signout-link:hover {
+  color: #0f172a;
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}

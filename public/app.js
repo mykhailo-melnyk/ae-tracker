@@ -164,6 +164,13 @@ async function init() {
     : "Welcome back, " + (PROGRESS.display_name || PROGRESS.github_username);
   document.getElementById("greeting-title").textContent = title;
 
+  // Topbar: username + sign-out link
+  const userBox = document.getElementById("user-box");
+  userBox.innerHTML = `
+    <span class="user-name">${PROGRESS.display_name || PROGRESS.github_username}</span>
+    <a class="signout-link" href="${WORKER}/auth/logout">Sign out</a>
+  `;
+
   if (READONLY) document.body.classList.add("readonly");
 
   const lvl = CURRICULUM.levels.find((l) => l.id === FOCUS_LEVEL);

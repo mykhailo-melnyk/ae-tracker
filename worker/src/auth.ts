@@ -108,3 +108,14 @@ export async function handleCallback(
     },
   });
 }
+
+export function handleLogout(_request: Request, env: Env): Response {
+  const basePath = env.FRONTEND_BASE_PATH ?? "";
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: `${env.FRONTEND_ORIGIN}${basePath}/tracker.html`,
+      "Set-Cookie": `session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`,
+    },
+  });
+}

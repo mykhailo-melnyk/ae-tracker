@@ -57,6 +57,19 @@ describe("/auth/callback", () => {
     expect(setCookie).toContain("SameSite=Lax");
   });
 
+  it("logout clears the session cookie and redirects to the tracker", async () => {
+    const { handleLogout } = await import("../src/auth");
+    const req = new Request("https://w.example/auth/logout");
+    const res = handleLogout(req, baseEnv);
+    expect(res.status).toBe(302);
+    expect(res.headers.get("Location")).toBe("https://example.github.io/ae-tracker/tracker.html");
+    const setCookie = res.headers.get("Set-Cookie")!;
+    expect(setCookie).toMatch(/^session=;/);
+    expect(setCookie).toContain("Max-Age=0");
+    expect(setCookie).toContain("HttpOnly");
+    expect(setCookie).toContain("Secure");
+  });
+
   it("redirects to /tracker.html (no prefix) when FRONTEND_BASE_PATH is unset (local dev)", async () => {
     const fetchMock = mockFetch({
       "/login/oauth/access_token": { access_token: "gh-token-123", token_type: "bearer" },

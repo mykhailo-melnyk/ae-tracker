@@ -1,4 +1,4 @@
-import { handleLogin, handleCallback } from "./auth";
+import { handleLogin, handleCallback, handleLogout } from "./auth";
 import { handleApiMe, handleApiMark, handleApiUser } from "./api";
 import { handleApiAggregate } from "./aggregate";
 import curriculum from "../../public/curriculum.json";
@@ -43,6 +43,7 @@ export default {
     // /auth/* — no CORS needed (full-page redirects)
     if (url.pathname === "/auth/login") return handleLogin(request, env);
     if (url.pathname === "/auth/callback") return await handleCallback(request, env);
+    if (url.pathname === "/auth/logout") return handleLogout(request, env);
 
     // /api/*
     if (url.pathname === "/api/me") return withCors(await handleApiMe(request, env), env, request);

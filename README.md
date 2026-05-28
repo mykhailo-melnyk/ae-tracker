@@ -1,6 +1,6 @@
 # AE Progress Tracker
 
-> See [the design spec](https://github.com/solvdinc/agentic-engineering/blob/main/meta/specs/2026-05-27-progress-tracker-design.md) for the full architecture and decisions.
+> **Design & plan:** [`docs/2026-05-27-progress-tracker-design.md`](docs/2026-05-27-progress-tracker-design.md) (architecture + decisions) · [`docs/2026-05-27-progress-tracker-plan.md`](docs/2026-05-27-progress-tracker-plan.md) (step-by-step implementation plan). Canonical source is the [`solvdinc/agentic-engineering`](https://github.com/solvdinc/agentic-engineering) knowledge base under `meta/specs/` and `meta/plans/`; copies in this repo are kept for self-containment.
 
 ## What this is
 

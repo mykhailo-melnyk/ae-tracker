@@ -78,3 +78,22 @@ export async function handleApiMark(
 
   return Response.json(progress);
 }
+
+function isAdmin(username: string, env: Env): boolean {
+  return env.ADMIN_USERNAMES.split(",").map((s) => s.trim()).includes(username);
+}
+
+export async function handleApiUser(
+  request: Request,
+  env: Env,
+  fetchFn: typeof fetch,
+  targetUsername: string,
+): Promise<Response> {
+  const auth = await requireSession(request, env);
+  if (auth instanceof Response) return auth;
+  if (!isAdmin(auth, env)) return new Response("forbidden", { status: 403 });
+
+  const cfg = { owner: env.DATA_REPO_OWNER, repo: env.DATA_REPO_NAME, token: env.BOT_PAT };
+  const existing = await readJsonFile<ProgressFile>(cfg, progressPath(targetUsername), fetchFn);
+  return Response.json(existing?.data ?? emptyProgress(targetUsername));
+}

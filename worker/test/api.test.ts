@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { handleApiMe, handleApiMark } from "../src/api";
+import { handleApiMe, handleApiMark, handleApiUser } from "../src/api";
 import { signSession } from "../src/session";
 
 const ENV = {
@@ -80,5 +80,33 @@ describe("/api/mark", () => {
     const written = JSON.parse(atob(putBody.content));
     expect(written.tasks["L1.T1"].done).toBe(true);
     expect(written.tasks["L1.T1"].at).toBeTruthy();
+  });
+});
+
+describe("/api/user/:username (admin only)", () => {
+  it("returns 403 when caller is not in admin allowlist", async () => {
+    const session = await signSession("randomguy", ENV.SESSION_SECRET, 3600);
+    const env = { ...ENV, ADMIN_USERNAMES: "mykhailo-melnyk" };
+    const req = new Request("https://w.example/api/user/mykhailo-melnyk", {
+      headers: { Cookie: `session=${session}` },
+    });
+    const res = await handleApiUser(req, env, globalThis.fetch, "mykhailo-melnyk");
+    expect(res.status).toBe(403);
+  });
+
+  it("returns the target user's progress when caller is an admin", async () => {
+    const session = await signSession("mykhailo-melnyk", ENV.SESSION_SECRET, 3600);
+    const env = { ...ENV, ADMIN_USERNAMES: "mykhailo-melnyk,anotheradmin" };
+    const stored = { github_username: "anna", created_at: "x", updated_at: "y", tasks: {} };
+    const fetchMock = (async () => new Response(JSON.stringify({
+      sha: "s", content: btoa(JSON.stringify(stored)), encoding: "base64",
+    }), { headers: { "content-type": "application/json" } })) as typeof fetch;
+    const req = new Request("https://w.example/api/user/anna", {
+      headers: { Cookie: `session=${session}` },
+    });
+    const res = await handleApiUser(req, env, fetchMock, "anna");
+    expect(res.status).toBe(200);
+    const body = await res.json() as any;
+    expect(body.github_username).toBe("anna");
   });
 });

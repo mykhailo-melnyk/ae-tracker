@@ -248,6 +248,7 @@ Reference mockup: `manager-dashboard.html` in the brainstorm artifacts.
 - **Time-series.** Persist a daily snapshot of aggregates so we can chart adoption over time.
 - **Confluence/Teams integration.** Embed the dashboard or surface "your current level" via the existing Solvd AI Dev Guide bots.
 - **Self-served admin allowlist.** Replace the Worker env var with a JSON file in the frontend repo so adding a lead is a PR rather than a redeploy.
+- **Separate dev and prod environments.** v1 ships with a single Worker (`ae-tracker`) and a single OAuth App, whose callback URL points at production — so local development against `wrangler dev` is broken until either: (a) the callback URL is reverted to localhost, or (b) a second OAuth App is registered for local dev. Future: maintain two Wrangler environments (`[env.production]` and an implicit dev env), two OAuth Apps (prod + dev) with different Client IDs, and possibly two data repos (`ae-tracker-data` + `ae-tracker-data-staging`) so dev mutations never touch production engineers' progress files.
 
 ## Open Questions
 

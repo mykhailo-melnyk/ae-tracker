@@ -1,0 +1,12 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Wrangler
+.wrangler/
+.dev.vars        # local secrets, NEVER commit
+
+# Editor
+.DS_Store
+.vscode/
+*.swp

@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { computeAggregate } from "../src/aggregate";
+import { computeAggregate, handleApiAggregate } from "../src/aggregate";
+import { signSession } from "../src/session";
 
 const cfg = { owner: "x", repo: "y", token: "t" };
 
@@ -54,5 +55,34 @@ describe("computeAggregate", () => {
     expect(agg.by_task["L2.T1"]).toBe(0);
     expect(agg.stalled_14d).toBe(1); // ben hasn't updated in >14d
     expect(agg.engineers).toHaveLength(2);
+  });
+});
+
+describe("handleApiAggregate (auth gate)", () => {
+  const baseEnv = {
+    SESSION_SECRET: "test-secret-32-bytes-long-padding-ok",
+    DATA_REPO_OWNER: "x",
+    DATA_REPO_NAME: "y",
+    BOT_PAT: "t",
+    ADMIN_USERNAMES: "alice",
+  } as any;
+
+  const minimalCurriculum = { levels: [
+    { id: "L1", tasks: [{ id: "L1.T1" }], level_complete_when: "all_tasks_done" },
+  ] };
+
+  it("returns 401 when no session cookie", async () => {
+    const req = new Request("https://w.example/api/aggregate");
+    const res = await handleApiAggregate(req, baseEnv, minimalCurriculum as any, globalThis.fetch);
+    expect(res.status).toBe(401);
+  });
+
+  it("returns 403 when signed-in user is not an admin", async () => {
+    const session = await signSession("bob", baseEnv.SESSION_SECRET, 3600);
+    const req = new Request("https://w.example/api/aggregate", {
+      headers: { Cookie: `session=${session}` },
+    });
+    const res = await handleApiAggregate(req, baseEnv, minimalCurriculum as any, globalThis.fetch);
+    expect(res.status).toBe(403);
   });
 });

@@ -54,7 +54,7 @@ export async function handleApiMark(
 
   let body: { task_id?: string; done?: boolean };
   try { body = await request.json(); } catch { return new Response("invalid json", { status: 400 }); }
-  if (typeof body.task_id !== "string" || typeof body.done !== "boolean") {
+  if (typeof body.task_id !== "string" || body.task_id.length > 32 || typeof body.done !== "boolean") {
     return new Response("invalid body", { status: 400 });
   }
 

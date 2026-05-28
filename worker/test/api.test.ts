@@ -81,6 +81,17 @@ describe("/api/mark", () => {
     expect(written.tasks["L1.T1"].done).toBe(true);
     expect(written.tasks["L1.T1"].at).toBeTruthy();
   });
+
+  it("rejects task_id longer than 32 chars", async () => {
+    const session = await signSession("anna", ENV.SESSION_SECRET, 3600);
+    const req = new Request("https://w.example/api/mark", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ task_id: "A".repeat(33), done: true }),
+    });
+    const res = await handleApiMark(req, ENV, globalThis.fetch);
+    expect(res.status).toBe(400);
+  });
 });
 
 describe("/api/user/:username (admin only)", () => {

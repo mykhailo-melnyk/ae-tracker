@@ -71,4 +71,10 @@ describe("listDirectory", () => {
     const result = await listDirectory(cfg, "progress", fetchMock);
     expect(result.map((f) => f.name).sort()).toEqual(["anna.json", "mykhailo-melnyk.json"]);
   });
+
+  it("returns empty array when directory does not exist (404)", async () => {
+    const fetchMock = (async () => new Response("not found", { status: 404 })) as typeof fetch;
+    const result = await listDirectory(cfg, "progress", fetchMock);
+    expect(result).toEqual([]);
+  });
 });

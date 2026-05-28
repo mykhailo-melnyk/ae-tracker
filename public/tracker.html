@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AE Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">AE Tracker <span class="tag">SOLVD</span></div>
+    <div id="user-box" class="user"></div>
+  </div>
+
+  <div id="signed-out" class="container hidden">
+    <div class="signin-card">
+      <h1>Welcome to the AE Tracker</h1>
+      <p>Sign in with GitHub to see your personal progress through the 5 levels.</p>
+      <a id="signin-link" class="signin-btn" href="">Sign in with GitHub</a>
+    </div>
+  </div>
+
+  <div id="signed-in" class="container hidden">
+    <div class="greeting">
+      <div>
+        <h1 id="greeting-title">Welcome back</h1>
+        <div class="lede" id="greeting-sub"></div>
+      </div>
+      <div class="totals"><strong id="done-count">0</strong> / <span id="total-count">0</span> tasks done</div>
+    </div>
+
+    <div class="pill-bar-wrap"><div class="pill-bar" id="pill-bar"></div></div>
+    <div class="focus-card" id="focus-card"></div>
+  </div>
+
+  <script>
+    window.WORKER_URL = "http://localhost:8787"; // updated for production in Task 10.4
+  </script>
+  <script src="app.js"></script>
+</body>
+</html>

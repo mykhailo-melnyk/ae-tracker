@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { handleApiMe } from "../src/api";
+import { handleApiMe, handleApiMark } from "../src/api";
 import { signSession } from "../src/session";
 
 const ENV = {
@@ -47,5 +47,38 @@ describe("/api/me", () => {
     expect(res.status).toBe(200);
     const body = await res.json() as any;
     expect(body.tasks["L1.T1"].done).toBe(true);
+  });
+});
+
+describe("/api/mark", () => {
+  it("returns 401 with no session", async () => {
+    const req = new Request("https://w.example/api/mark", { method: "POST", body: "{}" });
+    const res = await handleApiMark(req, ENV, globalThis.fetch);
+    expect(res.status).toBe(401);
+  });
+
+  it("creates a progress file on first mark", async () => {
+    const session = await signSession("anna", ENV.SESSION_SECRET, 3600);
+    const calls: any[] = [];
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      calls.push({ url, method: init?.method ?? "GET", body: init?.body });
+      if (init?.method === "PUT") {
+        return new Response(JSON.stringify({ content: { sha: "new-sha" } }), { status: 201 });
+      }
+      // First read: 404 (no existing file)
+      return new Response("not found", { status: 404 });
+    }) as typeof fetch;
+    const req = new Request("https://w.example/api/mark", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ task_id: "L1.T1", done: true }),
+    });
+    const res = await handleApiMark(req, ENV, fetchMock);
+    expect(res.status).toBe(200);
+    const put = calls.find((c) => c.method === "PUT")!;
+    const putBody = JSON.parse(put.body);
+    const written = JSON.parse(atob(putBody.content));
+    expect(written.tasks["L1.T1"].done).toBe(true);
+    expect(written.tasks["L1.T1"].at).toBeTruthy();
   });
 });

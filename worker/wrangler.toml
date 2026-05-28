@@ -1,0 +1,16 @@
+name = "ae-tracker"
+main = "src/index.ts"
+compatibility_date = "2026-05-27"
+workers_dev = true
+
+# Vars (non-secret) — secrets are set via `wrangler secret put`
+[vars]
+DATA_REPO_OWNER = "mykhailo-melnyk"
+DATA_REPO_NAME = "ae-tracker-data"
+ADMIN_USERNAMES = "mykhailo-melnyk"  # comma-separated; e.g. "mykhailo-melnyk,jdoe"
+FRONTEND_ORIGIN = "https://mykhailo-melnyk.github.io"
+
+# KV namespace for aggregate cache (id filled in by Task 10.1)
+# [[kv_namespaces]]
+# binding = "AGGREGATE_CACHE"
+# id = "..."

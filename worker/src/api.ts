@@ -59,24 +59,32 @@ export async function handleApiMark(
   }
 
   const cfg = { owner: env.DATA_REPO_OWNER, repo: env.DATA_REPO_NAME, token: env.BOT_PAT };
-  const existing = await readJsonFile<ProgressFile>(cfg, progressPath(username), fetchFn);
-  const progress = existing?.data ?? emptyProgress(username);
-  const sha = existing?.sha ?? null;
+  const taskId = body.task_id;
+  const done = body.done;
+  const msg = `progress(${username}): ${done ? "✓" : "✗"} ${taskId}`;
 
-  const now = new Date().toISOString();
-  progress.tasks[body.task_id] = body.done ? { done: true, at: now } : { done: false };
-  progress.updated_at = now;
-
-  await writeJsonFile(
-    cfg,
-    progressPath(username),
-    progress,
-    sha,
-    `progress(${username}): ${body.done ? "✓" : "✗"} ${body.task_id}`,
-    fetchFn,
-  );
-
-  return Response.json(progress);
+  // Retry on 409 (GitHub's optimistic-concurrency rejection when SHA is stale,
+  // e.g. when two writes race). Re-read to pick up the fresh SHA, re-apply, retry.
+  const MAX_ATTEMPTS = 4;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const existing = await readJsonFile<ProgressFile>(cfg, progressPath(username), fetchFn);
+    const progress = existing?.data ?? emptyProgress(username);
+    const now = new Date().toISOString();
+    progress.tasks[taskId] = done ? { done: true, at: now } : { done: false };
+    progress.updated_at = now;
+    try {
+      await writeJsonFile(cfg, progressPath(username), progress, existing?.sha ?? null, msg, fetchFn);
+      return Response.json(progress);
+    } catch (e) {
+      const errStr = e instanceof Error ? e.message : String(e);
+      const isConflict = errStr.includes("writeJsonFile 409");
+      if (!isConflict || attempt === MAX_ATTEMPTS) throw e;
+      // Else: re-read & retry. Tiny back-off to give the other writer time to settle.
+      await new Promise((r) => setTimeout(r, 50 * attempt));
+    }
+  }
+  // Unreachable — loop either returns or throws.
+  throw new Error("unreachable");
 }
 
 function isAdmin(username: string, env: Env): boolean {

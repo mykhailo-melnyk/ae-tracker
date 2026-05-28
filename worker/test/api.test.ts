@@ -82,6 +82,35 @@ describe("/api/mark", () => {
     expect(written.tasks["L1.T1"].at).toBeTruthy();
   });
 
+  it("retries on a 409 SHA-conflict and succeeds on re-read", async () => {
+    const session = await signSession("anna", ENV.SESSION_SECRET, 3600);
+    let putAttempts = 0;
+    const stored = { github_username: "anna", created_at: "x", updated_at: "y", tasks: {} };
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      if (init?.method === "PUT") {
+        putAttempts += 1;
+        if (putAttempts === 1) {
+          // First write: simulate the SHA-conflict 409 GitHub returns when another
+          // writer beat us.
+          return new Response('{"message":"file does not match sha","status":"409"}', { status: 409 });
+        }
+        return new Response(JSON.stringify({ content: { sha: "new-sha" } }), { status: 200 });
+      }
+      // Reads always succeed — simulating the file existing.
+      return new Response(JSON.stringify({
+        sha: "fresh-sha", content: btoa(JSON.stringify(stored)), encoding: "base64",
+      }), { headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+    const req = new Request("https://w.example/api/mark", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ task_id: "L1.T1", done: true }),
+    });
+    const res = await handleApiMark(req, ENV, fetchMock);
+    expect(res.status).toBe(200);
+    expect(putAttempts).toBe(2);
+  });
+
   it("rejects task_id longer than 32 chars", async () => {
     const session = await signSession("anna", ENV.SESSION_SECRET, 3600);
     const req = new Request("https://w.example/api/mark", {

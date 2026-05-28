@@ -1,0 +1,185 @@
+{
+  "version": "1.0",
+  "source": "general/getting-started/levels.md",
+  "last_reviewed": "2026-05-12",
+  "levels": [
+    {
+      "id": "L1",
+      "title": "Understand",
+      "subtitle": "Use AI to Read, Not Write",
+      "move_on_when": "You can tell confident-correct from confident-guessing AI without checking every claim.",
+      "level_complete_when": "all_tasks_done",
+      "tasks": [
+        {
+          "id": "L1.T1",
+          "kind": "practice",
+          "title": "Ask AI to explain code you already know",
+          "desc": "Open a project you know well. Use @-references. Ask AI to walk you through the logic. The point is to build a baseline for spotting hallucinations."
+        },
+        {
+          "id": "L1.T2",
+          "kind": "practice",
+          "title": "Use /btw for side questions",
+          "desc": "Try the /btw command mid-task to get quick factual answers without interrupting your flow."
+        },
+        {
+          "id": "L1.T3",
+          "kind": "course",
+          "title": "AI Fluency: Framework & Foundations",
+          "desc": "Anthropic's foundational course — free with certificate.",
+          "link": "https://www.anthropic.com/learn"
+        },
+        {
+          "id": "L1.T4",
+          "kind": "checkpoint",
+          "title": "Spot confident-correct vs confident-guessing AI",
+          "desc": "You've caught AI hallucinating a few times and know what that looks like.",
+          "self_assessment": true
+        }
+      ]
+    },
+    {
+      "id": "L2",
+      "title": "Edit with Review",
+      "subtitle": "Quality Is the Point — the target level for most engineers at Solvd",
+      "move_on_when": "You instinctively review diffs, can look at AI-generated code and say 'this is overcomplicated, simplify' and get a better result.",
+      "level_complete_when": "all_tasks_done",
+      "tasks": [
+        {
+          "id": "L2.T1",
+          "kind": "practice",
+          "title": "Practice weak vs strong prompts",
+          "desc": "Pick a task you'd normally prompt vaguely. Rewrite the prompt with explicit constraints. Compare results."
+        },
+        {
+          "id": "L2.T2",
+          "kind": "practice",
+          "title": "Internalize the diff-review habit",
+          "desc": "For one week, read every diff before accepting. Note one thing you caught that you would have missed."
+        },
+        {
+          "id": "L2.T3",
+          "kind": "practice",
+          "title": "Practice the 3-try rule",
+          "desc": "When AI doesn't get it right in 3 attempts, the problem is your prompt or context. Reframe instead of retrying."
+        },
+        {
+          "id": "L2.T4",
+          "kind": "course",
+          "title": "Claude Code in Action",
+          "desc": "Modes, context control, and the habits that make daily AI usage productive. Free with certificate.",
+          "link": "https://www.anthropic.com/learn"
+        },
+        {
+          "id": "L2.T5",
+          "kind": "checkpoint",
+          "title": "I instinctively review diffs and ask for simplification",
+          "desc": "You no longer accept the first output without reading it.",
+          "self_assessment": true
+        }
+      ]
+    },
+    {
+      "id": "L3",
+      "title": "Plan and Implement",
+      "subtitle": "Think Before Building",
+      "move_on_when": "You never start multi-file work without Plan mode.",
+      "level_complete_when": "all_tasks_done",
+      "tasks": [
+        {
+          "id": "L3.T1",
+          "kind": "practice",
+          "title": "Use the 3-step workflow (Context → Plan → Implement) on a real change",
+          "desc": "Be explicit about @-references in step 1."
+        },
+        {
+          "id": "L3.T2",
+          "kind": "practice",
+          "title": "Use /branch to compare two approaches",
+          "desc": "Fork your session. Try approach A and B. Pick the better one."
+        },
+        {
+          "id": "L3.T3",
+          "kind": "course",
+          "title": "Claude Code in Action — Plan Mode chapters",
+          "link": "https://www.anthropic.com/learn"
+        },
+        {
+          "id": "L3.T4",
+          "kind": "checkpoint",
+          "title": "I never start >3-file work without a plan",
+          "self_assessment": true
+        }
+      ]
+    },
+    {
+      "id": "L4",
+      "title": "Orchestrate",
+      "subtitle": "Multiply Your Output",
+      "move_on_when": "You have automated feedback loops; team has shared custom commands.",
+      "level_complete_when": "all_tasks_done",
+      "tasks": [
+        {
+          "id": "L4.T1",
+          "kind": "practice",
+          "title": "Add a PostToolUse hook for type-checking",
+          "desc": "Catch type errors automatically after every edit."
+        },
+        {
+          "id": "L4.T2",
+          "kind": "practice",
+          "title": "Create a team /review custom command",
+          "desc": "Codify your team's review checklist."
+        },
+        {
+          "id": "L4.T3",
+          "kind": "practice",
+          "title": "Run a spec-driven implementation end-to-end"
+        },
+        {
+          "id": "L4.T4",
+          "kind": "course",
+          "title": "Agent Skills + Subagents (Anthropic Academy)",
+          "link": "https://www.anthropic.com/learn"
+        },
+        {
+          "id": "L4.T5",
+          "kind": "checkpoint",
+          "title": "I have an automated feedback loop catching bugs",
+          "self_assessment": true
+        }
+      ]
+    },
+    {
+      "id": "L5",
+      "title": "AI as Architecture Partner",
+      "subtitle": "Use AI for thinking, not just doing",
+      "move_on_when": "There is no Level 6 — you are using AI to challenge your own assumptions.",
+      "level_complete_when": "all_tasks_done",
+      "tasks": [
+        {
+          "id": "L5.T1",
+          "kind": "practice",
+          "title": "Run anti-sycophancy prompting on a real decision"
+        },
+        {
+          "id": "L5.T2",
+          "kind": "practice",
+          "title": "Use the evaluator-optimizer pattern"
+        },
+        {
+          "id": "L5.T3",
+          "kind": "course",
+          "title": "Building with the Claude API + MCP",
+          "link": "https://www.anthropic.com/learn"
+        },
+        {
+          "id": "L5.T4",
+          "kind": "checkpoint",
+          "title": "I use AI to challenge my own assumptions",
+          "self_assessment": true
+        }
+      ]
+    }
+  ]
+}

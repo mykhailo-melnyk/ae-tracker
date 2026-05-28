@@ -59,10 +59,76 @@ function renderPillBar() {
   }
 }
 
+function renderTotals() {
+  const totalTasks = CURRICULUM.levels.reduce((n, l) => n + l.tasks.length, 0);
+  const done = CURRICULUM.levels.reduce((n, l) => n + tasksDoneInLevel(l), 0);
+  document.getElementById("done-count").textContent = done;
+  document.getElementById("total-count").textContent = totalTasks;
+}
+
 function renderFocusCard() {
-  // Implemented in Task 7.3 — for now just a stub so the click handler doesn't crash
   const card = document.getElementById("focus-card");
-  if (card) card.textContent = "Focus level: " + FOCUS_LEVEL;
+  const lvl = CURRICULUM.levels.find((l) => l.id === FOCUS_LEVEL);
+  if (!lvl) { card.innerHTML = ""; return; }
+  const done = tasksDoneInLevel(lvl);
+  const total = lvl.tasks.length;
+
+  const taskHtml = lvl.tasks.map((task) => {
+    const isDone = PROGRESS.tasks[task.id]?.done === true;
+    return `
+      <div class="task ${isDone ? "done" : ""}" data-task="${task.id}">
+        <div class="check"></div>
+        <div class="body">
+          <div class="title">${task.title} <span class="kind-tag ${task.kind}">${task.kind}</span></div>
+          ${task.desc ? `<div class="desc">${task.desc}</div>` : ""}
+          ${task.link ? `<a class="external" href="${task.link}" target="_blank" rel="noopener">${task.link} ↗</a>` : ""}
+        </div>
+      </div>`;
+  }).join("");
+
+  card.innerHTML = `
+    <div class="focus-head">
+      <div>
+        <span class="level-tag">LEVEL ${lvl.id.slice(1)} · ${lvl.id === computeCurrentLevel() ? "CURRENT" : "PREVIEW"}</span>
+        <h2>${lvl.title}</h2>
+        <div class="sub">${lvl.subtitle}</div>
+      </div>
+      <div class="count">${done} / ${total}</div>
+    </div>
+    ${lvl.move_on_when ? `<div class="move-on"><strong>Move on when:</strong> ${lvl.move_on_when}</div>` : ""}
+    ${taskHtml}
+  `;
+  card.querySelectorAll(".task").forEach((el) => {
+    el.querySelector(".check").addEventListener("click", () => toggleTask(el.dataset.task));
+  });
+}
+
+async function toggleTask(taskId) {
+  const currentlyDone = PROGRESS.tasks[taskId]?.done === true;
+  const newDone = !currentlyDone;
+  // Optimistic
+  PROGRESS.tasks[taskId] = { done: newDone, at: new Date().toISOString() };
+  renderTotals();
+  renderPillBar();
+  renderFocusCard();
+  // Persist
+  try {
+    const res = await fetch(WORKER + "/api/mark", {
+      method: "POST",
+      credentials: "include",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ task_id: taskId, done: newDone }),
+    });
+    if (!res.ok) throw new Error("mark failed: " + res.status);
+    PROGRESS = await res.json();
+  } catch (e) {
+    // Roll back
+    PROGRESS.tasks[taskId] = { done: currentlyDone };
+    renderTotals();
+    renderPillBar();
+    renderFocusCard();
+    alert("Could not save your change. Try again in a moment.");
+  }
 }
 
 async function init() {
@@ -80,10 +146,7 @@ async function init() {
     "Welcome back, " + (PROGRESS.display_name || PROGRESS.github_username);
   const lvl = CURRICULUM.levels.find((l) => l.id === FOCUS_LEVEL);
   document.getElementById("greeting-sub").textContent = "Currently at " + lvl.title;
-  const totalTasks = CURRICULUM.levels.reduce((n, l) => n + l.tasks.length, 0);
-  const done = CURRICULUM.levels.reduce((n, l) => n + tasksDoneInLevel(l), 0);
-  document.getElementById("done-count").textContent = done;
-  document.getElementById("total-count").textContent = totalTasks;
+  renderTotals();
   renderPillBar();
   renderFocusCard();
 }

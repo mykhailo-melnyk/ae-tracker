@@ -54,7 +54,8 @@ describe("/auth/callback", () => {
     expect(setCookie).toMatch(/^session=[^;]+;/);
     expect(setCookie).toContain("HttpOnly");
     expect(setCookie).toContain("Secure");
-    expect(setCookie).toContain("SameSite=Lax");
+    // SameSite=None required for cross-origin fetch (Pages -> Worker)
+    expect(setCookie).toContain("SameSite=None");
   });
 
   it("logout clears the session cookie and redirects to the tracker", async () => {

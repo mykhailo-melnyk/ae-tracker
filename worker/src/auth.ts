@@ -104,7 +104,10 @@ export async function handleCallback(
     status: 302,
     headers: {
       Location: `${env.FRONTEND_ORIGIN}${basePath}/tracker.html`,
-      "Set-Cookie": `session=${session}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_TTL_SECONDS}`,
+      // SameSite=None is required so the browser sends the cookie on cross-origin
+      // fetch() from the frontend (github.io) to this Worker (workers.dev). With
+      // Lax the cookie is set but never attached to fetch — only to top-level navs.
+      "Set-Cookie": `session=${session}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=${SESSION_TTL_SECONDS}`,
     },
   });
 }
@@ -115,7 +118,7 @@ export function handleLogout(_request: Request, env: Env): Response {
     status: 302,
     headers: {
       Location: `${env.FRONTEND_ORIGIN}${basePath}/tracker.html`,
-      "Set-Cookie": `session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`,
+      "Set-Cookie": `session=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0`,
     },
   });
 }

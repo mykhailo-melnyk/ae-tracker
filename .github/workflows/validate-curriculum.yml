@@ -1,0 +1,23 @@
+name: Validate curriculum
+
+on:
+  push:
+    paths:
+      - "public/curriculum.json"
+      - "schema/curriculum.schema.json"
+      - ".github/workflows/validate-curriculum.yml"
+  pull_request:
+    paths:
+      - "public/curriculum.json"
+      - "schema/curriculum.schema.json"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install -g ajv-cli ajv-formats
+      - run: ajv validate -s schema/curriculum.schema.json -d public/curriculum.json -c ajv-formats

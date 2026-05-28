@@ -12,6 +12,7 @@ describe("/auth/callback", () => {
     OAUTH_CLIENT_SECRET: "secret-xyz",
     SESSION_SECRET: "test-secret-32-bytes-long-padding-ok",
     FRONTEND_ORIGIN: "https://example.github.io",
+    FRONTEND_BASE_PATH: "/ae-tracker",
   } as any;
 
   function mockFetch(responses: Record<string, any>): typeof fetch {
@@ -54,6 +55,20 @@ describe("/auth/callback", () => {
     expect(setCookie).toContain("HttpOnly");
     expect(setCookie).toContain("Secure");
     expect(setCookie).toContain("SameSite=Lax");
+  });
+
+  it("redirects to /tracker.html (no prefix) when FRONTEND_BASE_PATH is unset (local dev)", async () => {
+    const fetchMock = mockFetch({
+      "/login/oauth/access_token": { access_token: "gh-token-123", token_type: "bearer" },
+      "api.github.com/user": { login: "mykhailo-melnyk", name: "Mykhailo Melnyk" },
+    });
+    const devEnv = { ...baseEnv, FRONTEND_ORIGIN: "http://localhost:8080", FRONTEND_BASE_PATH: undefined };
+    const req = new Request("https://w.example/auth/callback?code=abc&state=goodstate", {
+      headers: { Cookie: "oauth_state=goodstate" },
+    });
+    const res = await handleCallback(req, devEnv, fetchMock);
+    expect(res.status).toBe(302);
+    expect(res.headers.get("Location")).toBe("http://localhost:8080/tracker.html");
   });
 });
 

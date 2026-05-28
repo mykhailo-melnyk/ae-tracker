@@ -62,29 +62,48 @@ export async function handleCallback(
       code,
     }),
   });
-  if (!tokenRes.ok) return new Response("OAuth token exchange failed", { status: 502 });
-  const tokenJson = await tokenRes.json() as { access_token?: string };
+  if (!tokenRes.ok) {
+    const bodyText = await tokenRes.text();
+    return new Response(
+      `OAuth token exchange failed — status ${tokenRes.status}; body: ${bodyText.slice(0, 500)}`,
+      { status: 502 },
+    );
+  }
+  const tokenJson = await tokenRes.json() as { access_token?: string; error?: string; error_description?: string };
   const accessToken = tokenJson.access_token;
-  if (!accessToken) return new Response("No access token in response", { status: 502 });
+  if (!accessToken) {
+    return new Response(
+      `No access token in response — error: ${tokenJson.error ?? "(none)"}; description: ${tokenJson.error_description ?? "(none)"}`,
+      { status: 502 },
+    );
+  }
 
-  // Fetch user identity
+  // Fetch user identity. Use "token <oauth>" scheme — GitHub's documented scheme
+  // for OAuth-flow tokens. (Bearer also works for most endpoints but token is canonical.)
   const userRes = await fetchFn("https://api.github.com/user", {
     headers: {
-      authorization: `Bearer ${accessToken}`,
+      authorization: `token ${accessToken}`,
       "user-agent": "ae-tracker-worker",
       accept: "application/vnd.github+json",
     },
   });
-  if (!userRes.ok) return new Response("Failed to fetch GitHub user", { status: 502 });
+  if (!userRes.ok) {
+    const bodyText = await userRes.text();
+    return new Response(
+      `Failed to fetch GitHub user — status ${userRes.status}; body: ${bodyText.slice(0, 500)}`,
+      { status: 502 },
+    );
+  }
   const user = await userRes.json() as { login: string; name?: string };
 
   // Mint session cookie
   const session = await signSession(user.login, env.SESSION_SECRET, SESSION_TTL_SECONDS);
 
+  const basePath = env.FRONTEND_BASE_PATH ?? "";
   return new Response(null, {
     status: 302,
     headers: {
-      Location: `${env.FRONTEND_ORIGIN}/ae-tracker/tracker.html`,
+      Location: `${env.FRONTEND_ORIGIN}${basePath}/tracker.html`,
       "Set-Cookie": `session=${session}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_TTL_SECONDS}`,
     },
   });

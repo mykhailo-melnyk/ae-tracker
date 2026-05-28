@@ -2,9 +2,9 @@
 node_modules/
 npm-debug.log*
 
-# Wrangler
+# Wrangler — NEVER commit .dev.vars; it holds local secrets
 .wrangler/
-.dev.vars        # local secrets, NEVER commit
+.dev.vars
 
 # Editor
 .DS_Store

@@ -8,6 +8,7 @@ export interface Env {
   DATA_REPO_NAME: string;
   ADMIN_USERNAMES: string;
   FRONTEND_ORIGIN: string;
+  FRONTEND_BASE_PATH?: string;
   SESSION_SECRET: string;
   OAUTH_CLIENT_ID: string;
   OAUTH_CLIENT_SECRET: string;

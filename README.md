@@ -49,6 +49,25 @@ FRONTEND_ORIGIN=http://localhost:8080
 
 Do not commit `.dev.vars` — it's in `.gitignore`.
 
+## Known issues
+
+### Firefox with strict tracking protection blocks the session cookie
+
+**Symptom:** signing in succeeds on `https://mykhailo-melnyk.github.io/ae-tracker/`, but every reload sends you back to the sign-in card. DevTools shows `GET /api/me → 401` even after sign-in.
+
+**Cause:** The frontend lives on `mykhailo-melnyk.github.io` and the Worker on `ae-tracker.mihael-melnyk.workers.dev` — two different registrable domains. The session cookie is set by the Worker on its own domain, so when the frontend's `fetch()` sends it back, Firefox classifies it as a third-party cookie. Firefox's **Enhanced Tracking Protection** in "Strict" mode (and Total Cookie Protection) blocks third-party cookies, so the cookie never reaches the Worker.
+
+**Workaround (per user, takes 5 seconds):**
+
+1. Visit `https://mykhailo-melnyk.github.io/ae-tracker/tracker.html`.
+2. Click the shield icon 🛡️ to the left of the URL.
+3. Toggle **Enhanced Tracking Protection** off for this site.
+4. Reload and sign in again.
+
+**Proper fix (deferred — see Future Work in the design spec):** put the Worker behind a subdomain of a domain you control (e.g. `tracker-api.solvd.com`). When both frontend and Worker share the same registrable domain, the session cookie is first-party and no browser blocks it. Requires ~30 minutes of DNS + Cloudflare custom-domain setup; only worth doing if multiple Firefox users hit this.
+
+Chrome, Safari (signed-in, with cross-site cookies enabled per default), and Firefox with "Standard" tracking protection are unaffected.
+
 ## Layout
 
 ```

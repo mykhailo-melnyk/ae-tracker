@@ -267,6 +267,20 @@ body {
 }
 .signin-btn:hover { background: #1e293b; }
 
+.firefox-note {
+  margin-top: 28px;
+  padding: 12px 16px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #78350f;
+  background: #fef3c7;
+  border-left: 3px solid #d97706;
+  border-radius: 6px;
+  text-align: left;
+}
+.firefox-note strong { color: #78350f; }
+.firefox-note em { font-style: normal; font-weight: 600; }
+
 body.readonly .check { cursor: default; opacity: 0.7; }
 body.readonly .task .check:hover { background: inherit; }
 

@@ -148,6 +148,12 @@ async function init() {
   if (result.unauthenticated) {
     document.getElementById("signed-out").classList.remove("hidden");
     document.getElementById("signin-link").href = WORKER + "/auth/login";
+    // Firefox's strict Enhanced Tracking Protection blocks our cross-site
+    // session cookie. Show the workaround note only to Firefox users to avoid
+    // noise for everyone else.
+    if (navigator.userAgent.includes("Firefox")) {
+      document.getElementById("firefox-note").classList.remove("hidden");
+    }
     return;
   }
   if (result.forbidden) {

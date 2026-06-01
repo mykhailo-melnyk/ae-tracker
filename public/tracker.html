@@ -34,7 +34,9 @@
   </div>
 
   <script>
-    window.WORKER_URL = "https://ae-tracker.mihael-melnyk.workers.dev";
+    window.WORKER_URL = ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname)
+      ? "http://localhost:8787"
+      : "https://ae-tracker.mihael-melnyk.workers.dev";
   </script>
   <script src="app.js"></script>
 </body>

@@ -110,8 +110,8 @@
       "subtitle": "Quality Is the Point — the target level for most engineers at Solvd",
       "move_on_when": "You instinctively review diffs, can look at AI-generated code and say 'this is overcomplicated, simplify' and get a better result.",
       "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/levels.md#level-2-edit-with-review--quality-is-the-point",
-      "estimated_hours_min": 7,
-      "estimated_hours_max": 9,
+      "estimated_hours_min": 15,
+      "estimated_hours_max": 20,
       "level_complete_when": "all_tasks_done",
       "tasks": [
         {
@@ -182,8 +182,8 @@
       "subtitle": "Think Before Building",
       "move_on_when": "You never start multi-file work without Plan mode.",
       "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/levels.md#level-3-plan-and-implement--think-before-building",
-      "estimated_hours_min": 3,
-      "estimated_hours_max": 5,
+      "estimated_hours_min": 10,
+      "estimated_hours_max": 15,
       "level_complete_when": "all_tasks_done",
       "tasks": [
         {

@@ -178,6 +178,20 @@
       "level_complete_when": "all_tasks_done",
       "tasks": [
         {
+          "id": "L3.T5",
+          "kind": "reading",
+          "title": "Spec-Driven Development",
+          "desc": "Write a specification before writing code. Use AI to draft the spec, then generate architecture, then implement step-by-step with explicit STOP points. This is the workflow the 3-step practice below operationalizes — read this first so 'Context → Plan → Implement' has weight behind each word.",
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/workflows/spec-driven-dev.md"
+        },
+        {
+          "id": "L3.T6",
+          "kind": "reading",
+          "title": "AI Model Selection Guide",
+          "desc": "Opus for architecture and complex reasoning, Sonnet for daily coding, Haiku for quick queries. L3 is where this first matters — Plan mode and thinking mode let you spend more compute, and choosing the right model for the plan phase vs the code phase is a real productivity lever.",
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/tools/model-selection.md"
+        },
+        {
           "id": "L3.T1",
           "kind": "practice",
           "title": "Use the 3-step workflow (Context → Plan → Implement) on a real change",

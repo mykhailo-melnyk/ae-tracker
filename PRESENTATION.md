@@ -14,38 +14,43 @@ Doing it by accident — letting each engineer figure it out alone — produces 
 
 ## Success criteria
 
-We will know this program is working when, **6 months in**:
+L1 ("Understand") and L2 ("Edit with Review") are **universal baseline expectations for the unit** — every engineer is expected to reach them. L3-L5 remain role-dependent (feature leads, platform engineers, architects).
+
+We will know this program is working when, **12 months in**:
 
 | Metric | Source | Target |
 |---|---|---|
-| Engineers signed up & started L1 | Tracker dashboard | ≥ 85% of unit |
-| Engineers at L2 or higher | Tracker dashboard | ≥ 55% of unit |
-| Engineers stalled (no activity in 14d) | Tracker dashboard | ≤ 10% of *started* |
-| Average curriculum completion | Tracker dashboard | ≥ 50% |
-| Custom commands / skills shared across teams | Manual count | ≥ 5 reusable artifacts |
-| Engineers reporting they use Claude Code daily | Quarterly survey | ≥ 50% |
+| Engineers completed L1 | Tracker dashboard | **100% of unit** |
+| Engineers completed L2 | Tracker dashboard | **100% of unit** |
+| Engineers stalled (no activity in 14d) | Tracker dashboard | ≤ 5% of *active* |
+| Average curriculum completion | Tracker dashboard | ≥ 75% |
+| Custom commands / skills shared across teams | Manual count | ≥ 15 reusable artifacts |
+| Engineers reporting they use Claude Code daily | Quarterly survey | ≥ 80% |
 
-L2 ("Edit with Review") is the explicit target steady state for most engineers per the original curriculum design. Hitting 55% at L2+ in 6 months means the bulk of the unit is operating at the level where AI-assisted development is productive and quality-controlled, not chaotic.
+100% is the stated ambition. In practice, expect natural attrition: engineers on extended leave, exits, or late hires will leave a residual 5-10% short of literal 100% at any given snapshot. The headline target is "every engineer at L2 within their first 12 months in the unit."
+
+L3-L5 are explicitly **not** unit-wide targets — see the "Who should reach which level" section below.
 
 ## 3 / 6 / 12-month milestones
 
-Targets below assume engineers receive **~5 hrs/week of explicit upskilling time** (see ask #3 in "What we're asking for"). If we settle on a lower cadence, calendar timelines stretch roughly linearly — these targets would shift right accordingly. All percentages are of the business-unit headcount.
+Targets assume engineers receive **~5 hrs/week of explicit upskilling time** (see ask #3 in "What we're asking for"). The L1+L2 100% target depends on this — without dedicated time, the calendar stretches roughly linearly and the 12-month deadline slips. All percentages are of the business-unit headcount.
 
 | Milestone | 3 months | 6 months | 12 months |
 |---|---:|---:|---:|
-| % signed up & started L1 | 70% | 85% | 95% |
-| % completed L1 (Understand) | 45% | 75% | 90% |
-| % at L2+ (target steady state) | 30% | 55% | 75% |
-| % at L3+ (feature leads) | 8% | 20% | 35% |
-| % at L4+ (platform engineers) | 2% | 8% | 15% |
-| % at L5 (architects) | 0% | 2% | 5% |
-| Stalled rate (no activity 14d) | ≤ 20% | ≤ 10% | ≤ 8% |
+| % completed L1 (Understand) | 35% | 70% | **100%** |
+| % at L2+ (universal baseline) | 15% | 45% | **100%** |
+| % at L3+ (feature leads) | 3% | 12% | 30% |
+| % at L4+ (platform engineers) | 0% | 5% | 12% |
+| % at L5 (architects) | 0% | 1% | 3% |
+| Stalled rate (no activity 14d) | ≤ 25% | ≤ 12% | ≤ 5% |
 
-Multiply by your unit headcount to get absolute numbers. Example for a 100-engineer unit at 6 months: 85 started, 55 at L2+, 20 at L3+, 8 at L4+, 2 at L5.
+Multiply by your unit headcount to get absolute numbers. Example for a 100-engineer unit at 6 months: 70 completed L1, 45 at L2+, 12 at L3+, 5 at L4+, 1 at L5.
+
+**Math check for the 100% L2 target:** L1+L2 cumulative time is 37-49 hours per engineer. At 5 hrs/week, that's 7-10 weeks of effective work. Spread across 12 months allows for onboarding lag, parental leave, project deadlines, and other interruptions — the per-engineer commitment is small enough that 100% is mathematically feasible *if* the dedicated time is allocated.
 
 ## What we're asking for
 
-1. **OKR inclusion.** Add `% of unit at L2+` as an OKR for the business unit at the next quarterly cycle. Makes the program visible to senior leadership and converts a soft target into a tracked one. The 6-month target in the milestones table (55% at L2+) becomes the OKR commitment.
+1. **OKR inclusion.** Add `% of unit at L2+` as an OKR for the business unit. Makes the program visible to senior leadership and converts a soft target into a tracked one. The OKR commitment should match the milestones table — e.g., 45% at L2+ at the 6-month mark, climbing to 100% at L2+ by the 12-month mark.
 
 2. **Unit Leaders as the pilot cohort.** Unit Leaders complete the curriculum first — they're the natural ambassadors. Going through it themselves before rolling it down accomplishes three things: (a) builds their own AI fluency, (b) gives them firsthand experience of the time commitment and content quality, (c) makes their downstream advocacy credible to engineers. Start date for the Unit Leader cohort: *[fill in: target start date]*.
 

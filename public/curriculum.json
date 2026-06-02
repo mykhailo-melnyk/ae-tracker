@@ -109,6 +109,34 @@
       "level_complete_when": "all_tasks_done",
       "tasks": [
         {
+          "id": "L2.T6",
+          "kind": "reading",
+          "title": "Prompt Patterns",
+          "desc": "Effective prompts are short, concrete, verifiable. Covers proven prompt patterns (Socratic, 3x3, Evaluator-Optimizer) and workflow patterns (chaining, parallelization). Read before L2.T1 (weak vs strong prompts) — it's the toolkit that practice task draws on.",
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/workflows/prompt-patterns.md"
+        },
+        {
+          "id": "L2.T7",
+          "kind": "reading",
+          "title": "Context Engineering",
+          "desc": "What AI sees, when, and how. Three context layers (project memory, rules, conversation), automating context injection with hooks, cross-session persistence. The Working Memory property from L1 made operational.",
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/workflows/context-engineering.md"
+        },
+        {
+          "id": "L2.T8",
+          "kind": "reading",
+          "title": "Code Review with AI",
+          "desc": "First-pass review framework: Logic → Security → Performance → Maintainability → Style. AI catches patterns; humans validate architecture and business logic. Surgical-changes principle: every changed line traces to the request. Underpins L2.T2 (diff-review habit).",
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/workflows/code-review-with-ai.md"
+        },
+        {
+          "id": "L2.T9",
+          "kind": "reading",
+          "title": "Debugging with AI",
+          "desc": "Give AI the full error context (message, stack, code, what you tried). Use AI for hypothesis generation, never for unverified fixes — AI generates plausible hypotheses, not verified ones. Underpins L2.T3 (3-try rule).",
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/workflows/debugging-with-ai.md"
+        },
+        {
           "id": "L2.T1",
           "kind": "practice",
           "title": "Practice weak vs strong prompts",

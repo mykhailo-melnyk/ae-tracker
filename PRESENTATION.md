@@ -68,11 +68,11 @@ These are intentionally not in scope for the initial ask but should be discussed
 | **L1 Understand** | Use AI to read, not write | 1.5 h | 1 h | 3.5 h | 16–23 h (5 courses) | **22–29 h** |
 | **L2 Edit with Review** | Quality is the point | 2 h | 5–8 h | — | 3–4 h (1 course) | **15–20 h** |
 | **L3 Plan and Implement** | Think before building | 1 h | 4–8 h | — | 30 m–1 h (rewatch) | **10–15 h** |
-| **L4 Orchestrate** | Multiply your output | 2 h | 6–10 h | — | 4–6 h (2 courses) | **12–18 h** |
-| **L5 AI as Architecture Partner** | Use AI for thinking | 20 m | 2–3 h | — | 23–32 h (3 courses) | **26–35 h** |
-| **Whole curriculum** |  | ~7 h | ~18–30 h | 3.5 h | ~47–66 h | **~85–117 h** |
+| **L4 Orchestrate** | Multiply your output | 2 h | 10–16 h | — | 4–6 h (2 courses) | **16–24 h** |
+| **L5 AI as Architecture Partner** | Use AI for thinking | 20 m | 5–8 h | — | 23–32 h (3 courses) | **29–40 h** |
+| **Whole curriculum** |  | ~7 h | ~25–43 h | 3.5 h | ~47–66 h | **~92–128 h** |
 
-Practice hours for L2 and L3 reflect habit-formation cost (e.g. "diff-review habit for one week" is ~3-5 hours of slowdown during real work; "one real multi-file change end-to-end with Plan mode" is one full afternoon), not single-sitting task completion.
+Practice hours across all levels reflect habit-formation cost, not single-sitting task completion. Examples: L2's "diff-review habit for one week" is ~3-5 hours of slowdown during real work; L3's "one real multi-file change end-to-end with Plan mode" is one full afternoon; L4's "Run a spec-driven implementation end-to-end" implies a real shipped feature; L5's anti-sycophancy and evaluator-optimizer techniques applied to a real architecture decision span days, not minutes.
 
 ## Calendar projection
 
@@ -83,10 +83,10 @@ Most engineers will work through this part-time alongside their normal workload.
 | L1 only | 22–29 h | 4.5–6 weeks | ~3 weeks |
 | Through L2 (target for most engineers) | 37–49 h | 7–10 weeks | 4–5 weeks |
 | Through L3 (feature leads) | 47–64 h | 9–13 weeks | 5–6.5 weeks |
-| Through L4 (platform engineers) | 59–82 h | 12–16 weeks | 6–8 weeks |
-| Through L5 (architects) | 85–117 h | 17–23 weeks | 8.5–12 weeks |
+| Through L4 (platform engineers) | 63–88 h | 13–18 weeks | 6.5–9 weeks |
+| Through L5 (architects) | 92–128 h | 18–26 weeks | 9–13 weeks |
 
-**Practical reading:** at 5 hours/week of dedicated upskilling time, an engineer reaches the target steady state (L2) in **7–10 weeks** — roughly 2 months. Reaching L3 takes another 2–3 weeks; L4 and L5 are substantial additional commitments (each adds ~3–6 weeks) and are not the default destination.
+**Practical reading:** at 5 hours/week of dedicated upskilling time, an engineer reaches the target steady state (L2) in **7–10 weeks** — roughly 2 months. Reaching L3 takes another 2–3 weeks. L4 and L5 are substantial additional commitments (each adds ~4–8 weeks) and are not the default destination.
 
 ## Who should reach which level
 

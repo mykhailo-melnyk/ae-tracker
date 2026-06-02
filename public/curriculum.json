@@ -233,8 +233,8 @@
       "subtitle": "Multiply Your Output",
       "move_on_when": "You have automated feedback loops; team has shared custom commands.",
       "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/levels.md#level-4-orchestrate--multiply-your-output",
-      "estimated_hours_min": 12,
-      "estimated_hours_max": 18,
+      "estimated_hours_min": 16,
+      "estimated_hours_max": 24,
       "level_complete_when": "all_tasks_done",
       "tasks": [
         {
@@ -310,8 +310,8 @@
       "subtitle": "Use AI for thinking, not just doing",
       "move_on_when": "There is no Level 6 — you are using AI to challenge your own assumptions.",
       "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/levels.md#level-5-ai-as-architecture-partner",
-      "estimated_hours_min": 26,
-      "estimated_hours_max": 35,
+      "estimated_hours_min": 29,
+      "estimated_hours_max": 40,
       "level_complete_when": "all_tasks_done",
       "tasks": [
         {

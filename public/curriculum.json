@@ -300,6 +300,13 @@
       "level_complete_when": "all_tasks_done",
       "tasks": [
         {
+          "id": "L5.T5",
+          "kind": "reading",
+          "title": "Recommended AI Tool Stack",
+          "desc": "Claude Code is the primary AI coding tool at Solvd; Codex, Cursor, and Copilot are supported alternatives. Every project should be configured with CLAUDE.md (or AGENTS.md for Codex), rules, MCP servers, and permissions. At Level 5 you're making cross-team tool decisions — this is the stance you're operating from.",
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/tools/recommended-stack.md"
+        },
+        {
           "id": "L5.T1",
           "kind": "practice",
           "title": "Run anti-sycophancy prompting on a real decision"
@@ -312,8 +319,23 @@
         {
           "id": "L5.T3",
           "kind": "course",
-          "title": "Building with the Claude API + MCP",
-          "link": "https://www.anthropic.com/learn"
+          "title": "Building with the Claude API",
+          "desc": "Comprehensive Anthropic Academy course on working with Anthropic models via the Claude API. Where you stop being a Claude Code user and start being an engineer who builds AI-powered systems. Free with certificate.",
+          "link": "https://anthropic.skilljar.com/claude-with-the-anthropic-api"
+        },
+        {
+          "id": "L5.T6",
+          "kind": "course",
+          "title": "Introduction to Model Context Protocol",
+          "desc": "Build MCP servers and clients in Python. Master the three MCP primitives — tools, resources, and prompts — to connect Claude with external services. Companion course to the L4 MCP Configuration reading: that one is consumer-side, this one is server-side.",
+          "link": "https://anthropic.skilljar.com/introduction-to-model-context-protocol"
+        },
+        {
+          "id": "L5.T7",
+          "kind": "course",
+          "title": "Model Context Protocol: Advanced Topics",
+          "desc": "Advanced MCP implementation patterns: sampling, notifications, file-system access, transport mechanisms. Take this after Introduction to MCP when you're ready to ship a production MCP server.",
+          "link": "https://anthropic.skilljar.com/model-context-protocol-advanced-topics"
         },
         {
           "id": "L5.T4",

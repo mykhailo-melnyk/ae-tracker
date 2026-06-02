@@ -19,6 +19,7 @@
           "title": { "type": "string" },
           "subtitle": { "type": "string" },
           "move_on_when": { "type": "string" },
+          "link": { "type": "string", "format": "uri" },
           "level_complete_when": { "type": "string", "enum": ["all_tasks_done"] },
           "tasks": {
             "type": "array",

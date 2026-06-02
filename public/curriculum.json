@@ -8,6 +8,7 @@
       "title": "Understand",
       "subtitle": "Use AI to Read, Not Write",
       "move_on_when": "You can tell confident-correct from confident-guessing AI without checking every claim.",
+      "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/levels.md#level-1-understand--use-ai-to-read-not-write",
       "level_complete_when": "all_tasks_done",
       "tasks": [
         {
@@ -106,6 +107,7 @@
       "title": "Edit with Review",
       "subtitle": "Quality Is the Point — the target level for most engineers at Solvd",
       "move_on_when": "You instinctively review diffs, can look at AI-generated code and say 'this is overcomplicated, simplify' and get a better result.",
+      "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/levels.md#level-2-edit-with-review--quality-is-the-point",
       "level_complete_when": "all_tasks_done",
       "tasks": [
         {
@@ -175,6 +177,7 @@
       "title": "Plan and Implement",
       "subtitle": "Think Before Building",
       "move_on_when": "You never start multi-file work without Plan mode.",
+      "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/levels.md#level-3-plan-and-implement--think-before-building",
       "level_complete_when": "all_tasks_done",
       "tasks": [
         {
@@ -223,6 +226,7 @@
       "title": "Orchestrate",
       "subtitle": "Multiply Your Output",
       "move_on_when": "You have automated feedback loops; team has shared custom commands.",
+      "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/levels.md#level-4-orchestrate--multiply-your-output",
       "level_complete_when": "all_tasks_done",
       "tasks": [
         {
@@ -297,6 +301,7 @@
       "title": "AI as Architecture Partner",
       "subtitle": "Use AI for thinking, not just doing",
       "move_on_when": "There is no Level 6 — you are using AI to challenge your own assumptions.",
+      "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/levels.md#level-5-ai-as-architecture-partner",
       "level_complete_when": "all_tasks_done",
       "tasks": [
         {

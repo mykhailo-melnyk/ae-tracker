@@ -305,3 +305,18 @@ body.readonly .task .check:hover { background: inherit; }
   border-color: #cbd5e1;
   background: #f8fafc;
 }
+
+.focus-head .level-link {
+  margin-top: 8px;
+  font-size: 12.5px;
+}
+.focus-head .level-link a {
+  color: #475569;
+  text-decoration: none;
+  border-bottom: 1px dotted #94a3b8;
+  padding-bottom: 1px;
+}
+.focus-head .level-link a:hover {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+}

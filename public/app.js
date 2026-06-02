@@ -102,6 +102,7 @@ function renderFocusCard() {
         <span class="level-tag">LEVEL ${lvl.id.slice(1)} · ${lvl.id === computeCurrentLevel() ? "CURRENT" : "PREVIEW"}</span>
         <h2>${lvl.title}</h2>
         <div class="sub">${lvl.subtitle}</div>
+        ${lvl.link ? `<div class="level-link"><a href="${lvl.link}" target="_blank" rel="noopener">Read the full level explanation on GitHub ↗</a></div>` : ""}
       </div>
       <div class="count">${done} / ${total}</div>
     </div>

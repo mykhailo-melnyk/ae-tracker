@@ -158,8 +158,8 @@
           "id": "L2.T4",
           "kind": "course",
           "title": "Claude Code in Action",
-          "desc": "Modes, context control, and the habits that make daily AI usage productive. Free with certificate.",
-          "link": "https://www.anthropic.com/learn"
+          "desc": "Modes, context control, and the habits that make daily AI usage productive. Free with certificate. Pairs directly with L2.T6 (Prompt Patterns) and L2.T8 (Code Review with AI) — the readings provide the principles, the course shows them in motion.",
+          "link": "https://anthropic.skilljar.com/claude-code-in-action"
         },
         {
           "id": "L2.T5",
@@ -193,7 +193,8 @@
           "id": "L3.T3",
           "kind": "course",
           "title": "Claude Code in Action — Plan Mode chapters",
-          "link": "https://www.anthropic.com/learn"
+          "desc": "Same Anthropic Academy course as L2.T4 — focus this time on the Plan Mode and three-step-workflow chapters. If you already completed the course at L2, just rewatch those sections.",
+          "link": "https://anthropic.skilljar.com/claude-code-in-action"
         },
         {
           "id": "L3.T4",

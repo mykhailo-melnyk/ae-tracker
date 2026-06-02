@@ -195,7 +195,7 @@
           "id": "L3.T1",
           "kind": "practice",
           "title": "Use the 3-step workflow (Context → Plan → Implement) on a real change",
-          "desc": "Be explicit about @-references in step 1."
+          "desc": "Pick a real multi-file change you'd otherwise dive straight into. Do all three steps explicitly. Step 1 — Context: @-reference the relevant files and ask AI to analyze the current behavior; no changes yet. Step 2 — Plan: open Plan mode (/plan, or Shift+Tab twice) and describe the desired outcome; read the plan critically and push back before approving. Step 3 — Implement: only after the plan looks right, say 'execute'. The point isn't to do it once — it's to feel the difference between this and 'just ask AI to fix it'. Done when you've shipped one change end-to-end this way and can name one thing the plan caught that you would otherwise have missed."
         },
         {
           "id": "L3.T2",

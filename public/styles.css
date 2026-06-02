@@ -306,8 +306,17 @@ body.readonly .task .check:hover { background: inherit; }
   background: #f8fafc;
 }
 
-.focus-head .level-link {
+.focus-head .level-hours {
   margin-top: 8px;
+  font-size: 12.5px;
+  color: #64748b;
+}
+.focus-head .level-hours strong {
+  color: #0f172a;
+  font-weight: 600;
+}
+.focus-head .level-link {
+  margin-top: 6px;
   font-size: 12.5px;
 }
 .focus-head .level-link a {

@@ -20,6 +20,8 @@
           "subtitle": { "type": "string" },
           "move_on_when": { "type": "string" },
           "link": { "type": "string", "format": "uri" },
+          "estimated_hours_min": { "type": "integer", "minimum": 1 },
+          "estimated_hours_max": { "type": "integer", "minimum": 1 },
           "level_complete_when": { "type": "string", "enum": ["all_tasks_done"] },
           "tasks": {
             "type": "array",

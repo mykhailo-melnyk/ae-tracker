@@ -51,6 +51,34 @@
           "desc": "Try the /btw command mid-task to get quick factual answers without interrupting your flow."
         },
         {
+          "id": "L1.T9",
+          "kind": "course",
+          "title": "Claude 101",
+          "desc": "Anthropic Academy intro to Claude. Use Claude for routine professional tasks; survey of essential capabilities; signposts to deeper material. Free with certificate.",
+          "link": "https://anthropic.skilljar.com/claude-101"
+        },
+        {
+          "id": "L1.T10",
+          "kind": "course",
+          "title": "Claude Code 101",
+          "desc": "Anthropic Academy intro to Claude Code (the CLI/IDE coding agent). Installation, writing prompts, workflow management, day-to-day customization. Free with certificate.",
+          "link": "https://anthropic.skilljar.com/claude-code-101"
+        },
+        {
+          "id": "L1.T11",
+          "kind": "course",
+          "title": "Introduction to Claude Cowork",
+          "desc": "Working alongside Claude on real files and projects. Covers the task loop, plugins, skills setup, and responsibly steering multi-step work. Free with certificate.",
+          "link": "https://anthropic.skilljar.com/introduction-to-claude-cowork"
+        },
+        {
+          "id": "L1.T12",
+          "kind": "course",
+          "title": "AI Capabilities and Limitations",
+          "desc": "How modern generative AI systems work and behave. Identifies types of unexpected outputs (hallucinations, refusals) and applies targeted fixes based on the four machine properties — Next Token Prediction, Knowledge, Working Memory, Steerability. Video-first companion to the L1.T7 Mindset reading.",
+          "link": "https://anthropic.skilljar.com/ai-capabilities-and-limitations"
+        },
+        {
           "id": "L1.T3",
           "kind": "course",
           "title": "AI Fluency: Framework & Foundations",

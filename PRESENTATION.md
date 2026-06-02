@@ -31,18 +31,18 @@ We will know this program is working when, **12 months in**:
 
 L3-L5 are explicitly **not** unit-wide targets — see the "Who should reach which level" section below.
 
-## 3 / 6 / 12-month milestones
+## 3- and 6-month milestones
 
-Targets assume engineers receive **~5 hrs/week of explicit upskilling time** (see ask #3 in "What we're asking for"). The L1+L2 100% target depends on this — without dedicated time, the calendar stretches roughly linearly and the 12-month deadline slips. All percentages are of the business-unit headcount.
+Quarterly checkpoints between program start and the 12-month success criteria. Targets assume engineers receive **~5 hrs/week of explicit upskilling time** (see ask #3 in "What we're asking for"). The L1+L2 100% target at 12 months depends on this — without dedicated time, the calendar stretches roughly linearly and the deadline slips. All percentages are of the business-unit headcount.
 
-| Milestone | 3 months | 6 months | 12 months |
-|---|---:|---:|---:|
-| % completed L1 (Understand) | 35% | 70% | **100%** |
-| % at L2+ (universal baseline) | 15% | 45% | **100%** |
-| % at L3+ (feature leads) | 3% | 12% | 30% |
-| % at L4+ (platform engineers) | 0% | 5% | 12% |
-| % at L5 (architects) | 0% | 1% | 3% |
-| Stalled rate (no activity 14d) | ≤ 25% | ≤ 12% | ≤ 5% |
+| Milestone | 3 months | 6 months |
+|---|---:|---:|
+| % completed L1 (Understand) | 35% | 70% |
+| % at L2+ (universal baseline) | 15% | 45% |
+| % at L3+ (feature leads) | 3% | 12% |
+| % at L4+ (platform engineers) | 0% | 5% |
+| % at L5 (architects) | 0% | 1% |
+| Stalled rate (no activity 14d) | ≤ 25% | ≤ 12% |
 
 Multiply by your unit headcount to get absolute numbers. Example for a 100-engineer unit at 6 months: 70 completed L1, 45 at L2+, 12 at L3+, 5 at L4+, 1 at L5.
 

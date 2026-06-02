@@ -29,7 +29,7 @@ L2 ("Edit with Review") is the explicit target steady state for most engineers p
 
 ## 3 / 6 / 12-month milestones
 
-Targets are aspirational and assume engineers receive **~5 hrs/week of explicit upskilling time** (see "What we're asking for" below). All percentages are of the business-unit headcount.
+Targets below assume engineers receive **~5 hrs/week of explicit upskilling time** (see ask #3 in "What we're asking for"). If we settle on a lower cadence, calendar timelines stretch roughly linearly — these targets would shift right accordingly. All percentages are of the business-unit headcount.
 
 | Milestone | 3 months | 6 months | 12 months |
 |---|---:|---:|---:|
@@ -45,19 +45,21 @@ Multiply by your unit headcount to get absolute numbers. Example for a 100-engin
 
 ## What we're asking for
 
-To hit the targets above, we need the following. Items marked **[fill in]** require your decision before the presentation.
+1. **OKR inclusion.** Add `% of unit at L2+` as an OKR for the business unit at the next quarterly cycle. Makes the program visible to senior leadership and converts a soft target into a tracked one. The 6-month target in the milestones table (55% at L2+) becomes the OKR commitment.
 
-1. **Dedicated time:** ~5 hrs/week of explicit upskilling time per engineer, treated as work — not done on top of a full sprint load. Without dedicated time, the timelines stretch by ~3-4x and engagement falls off. *[fill in: confirm this is acceptable, or propose an alternative cadence]*
+2. **Unit Leaders as the pilot cohort.** Unit Leaders complete the curriculum first — they're the natural ambassadors. Going through it themselves before rolling it down accomplishes three things: (a) builds their own AI fluency, (b) gives them firsthand experience of the time commitment and content quality, (c) makes their downstream advocacy credible to engineers. Start date for the Unit Leader cohort: *[fill in: target start date]*.
 
-2. **Endorsement / sponsorship:** A public endorsement from you to the unit at all-hands or via Teams, framing the program as a strategic priority not a side project. Quick to do, high leverage on adoption rates. *[fill in: confirm you're willing to send the kickoff message; we'll draft it for you]*
+3. **Dedicated upskilling time — to be discussed.** The milestone targets above assume engineers receive ~5 hrs/week of explicit upskilling time, treated as work rather than added on top of full sprint load. With less dedicated time, the calendar stretches roughly linearly: at 2 hrs/week, hitting L2 in 6 months becomes hitting it in 12-15 months. This is the highest-leverage decision in the program and is partly a budget question — discuss what's feasible for the unit and adjust the milestones table to match.
 
-3. **OKR inclusion (optional):** Add `% of unit at L2+` as an OKR for the business unit at the next quarterly cycle. Makes the program visible to senior leadership and converts a soft target into a tracked one. *[fill in: yes / no / discuss]*
+4. **Budget — none requested for v1.** All Anthropic Academy courses are free with certificates. Claude Code is free for individual use. The tracker is self-hosted on free tiers (Cloudflare Workers + GitHub Pages + GitHub repo storage). Re-open this only if we later want enterprise Claude Code seats, paid training, or external coaching.
 
-4. **Lead identification:** Help name 2-3 engineers in the unit to act as ambassadors — they pilot the curriculum first, give feedback, then evangelize. They should be people who already use AI tools and have peer respect. *[fill in: who do you have in mind?]*
+## To revisit later
 
-5. **Measurement boundaries:** Confirm that the tracker data will **not** be used as performance-review input for individuals. The whole point is honest self-reporting; if engineers think the data feeds into their performance review, they'll game it. We're optimizing for unit-level adoption visibility, not individual-level surveillance. *[fill in: confirm this commitment]*
+These are intentionally not in scope for the initial ask but should be discussed before the program scales beyond the pilot:
 
-6. **Budget:** None requested. All Anthropic Academy courses are free with certificates. Claude Code is free for individual use. The tracker is self-hosted on free tiers. *[fill in: revisit only if we later want enterprise Claude Code seats or paid training]*
+- **Measurement boundaries.** Whether tracker data ever feeds into individual performance reviews. The dashboard shows per-engineer progress and stalled status. To preserve honest self-reporting, the standard recommendation is to commit explicitly that tracker data is unit-level only — but this is a policy decision for later.
+- **Kickoff endorsement / all-hands message.** A leadership endorsement at unit kickoff would accelerate adoption but isn't strictly required if the OKR carries the weight.
+- **External communications.** Whether to publish anything externally about Solvd's AE program (blog post, conference talk, partner outreach).
 
 ## Estimated time per level
 

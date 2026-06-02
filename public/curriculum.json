@@ -226,6 +226,34 @@
       "level_complete_when": "all_tasks_done",
       "tasks": [
         {
+          "id": "L4.T6",
+          "kind": "reading",
+          "title": "Creating Claude Code Skills and Plugins",
+          "desc": "A skill is a packaged set of instructions, references, and assets that teaches Claude Code domain-specific knowledge. Once installed, it activates automatically when relevant — so anyone on the team gets consistent output without re-explaining the rules. Covers the generic workflow: prompt structure, packaging, local marketplace install, team distribution. This is the foundation for the kind of automation that defines Level 4.",
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/workflows/creating-skills.md"
+        },
+        {
+          "id": "L4.T7",
+          "kind": "reading",
+          "title": "MCP — Model Context Protocol Configuration",
+          "desc": "Configure MCP servers in `.mcp.json` to give Claude Code real-time access to documentation, issue trackers, and design tools — replacing stale training data with live context. The way you wire 'AI knows about our Jira / our Figma / our Confluence' without copy-pasting screenshots.",
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/tools/mcp.md"
+        },
+        {
+          "id": "L4.T8",
+          "kind": "reading",
+          "title": "AI Security Policy",
+          "desc": "Never put secrets, API keys, passwords, or PII in prompts, CLAUDE.md, or AI rules. Use placeholders for sensitive data. Set up permissions to deny destructive operations. Especially important at Level 4: you're now wiring hooks that auto-execute scripts — security mindset is the guardrail.",
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/security/ai-security-policy.md"
+        },
+        {
+          "id": "L4.T9",
+          "kind": "reading",
+          "title": "Repo Preparation — Making Your Codebase AI-Ready",
+          "desc": "Step-by-step guide to preparing any existing codebase for effective AI agent collaboration. The bottleneck usually isn't the model — it's the codebase and environment it works in. Read the overview; follow links into the 10 specific guides (linters, type safety, CI/CD, hooks) as your codebase needs them.",
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/repo-preparation/README.md"
+        },
+        {
           "id": "L4.T1",
           "kind": "practice",
           "title": "Add a PostToolUse hook for type-checking",
@@ -245,8 +273,16 @@
         {
           "id": "L4.T4",
           "kind": "course",
-          "title": "Agent Skills + Subagents (Anthropic Academy)",
-          "link": "https://www.anthropic.com/learn"
+          "title": "Introduction to agent skills",
+          "desc": "Anthropic Academy course on building, configuring, and sharing reusable Skills in Claude Code that automatically apply to relevant tasks. The video companion to the Creating Skills and Plugins reading. Free with certificate.",
+          "link": "https://anthropic.skilljar.com/introduction-to-agent-skills"
+        },
+        {
+          "id": "L4.T10",
+          "kind": "course",
+          "title": "Introduction to subagents",
+          "desc": "Anthropic Academy course on Claude Code's sub-agents feature: delegate tasks to isolated assistants, manage context windows efficiently, build specialized workflows while keeping the main conversation focused. The orchestration multiplier — once you can fan work out across subagents, big migrations and audits become feasible. Free with certificate.",
+          "link": "https://anthropic.skilljar.com/introduction-to-subagents"
         },
         {
           "id": "L4.T5",

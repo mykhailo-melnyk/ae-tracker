@@ -222,6 +222,7 @@ body {
 }
 .kind-tag.course     { background: #dbeafe; color: #1e40af; }
 .kind-tag.checkpoint { background: #fef3c7; color: #78350f; }
+.kind-tag.reading    { background: #ccfbf1; color: #115e59; }
 .external {
   color: #2563eb;
   font-size: 12.5px;

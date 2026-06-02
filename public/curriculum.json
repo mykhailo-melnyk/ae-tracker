@@ -11,6 +11,34 @@
       "level_complete_when": "all_tasks_done",
       "tasks": [
         {
+          "id": "L1.T5",
+          "kind": "reading",
+          "title": "Tool Setup Guide",
+          "desc": "Install Claude Code (and iTerm 2 on macOS). After this you can install everything else by pasting prompts into Claude Code. Plan ~10 minutes for the manual bootstrap, then come back here.",
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/tool-setup.md"
+        },
+        {
+          "id": "L1.T6",
+          "kind": "reading",
+          "title": "How We Work With AI at Solvd",
+          "desc": "Five-minute orientation: why AI fails the way it does, the four principles we use at Solvd, and when to use which tool. This is the entry point — everything else builds on it.",
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/start-here.md"
+        },
+        {
+          "id": "L1.T7",
+          "kind": "reading",
+          "title": "The AI Mindset — 4-property framework",
+          "desc": "The diagnostic doc. Next Token Prediction, Knowledge, Working Memory, Steerability. Every success and every failure traces to one of these four — once you internalize them, every later guideline makes sense. Re-read whenever AI surprises you.",
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/mindset.md"
+        },
+        {
+          "id": "L1.T8",
+          "kind": "reading",
+          "title": "Claude Code — Best Practices (Reference)",
+          "desc": "Keep this open in a tab. Modes, slash commands, @-references, MCP, custom commands. You won't need every section at Level 1 — skim it now, return to specific sections as you hit them in later levels.",
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/tools/claude-code.md"
+        },
+        {
           "id": "L1.T1",
           "kind": "practice",
           "title": "Ask AI to explain code you already know",

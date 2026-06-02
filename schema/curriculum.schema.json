@@ -28,7 +28,7 @@
               "required": ["id", "kind", "title"],
               "properties": {
                 "id": { "type": "string", "pattern": "^L[1-5]\\.T[0-9]+$" },
-                "kind": { "type": "string", "enum": ["practice", "course", "checkpoint"] },
+                "kind": { "type": "string", "enum": ["practice", "course", "checkpoint", "reading"] },
                 "title": { "type": "string" },
                 "desc": { "type": "string" },
                 "link": { "type": "string", "format": "uri" },

@@ -51,6 +51,13 @@
           "desc": "Try the /btw command mid-task to get quick factual answers without interrupting your flow."
         },
         {
+          "id": "L1.T13",
+          "kind": "video",
+          "title": "Deep Dive into LLMs like ChatGPT — Andrej Karpathy",
+          "desc": "Andrej Karpathy's ~3.5-hour lecture on how LLMs are actually built and how to think about their outputs. The single best non-Anthropic source for mechanical intuition — pretraining, post-training, hallucinations, why models are good at some things and bad at others. Watch before the Anthropic Academy courses below; they assume this kind of mental model.",
+          "link": "https://youtu.be/7xTGNNLPyMI"
+        },
+        {
           "id": "L1.T9",
           "kind": "course",
           "title": "Claude 101",

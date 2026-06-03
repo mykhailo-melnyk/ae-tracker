@@ -1,0 +1,79 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## What this is
+
+A self-service progress tracker for engineers working through a 5-level agentic-engineering curriculum. Engineers tick off tasks on a static page; admins see aggregate adoption on a dashboard. Canonical curriculum source is the `solvdinc/agentic-engineering` knowledge base (`meta/specs/`, `meta/plans/`); copies under `docs/` here are kept for self-containment.
+
+## Commands
+
+All worker commands run from `worker/`:
+
+```bash
+cd worker
+npm run dev          # wrangler dev → http://localhost:8787
+npm test             # vitest run (one-shot)
+npm run test:watch   # vitest watch
+npm run typecheck    # tsc --noEmit
+npm run deploy       # wrangler deploy (production)
+```
+
+Run a single test file or test:
+
+```bash
+cd worker
+npx vitest run test/session.test.ts
+npx vitest run -t "verifySession rejects expired"
+```
+
+Frontend (no build step — plain static files):
+
+```bash
+npx http-server public -p 8080 -c-1   # → http://localhost:8080
+```
+
+## Architecture
+
+Two deployable pieces with **no shared registrable domain**, which drives several non-obvious design choices:
+
+- **Frontend** (`public/`): vanilla HTML/CSS/JS, served by GitHub Pages at `mykhailo-melnyk.github.io/ae-tracker/`. No framework, no bundler. `tracker.html` is the engineer page (`app.js`), `dashboard.html` is the admin page (`dashboard.js`). Both pick the Worker URL at runtime via `window.WORKER_URL` — `localhost`/`127.0.0.1` → `http://localhost:8787`, anything else → the production Worker (see the inline `<script>` in each HTML file). There is no separate dev/prod frontend.
+- **Backend** (`worker/`): a single Cloudflare Worker. `src/index.ts` is the only entry point — a hand-rolled `fetch` router. `/auth/*` routes are full-page redirects (no CORS); `/api/*` routes are wrapped in `withCors` against `FRONTEND_ORIGIN`.
+
+### Data flow
+
+There is no database. Per-engineer progress lives as one JSON file per engineer (`progress/<username>.json`) in a **separate private GitHub repo** (`mykhailo-melnyk/ae-tracker-data`), accessed via the GitHub Contents API using a bot PAT (`BOT_PAT`). `src/github.ts` is the entire storage layer (read / write / list). `src/types.ts:ProgressFile` is the on-disk shape.
+
+The aggregate dashboard (`src/aggregate.ts`) lists the `progress/` directory, reads every file, and computes adoption stats. Results are cached in Cloudflare KV (`AGGREGATE_CACHE` binding) for 5 minutes. **The Worker degrades gracefully when `AGGREGATE_CACHE` is undefined** (recomputes every request) — this is why local dev needs no KV namespace.
+
+### Auth
+
+`src/auth.ts` runs GitHub OAuth (`read:user` scope). On callback success it mints an **HMAC-SHA256-signed session cookie** (`src/session.ts`, format `<payloadB64>.<macHex>`, 30-day TTL) — there is no session store, the cookie *is* the session. Admin status is checked by membership in the comma-separated `ADMIN_USERNAMES` var (see `isAdmin` in `api.ts` and the inline check in `aggregate.ts`).
+
+The session cookie is set with `SameSite=None` deliberately: the frontend (github.io) and Worker (workers.dev) are different registrable domains, so the cross-origin `fetch(..., {credentials:"include"})` only attaches the cookie under `None`. (Firefox Strict tracking protection still blocks it — see README "Known issues".)
+
+### Concurrency
+
+`/api/mark` uses GitHub's optimistic-concurrency: a write carries the file's current SHA and GitHub returns 409 if it's stale. `handleApiMark` retries up to 4 times — re-read, re-apply, re-write with backoff — so two concurrent ticks by the same user don't clobber each other.
+
+## Conventions & gotchas
+
+- **`curriculum.json` is shared by both tiers.** It lives in `public/` (the frontend fetches it directly) AND is imported into the Worker (`index.ts` imports it as JSON to feed the aggregate). Edits to it are schema-validated in CI against `schema/curriculum.schema.json` (`ajv`). When changing curriculum structure, update the schema too.
+- **Worker functions take an injected `fetchFn: typeof fetch = fetch`.** This is for test seams — tests in `worker/test/` pass a stub. Preserve this parameter when adding API handlers.
+- **Tests use `@cloudflare/vitest-pool-workers`** (config in `worker/vitest.config.ts`) — they run inside the Workers runtime, not plain Node.
+- **Secrets** (`SESSION_SECRET`, `OAUTH_CLIENT_*`, `BOT_PAT`) are Wrangler secrets in production and live in `worker/.dev.vars` for local dev (gitignored). Non-secret vars are in `worker/wrangler.toml` under `[vars]`.
+
+## Deployment
+
+- **Frontend**: GitHub Actions (`.github/workflows/deploy-pages.yml`) auto-deploys `public/` to Pages on push to `main` when `public/**` changes.
+- **Worker**: deployed manually with `wrangler deploy` from `worker/` — it is *not* in CI. There is no deployed dev Worker; `wrangler dev` is the dev environment.
+
+## Common operations
+
+| Action | How |
+|---|---|
+| Add an admin | Edit `ADMIN_USERNAMES` (comma-separated GitHub usernames) in `worker/wrangler.toml`, then `wrangler deploy`. |
+| Update the curriculum | Edit `public/curriculum.json`; push to `main` (CI validates, Pages redeploys). |
+| Rotate the bot PAT | New fine-grained PAT scoped to `ae-tracker-data` (Contents R/W), `wrangler secret put BOT_PAT`, revoke old. |
+| Reset an engineer | Edit/delete `progress/<username>.json` in the `ae-tracker-data` repo. |
+| Watch logs | `wrangler tail`. |

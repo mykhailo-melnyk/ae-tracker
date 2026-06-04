@@ -49,6 +49,7 @@ export async function handleCallback(
   const expectedState = cookies["oauth_state"];
 
   if (!code || !state || !expectedState || state !== expectedState) {
+    console.error(`oauth: invalid state — hasCode=${!!code} hasState=${!!state} hasCookie=${!!expectedState} match=${state === expectedState}`);
     return new Response("Invalid OAuth state", { status: 400 });
   }
 
@@ -64,6 +65,7 @@ export async function handleCallback(
   });
   if (!tokenRes.ok) {
     const bodyText = await tokenRes.text();
+    console.error(`oauth token exchange failed: status=${tokenRes.status} body=${bodyText.slice(0, 500)}`);
     return new Response(
       `OAuth token exchange failed — status ${tokenRes.status}; body: ${bodyText.slice(0, 500)}`,
       { status: 502 },
@@ -72,6 +74,7 @@ export async function handleCallback(
   const tokenJson = await tokenRes.json() as { access_token?: string; error?: string; error_description?: string };
   const accessToken = tokenJson.access_token;
   if (!accessToken) {
+    console.error(`oauth: no access token — error=${tokenJson.error ?? "(none)"} description=${tokenJson.error_description ?? "(none)"}`);
     return new Response(
       `No access token in response — error: ${tokenJson.error ?? "(none)"}; description: ${tokenJson.error_description ?? "(none)"}`,
       { status: 502 },
@@ -89,6 +92,7 @@ export async function handleCallback(
   });
   if (!userRes.ok) {
     const bodyText = await userRes.text();
+    console.error(`oauth: fetch user failed — status=${userRes.status} body=${bodyText.slice(0, 500)}`);
     return new Response(
       `Failed to fetch GitHub user — status ${userRes.status}; body: ${bodyText.slice(0, 500)}`,
       { status: 502 },

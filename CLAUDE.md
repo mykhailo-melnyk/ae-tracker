@@ -76,4 +76,5 @@ The session cookie is set with `SameSite=None` deliberately: the frontend (githu
 | Update the curriculum | Edit `public/curriculum.json`; push to `main` (CI validates, Pages redeploys). |
 | Rotate the bot PAT | New fine-grained PAT scoped to `ae-tracker-data` (Contents R/W), `wrangler secret put BOT_PAT`, revoke old. |
 | Reset an engineer | Edit/delete `progress/<username>.json` in the `ae-tracker-data` repo. |
-| Watch logs | `wrangler tail`. |
+| Watch logs (live) | `wrangler tail`. |
+| Query past logs | Dashboard → Workers → ae-tracker → Logs. Persisted via `[observability]` in `wrangler.toml` (Workers Logs; free tier 200k events/day, 3-day retention). |

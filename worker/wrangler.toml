@@ -15,3 +15,9 @@ FRONTEND_BASE_PATH = "/ae-tracker"  # path prefix where tracker.html lives — e
 [[kv_namespaces]]
 binding = "AGGREGATE_CACHE"
 id = "4ffcb608e97c4f4499639f7892742d97"
+
+# Persisted, queryable logs (Workers Logs) — dashboard → Workers → ae-tracker → Logs.
+# Free tier: 200k events/day, 3-day retention; far above this app's scale.
+[observability]
+enabled = true
+head_sampling_rate = 1  # log 100% of requests

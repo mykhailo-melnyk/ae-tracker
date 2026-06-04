@@ -78,8 +78,12 @@ export async function handleApiMark(
     } catch (e) {
       const errStr = e instanceof Error ? e.message : String(e);
       const isConflict = errStr.includes("writeJsonFile 409");
-      if (!isConflict || attempt === MAX_ATTEMPTS) throw e;
+      if (!isConflict || attempt === MAX_ATTEMPTS) {
+        console.error(`mark failed: user=${username} task=${taskId} attempt=${attempt}/${MAX_ATTEMPTS} conflict=${isConflict} err=${errStr.slice(0, 300)}`);
+        throw e;
+      }
       // Else: re-read & retry. Tiny back-off to give the other writer time to settle.
+      console.warn(`mark 409 conflict: user=${username} task=${taskId} attempt=${attempt}/${MAX_ATTEMPTS}, retrying`);
       await new Promise((r) => setTimeout(r, 50 * attempt));
     }
   }

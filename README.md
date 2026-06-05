@@ -10,7 +10,7 @@ A static page where engineers self-report progress through the 5-level curriculu
 
 - **Frontend:** vanilla HTML/CSS/JS in `public/`, served by GitHub Pages.
 - **Backend:** a single Cloudflare Worker (`worker/`) that brokers GitHub OAuth and reads/writes per-engineer JSON files in a private data repo (`mykhailo-melnyk/ae-tracker-data`).
-- **Auth:** GitHub OAuth → HMAC-signed session cookie (HttpOnly, Secure, 30d TTL).
+- **Auth:** GitHub OAuth → HMAC-signed session token. Sent as an `Authorization: Bearer` header (stored in `localStorage`), because the frontend and Worker are on different domains and browsers block the cross-site cookie. See "Cross-domain auth" below.
 - **Storage:** GitHub Contents API. One JSON file per engineer.
 - **Cache:** Cloudflare KV stores the aggregate response for 5 minutes.
 
@@ -49,24 +49,19 @@ FRONTEND_ORIGIN=http://localhost:8080
 
 Do not commit `.dev.vars` — it's in `.gitignore`.
 
-## Known issues
+## Cross-domain auth
 
-### Firefox with strict tracking protection blocks the session cookie
+The frontend (`mykhailo-melnyk.github.io`) and the Worker (`ae-tracker.mihael-melnyk.workers.dev`) are on **different registrable domains** (`github.io` ≠ `workers.dev`). A session set as a *cookie* would be third-party on the frontend's cross-origin `fetch()`, and **Safari blocks all third-party cookies by default** (Firefox-Strict too) — so it never reaches the Worker and sign-in appears to bounce back to the sign-in card.
 
-**Symptom:** signing in succeeds on `https://mykhailo-melnyk.github.io/ae-tracker/`, but every reload sends you back to the sign-in card. DevTools shows `GET /api/me → 401` even after sign-in.
+The auth model therefore avoids cross-site cookies entirely:
 
-**Cause:** The frontend lives on `mykhailo-melnyk.github.io` and the Worker on `ae-tracker.mihael-melnyk.workers.dev` — two different registrable domains. The session cookie is set by the Worker on its own domain, so when the frontend's `fetch()` sends it back, Firefox classifies it as a third-party cookie. Firefox's **Enhanced Tracking Protection** in "Strict" mode (and Total Cookie Protection) blocks third-party cookies, so the cookie never reaches the Worker.
+1. The OAuth callback redirects to `tracker.html#t=<token>` — the signed session token rides in the URL **fragment** (never sent to a server, not included in `Referer`).
+2. `public/auth.js` reads the fragment on load, saves the token to `localStorage`, and strips it from the URL.
+3. Its `apiFetch()` wrapper attaches `Authorization: Bearer <token>` to every API call. Headers aren't subject to any browser's third-party-cookie policy, so this works on Safari, Firefox (any mode), and Chrome.
 
-**Workaround (per user, takes 5 seconds):**
+The Worker still *sets* a `session` cookie as a same-origin fallback, and reads the token from the `Authorization` header **or** the cookie. Logout clears both (the localStorage token via `clearAuthToken()` and the cookie via `/auth/logout`).
 
-1. Visit `https://mykhailo-melnyk.github.io/ae-tracker/tracker.html`.
-2. Click the shield icon 🛡️ to the left of the URL.
-3. Toggle **Enhanced Tracking Protection** off for this site.
-4. Reload and sign in again.
-
-**Proper fix (deferred — see Future Work in the design spec):** put the Worker behind a subdomain of a domain you control (e.g. `tracker-api.solvd.com`). When both frontend and Worker share the same registrable domain, the session cookie is first-party and no browser blocks it. Requires ~30 minutes of DNS + Cloudflare custom-domain setup; only worth doing if multiple Firefox users hit this.
-
-Chrome, Safari (signed-in, with cross-site cookies enabled per default), and Firefox with "Standard" tracking protection are unaffected.
+**Trade-off:** a `localStorage` token is readable by JavaScript (unlike an HttpOnly cookie), so an XSS bug could exfiltrate it. Acceptable here — the site is static with no user-generated HTML, the token only grants `read:user` scope plus read/write to the user's own progress file, and there's no sensitive PII. If that ever changes, the alternative is a shared custom domain (e.g. `tracker.solvd.com` + `tracker-api.solvd.com`) which makes the cookie first-party and lets us return to the HttpOnly-cookie model.
 
 ## Layout
 

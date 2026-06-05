@@ -48,9 +48,9 @@ The aggregate dashboard (`src/aggregate.ts`) lists the `progress/` directory, re
 
 ### Auth
 
-`src/auth.ts` runs GitHub OAuth (`read:user` scope). On callback success it mints an **HMAC-SHA256-signed session cookie** (`src/session.ts`, format `<payloadB64>.<macHex>`, 30-day TTL) — there is no session store, the cookie *is* the session. Admin status is checked by membership in the comma-separated `ADMIN_USERNAMES` var (see `isAdmin` in `api.ts` and the inline check in `aggregate.ts`).
+`src/auth.ts` runs GitHub OAuth (`read:user` scope). On callback success it mints an **HMAC-SHA256-signed session token** (`src/session.ts`, format `<payloadB64>.<macHex>`, 30-day TTL) — there is no session store, the token *is* the session. Admin status is checked by membership in the comma-separated `ADMIN_USERNAMES` var (see `isAdmin` in `api.ts` and the inline check in `aggregate.ts`).
 
-The session cookie is set with `SameSite=None` deliberately: the frontend (github.io) and Worker (workers.dev) are different registrable domains, so the cross-origin `fetch(..., {credentials:"include"})` only attaches the cookie under `None`. (Firefox Strict tracking protection still blocks it — see README "Known issues".)
+**Token transport is the key non-obvious bit.** Frontend (github.io) and Worker (workers.dev) are different registrable domains, so a session *cookie* is third-party and Safari blocks it outright (Firefox-Strict too). So auth is **token-in-header, not cookie**: the OAuth callback redirects to `tracker.html#t=<token>` (token in the URL *fragment* — never sent to a server, not in Referer); `public/auth.js` captures it, stores it in `localStorage`, strips the fragment, and its `apiFetch()` wrapper sends `Authorization: Bearer <token>` on every API call. The Worker reads the token via `tokenFromRequest()` (`session.ts`) which checks the `Authorization` header first, then falls back to a `session` cookie (still set, as a same-origin/Chrome fallback). CORS must allow the `authorization` header (`Access-Control-Allow-Headers` in `index.ts`). Trade-off vs. an HttpOnly cookie: the token is JS-readable, so logout must `clearAuthToken()` (the cookie has no server-side revocation either — it's stateless).
 
 ### Concurrency
 

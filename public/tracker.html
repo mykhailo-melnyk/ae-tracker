@@ -17,11 +17,6 @@
       <h1>Welcome to the AE Tracker</h1>
       <p>Sign in with GitHub to see your personal progress through the 5 levels.</p>
       <a id="signin-link" class="signin-btn" href="">Sign in with GitHub</a>
-      <div id="firefox-note" class="firefox-note hidden">
-        <strong>Using Firefox?</strong> If sign-in keeps bouncing you back here, your tracking protection may be blocking the session cookie. Click the shield icon
-        <span aria-hidden="true">🛡️</span> in the URL bar, toggle
-        <em>Enhanced Tracking Protection</em> off for this site, then reload.
-      </div>
     </div>
   </div>
 
@@ -43,6 +38,7 @@
       ? "http://localhost:8787"
       : "https://ae-tracker.mihael-melnyk.workers.dev";
   </script>
+  <script src="auth.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

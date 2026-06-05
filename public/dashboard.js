@@ -2,7 +2,7 @@ const WORKER = window.WORKER_URL;
 let AGG = null;
 
 async function loadAgg() {
-  const res = await fetch(WORKER + "/api/aggregate", { credentials: "include" });
+  const res = await apiFetch(WORKER + "/api/aggregate");
   if (res.status === 401) { window.location = "tracker.html"; return null; }
   if (res.status === 403) { document.getElementById("not-admin").classList.remove("hidden"); return null; }
   if (!res.ok) throw new Error("aggregate failed: " + res.status);
@@ -108,7 +108,7 @@ async function init() {
   document.getElementById("as-of").textContent = "As of " + new Date(AGG.as_of).toLocaleString();
   // Topbar: sign-out link (admin identity is implicit from session — no need to fetch /api/me)
   document.getElementById("who").innerHTML =
-    `<a class="signout-link" href="${WORKER}/auth/logout">Sign out</a>`;
+    `<a class="signout-link" href="${WORKER}/auth/logout" onclick="clearAuthToken()">Sign out</a>`;
   renderKpis(); renderBars(); renderTaskRates(); renderTable();
   wireFilters();
 }

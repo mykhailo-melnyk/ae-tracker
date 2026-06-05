@@ -89,7 +89,7 @@ export async function computeAggregate(
 }
 
 import type { Env } from "./index";
-import { verifySession } from "./session";
+import { verifySession, tokenFromRequest } from "./session";
 
 const CACHE_KEY = "aggregate-v1";
 const CACHE_TTL_SECONDS = 300;
@@ -100,10 +100,9 @@ export async function handleApiAggregate(
   curriculum: Curriculum,
   fetchFn: typeof fetch = fetch,
 ): Promise<Response> {
-  const cookie = request.headers.get("Cookie")?.split(";")
-    .map((p) => p.trim()).find((p) => p.startsWith("session="))?.slice(8);
-  if (!cookie) return new Response("unauthenticated", { status: 401 });
-  const session = await verifySession(cookie, env.SESSION_SECRET);
+  const token = tokenFromRequest(request);
+  if (!token) return new Response("unauthenticated", { status: 401 });
+  const session = await verifySession(token, env.SESSION_SECRET);
   if (!session.valid || !session.username) return new Response("unauthenticated", { status: 401 });
   const admins = env.ADMIN_USERNAMES.split(",").map((s) => s.trim());
   if (!admins.includes(session.username)) return new Response("forbidden", { status: 403 });

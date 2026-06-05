@@ -29,6 +29,20 @@ describe("/api/me", () => {
     expect(body.tasks).toEqual({});
   });
 
+  it("accepts a valid session token via Authorization: Bearer header (no cookie)", async () => {
+    // Safari/Firefox block our cross-site session cookie, so the frontend sends the
+    // token as a Bearer header instead. The Worker must accept it.
+    const session = await signSession("mykhailo-melnyk", ENV.SESSION_SECRET, 3600);
+    const req = new Request("https://w.example/api/me", {
+      headers: { Authorization: `Bearer ${session}` },
+    });
+    const fetchMock = (async () => new Response("not found", { status: 404 })) as typeof fetch;
+    const res = await handleApiMe(req, ENV, fetchMock);
+    expect(res.status).toBe(200);
+    const body = await res.json() as any;
+    expect(body.github_username).toBe("mykhailo-melnyk");
+  });
+
   it("returns existing progress when file exists", async () => {
     const session = await signSession("mykhailo-melnyk", ENV.SESSION_SECRET, 3600);
     const req = new Request("https://w.example/api/me", {

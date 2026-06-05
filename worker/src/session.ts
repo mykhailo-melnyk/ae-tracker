@@ -26,6 +26,29 @@ function timingSafeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 
+// Extract the session token from a request. Prefers the `Authorization: Bearer`
+// header (how the frontend sends it — see below) and falls back to the `session`
+// cookie. The header path exists because Safari and Firefox-Strict block our
+// cross-site session cookie: frontend (github.io) and Worker (workers.dev) are
+// different registrable domains, so the cookie is third-party and never sent on a
+// cross-origin fetch. A Bearer header is immune to that, so it's the primary path;
+// the cookie remains as a same-origin fallback.
+export function tokenFromRequest(request: Request): string | null {
+  const auth = request.headers.get("Authorization");
+  if (auth?.startsWith("Bearer ")) {
+    const t = auth.slice("Bearer ".length).trim();
+    if (t) return t;
+  }
+  const cookie = request.headers.get("Cookie");
+  if (cookie) {
+    for (const part of cookie.split(";")) {
+      const [k, ...v] = part.trim().split("=");
+      if (k === "session") return v.join("=");
+    }
+  }
+  return null;
+}
+
 export async function signSession(username: string, secret: string, ttlSeconds: number): Promise<string> {
   const payload: Payload = { u: username, e: Math.floor(Date.now() / 1000) + ttlSeconds };
   const payloadB64 = btoa(JSON.stringify(payload));

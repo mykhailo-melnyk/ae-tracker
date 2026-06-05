@@ -14,13 +14,13 @@ async function loadProgress() {
   const params = new URLSearchParams(window.location.search);
   const as = params.get("as");
   if (as) {
-    const res = await fetch(WORKER + "/api/user/" + encodeURIComponent(as), { credentials: "include" });
+    const res = await apiFetch(WORKER + "/api/user/" + encodeURIComponent(as));
     if (res.status === 401) return { unauthenticated: true };
     if (res.status === 403) return { forbidden: true };
     if (!res.ok) throw new Error("loadProgress(as) failed: " + res.status);
     return { progress: await res.json(), readonly: true, viewingUsername: as };
   }
-  const res = await fetch(WORKER + "/api/me", { credentials: "include" });
+  const res = await apiFetch(WORKER + "/api/me");
   if (res.status === 401) return { unauthenticated: true };
   if (!res.ok) throw new Error("loadMe failed: " + res.status);
   return { progress: await res.json(), readonly: false };
@@ -129,9 +129,8 @@ async function toggleTask(taskId) {
   renderFocusCard();
   // Persist
   try {
-    const res = await fetch(WORKER + "/api/mark", {
+    const res = await apiFetch(WORKER + "/api/mark", {
       method: "POST",
-      credentials: "include",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ task_id: taskId, done: newDone }),
     });
@@ -151,14 +150,11 @@ async function init() {
   CURRICULUM = await loadCurriculum();
   const result = await loadProgress();
   if (result.unauthenticated) {
+    // A stale/expired token may be sitting in localStorage; drop it so we don't keep
+    // sending a dead Bearer header.
+    clearAuthToken();
     document.getElementById("signed-out").classList.remove("hidden");
     document.getElementById("signin-link").href = WORKER + "/auth/login";
-    // Firefox's strict Enhanced Tracking Protection blocks our cross-site
-    // session cookie. Show the workaround note only to Firefox users to avoid
-    // noise for everyone else.
-    if (navigator.userAgent.includes("Firefox")) {
-      document.getElementById("firefox-note").classList.remove("hidden");
-    }
     return;
   }
   if (result.forbidden) {
@@ -179,7 +175,7 @@ async function init() {
   const userBox = document.getElementById("user-box");
   userBox.innerHTML = `
     <span class="user-name">${PROGRESS.display_name || PROGRESS.github_username}</span>
-    <a class="signout-link" href="${WORKER}/auth/logout">Sign out</a>
+    <a class="signout-link" href="${WORKER}/auth/logout" onclick="clearAuthToken()">Sign out</a>
   `;
 
   if (READONLY) document.body.classList.add("readonly");

@@ -104,13 +104,19 @@ export async function handleCallback(
   const session = await signSession(user.login, env.SESSION_SECRET, SESSION_TTL_SECONDS);
 
   const basePath = env.FRONTEND_BASE_PATH ?? "";
+  // Hand the token to the frontend in the URL *fragment* (#t=...). Safari and
+  // Firefox-Strict block the cross-site session cookie below, so the frontend's
+  // primary mechanism is to read this token, stash it in localStorage, and send it
+  // as a Bearer header on API calls. A fragment (not a query param) never reaches a
+  // server and isn't sent in the Referer header, so the token stays off the wire and
+  // out of logs; the frontend strips it from the URL immediately on load.
+  const redirect = `${env.FRONTEND_ORIGIN}${basePath}/tracker.html#t=${encodeURIComponent(session)}`;
   return new Response(null, {
     status: 302,
     headers: {
-      Location: `${env.FRONTEND_ORIGIN}${basePath}/tracker.html`,
-      // SameSite=None is required so the browser sends the cookie on cross-origin
-      // fetch() from the frontend (github.io) to this Worker (workers.dev). With
-      // Lax the cookie is set but never attached to fetch — only to top-level navs.
+      Location: redirect,
+      // Also set the cookie as a same-origin fallback (harmless where third-party
+      // cookies are allowed). SameSite=None so it's at least attempted cross-origin.
       "Set-Cookie": `session=${session}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=${SESSION_TTL_SECONDS}`,
     },
   });

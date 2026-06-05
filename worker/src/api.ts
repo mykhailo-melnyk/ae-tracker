@@ -1,21 +1,12 @@
 import type { Env } from "./index";
-import { verifySession } from "./session";
+import { verifySession, tokenFromRequest } from "./session";
 import { readJsonFile, writeJsonFile } from "./github";
 import type { ProgressFile } from "./types";
 
-function parseCookie(header: string | null, name: string): string | null {
-  if (!header) return null;
-  for (const p of header.split(";")) {
-    const [k, ...v] = p.trim().split("=");
-    if (k === name) return v.join("=");
-  }
-  return null;
-}
-
 async function requireSession(request: Request, env: Env): Promise<string | Response> {
-  const cookie = parseCookie(request.headers.get("Cookie"), "session");
-  if (!cookie) return new Response("unauthenticated", { status: 401 });
-  const result = await verifySession(cookie, env.SESSION_SECRET);
+  const token = tokenFromRequest(request);
+  if (!token) return new Response("unauthenticated", { status: 401 });
+  const result = await verifySession(token, env.SESSION_SECRET);
   if (!result.valid || !result.username) return new Response("unauthenticated", { status: 401 });
   return result.username;
 }

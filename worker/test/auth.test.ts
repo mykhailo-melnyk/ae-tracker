@@ -39,7 +39,7 @@ describe("/auth/callback", () => {
     expect(res.status).toBe(400);
   });
 
-  it("on success: sets session cookie, redirects to frontend tracker", async () => {
+  it("on success: redirects to tracker with token in fragment, also sets cookie fallback", async () => {
     const fetchMock = mockFetch({
       "/login/oauth/access_token": { access_token: "gh-token-123", token_type: "bearer" },
       "api.github.com/user": { login: "mykhailo-melnyk", name: "Mykhailo Melnyk" },
@@ -49,12 +49,16 @@ describe("/auth/callback", () => {
     });
     const res = await handleCallback(req, baseEnv, fetchMock);
     expect(res.status).toBe(302);
-    expect(res.headers.get("Location")).toBe("https://example.github.io/ae-tracker/tracker.html");
+    // Primary mechanism: token handed to the frontend in the URL fragment.
+    const loc = res.headers.get("Location")!;
+    expect(loc.startsWith("https://example.github.io/ae-tracker/tracker.html#t=")).toBe(true);
+    // The fragment carries the same value as the session cookie (URL-encoded).
     const setCookie = res.headers.get("Set-Cookie")!;
-    expect(setCookie).toMatch(/^session=[^;]+;/);
+    const cookieToken = setCookie.match(/^session=([^;]+);/)![1];
+    expect(decodeURIComponent(loc.split("#t=")[1])).toBe(cookieToken);
+    // Cookie fallback retains its cross-origin attributes.
     expect(setCookie).toContain("HttpOnly");
     expect(setCookie).toContain("Secure");
-    // SameSite=None required for cross-origin fetch (Pages -> Worker)
     expect(setCookie).toContain("SameSite=None");
   });
 
@@ -82,7 +86,7 @@ describe("/auth/callback", () => {
     });
     const res = await handleCallback(req, devEnv, fetchMock);
     expect(res.status).toBe(302);
-    expect(res.headers.get("Location")).toBe("http://localhost:8080/tracker.html");
+    expect(res.headers.get("Location")!.startsWith("http://localhost:8080/tracker.html#t=")).toBe(true);
   });
 });
 

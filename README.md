@@ -69,7 +69,7 @@ The Worker still *sets* a `session` cookie as a same-origin fallback, and reads 
 public/                # Served by GitHub Pages
   tracker.html         # Engineer's self-tracking page (Layout C)
   dashboard.html       # Admin aggregate dashboard
-  curriculum.json      # 5 levels × 22 tasks
+  curriculum.json      # 5 levels × 67 tasks
   styles.css           # Shared base styles
   dashboard.css        # Dashboard-specific styles
   app.js               # Engineer page logic

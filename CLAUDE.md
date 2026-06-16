@@ -59,6 +59,7 @@ The aggregate dashboard (`src/aggregate.ts`) lists the `progress/` directory, re
 ## Conventions & gotchas
 
 - **`curriculum.json` is shared by both tiers.** It lives in `public/` (the frontend fetches it directly) AND is imported into the Worker (`index.ts` imports it as JSON to feed the aggregate). Edits to it are schema-validated in CI against `schema/curriculum.schema.json` (`ajv`). When changing curriculum structure, update the schema too.
+- **In-repo lesson content lives in `docs/curriculum/`.** Most tasks link to the external `solvdinc/agentic-engineering` KB, but content we can't put there is authored as markdown under `docs/curriculum/` (lesson notes) and `docs/curriculum/assessments/` (per-level rubrics), then linked from a task via its GitHub blob URL (`https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/<file>`). Every new task `link` must point to a file that actually exists.
 - **Worker functions take an injected `fetchFn: typeof fetch = fetch`.** This is for test seams — tests in `worker/test/` pass a stub. Preserve this parameter when adding API handlers.
 - **Tests use `@cloudflare/vitest-pool-workers`** (config in `worker/vitest.config.ts`) — they run inside the Workers runtime, not plain Node.
 - **Secrets** (`SESSION_SECRET`, `OAUTH_CLIENT_*`, `BOT_PAT`) are Wrangler secrets in production and live in `worker/.dev.vars` for local dev (gitignored). Non-secret vars are in `worker/wrangler.toml` under `[vars]`.

@@ -4,7 +4,7 @@
 
 ## What this is
 
-The Solvd AE (Agentic Engineering) curriculum is a 5-level path that takes a software engineer from "uses AI casually" to "uses AI as an architecture partner". 45 tasks total: readings from our internal knowledge base, hands-on practice tasks, one long-form video (Andrej Karpathy's "Deep Dive into LLMs"), and 11 free Anthropic Academy courses with certificates. Each engineer's progress is tracked individually in the [AE Progress Tracker](https://mykhailo-melnyk.github.io/ae-tracker/tracker.html); aggregate adoption is visible on the [admin dashboard](https://mykhailo-melnyk.github.io/ae-tracker/dashboard.html).
+The Solvd AE (Agentic Engineering) curriculum is a 5-level path that takes a software engineer from "uses AI casually" to "uses AI as an architecture partner". 67 tasks total: readings from our internal knowledge base and in-repo lesson notes, hands-on practice tasks, per-level assessments, one optional long-form video (Andrej Karpathy's "Deep Dive into LLMs", with synthesized notes as the required read), 12 free Anthropic Academy courses with certificates, and 7 supplementary deeplearning.ai courses. Each engineer's progress is tracked individually in the [AE Progress Tracker](https://mykhailo-melnyk.github.io/ae-tracker/tracker.html); aggregate adoption is visible on the [admin dashboard](https://mykhailo-melnyk.github.io/ae-tracker/dashboard.html).
 
 ## Why now
 
@@ -115,6 +115,6 @@ The original guidance is explicit: "Levels 3–5 exist for specific roles — fe
 
 ## Source
 
-- Curriculum: [`public/curriculum.json`](public/curriculum.json) in this repo (45 tasks across 5 levels).
+- Curriculum: [`public/curriculum.json`](public/curriculum.json) in this repo (67 tasks across 5 levels). In-repo lesson notes and assessment rubrics live under [`docs/curriculum/`](docs/curriculum/).
 - Design narrative: [`general/getting-started/levels.md`](https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/levels.md) in the knowledge base.
 - Tracker (live): https://mykhailo-melnyk.github.io/ae-tracker/tracker.html

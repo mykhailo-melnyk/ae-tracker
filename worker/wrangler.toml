@@ -7,7 +7,7 @@ workers_dev = true
 [vars]
 DATA_REPO_OWNER = "mykhailo-melnyk"
 DATA_REPO_NAME = "ae-tracker-data"
-ADMIN_USERNAMES = "mykhailo-melnyk,lucaskasprzyk,jackiehimel"  # comma-separated; e.g. "mykhailo-melnyk,jdoe"
+ADMIN_USERNAMES = "mykhailo-melnyk,lucaskasprzyk,jackiehimel,venukanduri"  # comma-separated; e.g. "mykhailo-melnyk,jdoe"
 FRONTEND_ORIGIN = "https://mykhailo-melnyk.github.io"
 FRONTEND_BASE_PATH = "/ae-tracker"  # path prefix where tracker.html lives — empty for local dev (override in .dev.vars)
 

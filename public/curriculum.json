@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "source": "general/getting-started/levels.md",
-  "last_reviewed": "2026-05-12",
+  "last_reviewed": "2026-06-16",
   "levels": [
     {
       "id": "L1",
@@ -9,8 +9,8 @@
       "subtitle": "Use AI to Read, Not Write",
       "move_on_when": "You can tell confident-correct from confident-guessing AI without checking every claim.",
       "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/levels.md#level-1-understand--use-ai-to-read-not-write",
-      "estimated_hours_min": 22,
-      "estimated_hours_max": 29,
+      "estimated_hours_min": 28,
+      "estimated_hours_max": 37,
       "level_complete_when": "all_tasks_done",
       "tasks": [
         {
@@ -57,8 +57,29 @@
           "id": "L1.T13",
           "kind": "video",
           "title": "Deep Dive into LLMs like ChatGPT — Andrej Karpathy",
-          "desc": "Andrej Karpathy's ~3.5-hour lecture on how LLMs are actually built and how to think about their outputs. The single best non-Anthropic source for mechanical intuition — pretraining, post-training, hallucinations, why models are good at some things and bad at others. Watch before the Anthropic Academy courses below; they assume this kind of mental model.",
+          "desc": "Optional — recommended for depth. Andrej Karpathy's ~3.5-hour lecture on how LLMs are actually built — pretraining, post-training, hallucinations, why models are good at some things and bad at others. The synthesized notes in the next task (L1.T14) are the primary required read and cover the essentials; watch this when you want the full long-form treatment.",
           "link": "https://youtu.be/7xTGNNLPyMI"
+        },
+        {
+          "id": "L1.T14",
+          "kind": "reading",
+          "title": "LLM Mechanics — Synthesized Notes",
+          "desc": "The required, ~10-minute version of the Karpathy lecture: the two training stages, why models hallucinate, knowledge vs. working memory, and what models are good and bad at. This is the mechanical mental model every later course assumes — read it before the Anthropic Academy courses below.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/llm-mechanics-notes.md"
+        },
+        {
+          "id": "L1.T15",
+          "kind": "course",
+          "title": "ChatGPT Prompt Engineering for Developers",
+          "desc": "Short, hands-on prompting fundamentals (deeplearning.ai, with Andrew Ng & OpenAI). Uses the OpenAI API for examples, but the principles — clear instructions, giving the model time to reason, iterative prompt refinement — transfer directly to Claude. Complements, not replaces, Claude 101 and AI Fluency.",
+          "link": "https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers"
+        },
+        {
+          "id": "L1.T16",
+          "kind": "checkpoint",
+          "title": "Assessment: AI-claims practical exam",
+          "desc": "Graded exercise: quiz AI on a domain you know (including false-premise questions), predict correct-vs-guessing before verifying, then score yourself. Rubric and optional GLAT/MAILS literacy references in the linked doc.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L1.md"
         },
         {
           "id": "L1.T9",
@@ -110,8 +131,8 @@
       "subtitle": "Quality Is the Point — the target level for most engineers at Solvd",
       "move_on_when": "You instinctively review diffs, can look at AI-generated code and say 'this is overcomplicated, simplify' and get a better result.",
       "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/levels.md#level-2-edit-with-review--quality-is-the-point",
-      "estimated_hours_min": 15,
-      "estimated_hours_max": 20,
+      "estimated_hours_min": 25,
+      "estimated_hours_max": 33,
       "level_complete_when": "all_tasks_done",
       "tasks": [
         {
@@ -173,6 +194,41 @@
           "title": "I instinctively review diffs and ask for simplification",
           "desc": "You no longer accept the first output without reading it.",
           "self_assessment": true
+        },
+        {
+          "id": "L2.T10",
+          "kind": "reading",
+          "title": "Team Practices for AI Code",
+          "desc": "Your individual review habit scales to a team only with shared norms: PR-review norms for AI-generated code, CI gates, AI-PR disclosure, and reviewer-load balancing. Includes the 5-item AI-assisted-work checklist to run before opening any PR. The team-level companion to the Code Review with AI reading.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/team-practices.md"
+        },
+        {
+          "id": "L2.T11",
+          "kind": "reading",
+          "title": "Security Basics: Secrets, Prompt Injection & Untrusted Content",
+          "desc": "Three habits to adopt the moment AI starts editing real code: never paste secrets, understand prompt injection, and treat untrusted content as input not commands. Links the OWASP Top 10 for LLM & GenAI. The early-level companion to the deeper AI Security Policy at L4.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/security-basics.md"
+        },
+        {
+          "id": "L2.T12",
+          "kind": "reading",
+          "title": "The AI-Test Trap",
+          "desc": "When the same agent writes the code and the tests, a green suite only confirms the code's own bugs. How to break the loop with characterization tests and property-based testing — assert behaviour from intent, prefer invariants over example outputs the AI can reverse-fit.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/ai-test-trap.md"
+        },
+        {
+          "id": "L2.T13",
+          "kind": "course",
+          "title": "Automated Testing for LLMOps",
+          "desc": "deeplearning.ai short course on building a CI workflow that evaluates LLM applications on every change — rule-based and model-graded evaluations wired into automated testing. The practical follow-on to The AI-Test Trap.",
+          "link": "https://www.deeplearning.ai/courses/automated-testing-llmops"
+        },
+        {
+          "id": "L2.T14",
+          "kind": "checkpoint",
+          "title": "Assessment: one-week PR / session-log audit (SPACE)",
+          "desc": "Graded exercise: log a week of AI-assisted work — catches in review, simplifications, surgical-vs-drive-by changes — then audit it against the SPACE framework. Rubric in the linked doc.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L2.md"
         }
       ]
     },
@@ -182,8 +238,8 @@
       "subtitle": "Think Before Building",
       "move_on_when": "You never start multi-file work without Plan mode.",
       "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/levels.md#level-3-plan-and-implement--think-before-building",
-      "estimated_hours_min": 10,
-      "estimated_hours_max": 15,
+      "estimated_hours_min": 20,
+      "estimated_hours_max": 28,
       "level_complete_when": "all_tasks_done",
       "tasks": [
         {
@@ -224,6 +280,34 @@
           "kind": "checkpoint",
           "title": "I never start >3-file work without a plan",
           "self_assessment": true
+        },
+        {
+          "id": "L3.T7",
+          "kind": "reading",
+          "title": "Evaluating AI Systems",
+          "desc": "Once you ship features powered by AI, 'it looked good in three prompts' stops being enough. Eval datasets (input/output/criteria), acceptance testing (precision, recall, FP/FN, human-acceptance), regression testing, and how to evaluate a new model yourself instead of trusting the hype.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/evaluating-ai-systems.md"
+        },
+        {
+          "id": "L3.T8",
+          "kind": "course",
+          "title": "Evaluating AI Agents",
+          "desc": "deeplearning.ai short course (with Arize AI) on tracing agents, building evaluations, choosing code-based vs LLM-as-judge evaluators, and the right metrics to improve agent performance. The hands-on companion to the Evaluating AI Systems reading.",
+          "link": "https://www.deeplearning.ai/courses/evaluating-ai-agents"
+        },
+        {
+          "id": "L3.T9",
+          "kind": "course",
+          "title": "Spec-Driven Development with Coding Agents",
+          "desc": "deeplearning.ai short course (with JetBrains) on the disciplined alternative to vibe coding: write a clear spec, then run iterative plan-implement-validate loops with a coding agent, and package the workflow into portable skills. Reinforces the Spec-Driven Development reading above.",
+          "link": "https://www.deeplearning.ai/courses/spec-driven-development-with-coding-agents"
+        },
+        {
+          "id": "L3.T10",
+          "kind": "checkpoint",
+          "title": "Assessment: ship a spec-first backlog item (>3 files)",
+          "desc": "Graded exercise: take a real backlog item touching more than 3 files and ship it Context → Spec → Plan → Implement, pushing back on the plan before approving. Rubric and required evidence in the linked doc.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L3.md"
         }
       ]
     },
@@ -233,8 +317,8 @@
       "subtitle": "Multiply Your Output",
       "move_on_when": "You have automated feedback loops; team has shared custom commands.",
       "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/levels.md#level-4-orchestrate--multiply-your-output",
-      "estimated_hours_min": 16,
-      "estimated_hours_max": 24,
+      "estimated_hours_min": 35,
+      "estimated_hours_max": 50,
       "level_complete_when": "all_tasks_done",
       "tasks": [
         {
@@ -301,6 +385,62 @@
           "kind": "checkpoint",
           "title": "I have an automated feedback loop catching bugs",
           "self_assessment": true
+        },
+        {
+          "id": "L4.T11",
+          "kind": "reading",
+          "title": "Tracing, Cost Tracking & Failure Analysis",
+          "desc": "Orchestrating agents costs you the line-by-line visibility you had at L2. Get it back: traces (the stack trace of an agent run), per-run cost attribution, and clustering failures by root cause — then feed failures back into your eval dataset. The observability discipline that makes agent automation trustworthy.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/tracing-cost-failure.md"
+        },
+        {
+          "id": "L4.T12",
+          "kind": "reading",
+          "title": "Agentic Process Design",
+          "desc": "Reliable agent workflows come from choosing the right pattern, not one giant prompt. Reflection, tool use, planning, and multi-agent patterns (orchestrator-worker, evaluator-optimizer) — and how to pick the simplest one that clears the bar, since every added agent adds cost and failure surface.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/agentic-process-design.md"
+        },
+        {
+          "id": "L4.T13",
+          "kind": "reading",
+          "title": "Deterministic vs Probabilistic Testing",
+          "desc": "AI breaks the 'same input, same output' assumption. Test distributions not single runs; the compounding-failure math P(success)=(1-e)^n and why reducing the number of steps is the biggest reliability lever; and secondary-LLM-as-grader regression tests for outputs that vary every run.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/probabilistic-testing.md"
+        },
+        {
+          "id": "L4.T14",
+          "kind": "reading",
+          "title": "Measuring the Transformation",
+          "desc": "Org-level reference (not a per-engineer to-do): how the program measures whether the rollout works — baseline first, delivery metrics (cycle time, change-failure rate, rework), review burden, DX survey, a control cohort, and cost/benefit drivers. Read it so you know what's being tracked and why.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/measurement.md"
+        },
+        {
+          "id": "L4.T15",
+          "kind": "course",
+          "title": "Evaluating & Debugging Generative AI (Weights & Biases)",
+          "desc": "deeplearning.ai short course (with W&B) on instrumenting, tracking, and debugging generative-AI workflows — experiment tracking, tracing, and versioning evals. Pairs with the Tracing, Cost & Failure reading.",
+          "link": "https://www.deeplearning.ai/short-courses/evaluating-debugging-generative-ai"
+        },
+        {
+          "id": "L4.T16",
+          "kind": "course",
+          "title": "AI Agentic Design Patterns with AutoGen",
+          "desc": "deeplearning.ai short course (with the AutoGen creators) implementing the four agentic patterns — reflection, tool use, planning, and multi-agent collaboration. The hands-on companion to the Agentic Process Design reading.",
+          "link": "https://www.deeplearning.ai/courses/ai-agentic-design-patterns-with-autogen"
+        },
+        {
+          "id": "L4.T17",
+          "kind": "course",
+          "title": "Building & Evaluating Advanced RAG",
+          "desc": "deeplearning.ai short course on advanced retrieval-augmented generation: sentence-window and auto-merging retrieval, reranking, and the RAG triad of evaluation metrics. Grounding agents in your own data without copy-pasting context.",
+          "link": "https://www.deeplearning.ai/short-courses/building-evaluating-advanced-rag"
+        },
+        {
+          "id": "L4.T18",
+          "kind": "checkpoint",
+          "title": "Assessment: team-shared command/skill + finbot CTF",
+          "desc": "Graded exercise in two parts: ship a custom command or skill another engineer actually adopts, and complete the OWASP finbot CTF against an AI/agentic app. Rubric and links in the doc.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L4.md"
         }
       ]
     },
@@ -310,8 +450,8 @@
       "subtitle": "Use AI for thinking, not just doing",
       "move_on_when": "There is no Level 6 — you are using AI to challenge your own assumptions.",
       "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/levels.md#level-5-ai-as-architecture-partner",
-      "estimated_hours_min": 29,
-      "estimated_hours_max": 40,
+      "estimated_hours_min": 35,
+      "estimated_hours_max": 48,
       "level_complete_when": "all_tasks_done",
       "tasks": [
         {
@@ -357,6 +497,20 @@
           "kind": "checkpoint",
           "title": "I use AI to challenge my own assumptions",
           "self_assessment": true
+        },
+        {
+          "id": "L5.T8",
+          "kind": "course",
+          "title": "Anthropic Prompt Evaluations",
+          "desc": "Anthropic's open course on writing prompt evaluations: building eval datasets, grading model-graded and code-graded outputs, and iterating prompts against measured results. Where the evaluation discipline from L3 becomes a first-class engineering skill. Free, in the anthropics/courses repo.",
+          "link": "https://github.com/anthropics/courses/tree/master/prompt_evaluations"
+        },
+        {
+          "id": "L5.T9",
+          "kind": "checkpoint",
+          "title": "Assessment: AI as architecture partner",
+          "desc": "Graded exercise: take a real, consequential decision and use anti-sycophancy prompting plus the evaluator-optimizer pattern to make AI argue against your instinct and surface unexamined assumptions. Rubric and required evidence in the linked doc.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L5.md"
         }
       ]
     }

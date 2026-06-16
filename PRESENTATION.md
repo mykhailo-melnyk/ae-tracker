@@ -33,7 +33,7 @@ L3-L5 are explicitly **not** unit-wide targets — see the "Who should reach whi
 
 ## 3- and 6-month milestones
 
-The 6-month column is the success-criteria endpoint; the 3-month column is the halfway checkpoint. Targets assume engineers receive **~5 hrs/week of explicit upskilling time** (see ask #3 in "What we're asking for"). The L1+L2 100% target depends on this — without dedicated time, the calendar stretches roughly linearly and the 6-month deadline slips. All percentages are of the business-unit headcount.
+The 6-month column is the success-criteria endpoint; the 3-month column is the halfway checkpoint. Targets assume engineers receive **~5 hrs/week of explicit upskilling time** (see ask #3 in "What we're asking for"). The L1+L2 100% target depends on this — without dedicated time, the calendar stretches roughly linearly and the 6-month deadline slips. These targets were originally sized against ~37–49 h of L1+L2 work; the mid-2026 curriculum expansion raised that to **53–70 h**, so the 6-month target is now tighter — see the math check below. All percentages are of the business-unit headcount.
 
 | Milestone | 3 months | 6 months |
 |---|---:|---:|
@@ -46,7 +46,7 @@ The 6-month column is the success-criteria endpoint; the 3-month column is the h
 
 Multiply by your unit headcount to get absolute numbers. Example for a 100-engineer unit at 6 months: 100 completed L1, 100 at L2+, 25 at L3+, 10 at L4+, 2 at L5 (net of natural attrition).
 
-**Math check for the 100% L2 target:** L1+L2 cumulative time is 37-49 hours per engineer. At 5 hrs/week, that's 7-10 weeks of effective work. Spread across 6 months (26 weeks) allows for onboarding lag, parental leave, project deadlines, and other interruptions — feasible *if* the dedicated time is allocated, but tight. Without dedicated time (engineers fitting it into the margins of full sprint loads), the realistic 6-month outcome is 60-70% at L2+, not 100%.
+**Math check for the 100% L2 target:** L1+L2 cumulative time is now **53-70 hours** per engineer — up from 37-49 h before the mid-2026 curriculum expansion. At 5 hrs/week, that's **11-14 weeks** of effective work. Spread across 6 months (26 weeks) still allows for onboarding lag, parental leave, project deadlines, and other interruptions — feasible *if* the dedicated time is allocated, but **noticeably tighter than before the expansion** (less slack against the 6-month deadline). Without dedicated time (engineers fitting it into the margins of full sprint loads), the realistic 6-month outcome is ~50-60% at L2+, not 100%.
 
 ## What we're asking for
 
@@ -54,7 +54,7 @@ Multiply by your unit headcount to get absolute numbers. Example for a 100-engin
 
 2. **Unit Leaders as the pilot cohort.** Unit Leaders complete the curriculum first — they're the natural ambassadors. Going through it themselves before rolling it down accomplishes three things: (a) builds their own AI fluency, (b) gives them firsthand experience of the time commitment and content quality, (c) makes their downstream advocacy credible to engineers. Start date for the Unit Leader cohort: *[fill in: target start date]*.
 
-3. **Dedicated upskilling time — to be discussed.** The milestone targets above assume engineers receive ~5 hrs/week of explicit upskilling time, treated as work rather than added on top of full sprint load. With less dedicated time, the calendar stretches roughly linearly: at 2 hrs/week, hitting L2 in 6 months becomes hitting it in 12-15 months. This is the highest-leverage decision in the program and is partly a budget question — discuss what's feasible for the unit and adjust the milestones table to match.
+3. **Dedicated upskilling time — to be discussed.** The milestone targets above assume engineers receive ~5 hrs/week of explicit upskilling time, treated as work rather than added on top of full sprint load. With less dedicated time, the calendar stretches roughly linearly: at 2 hrs/week, hitting L2 in 6 months becomes hitting it in roughly 15-20 months (the larger post-expansion curriculum pushes this out further). This is the highest-leverage decision in the program and is partly a budget question — discuss what's feasible for the unit and adjust the milestones table to match.
 
 4. **Budget — none requested for v1.** All Anthropic Academy courses are free with certificates. Claude Code is free for individual use. The tracker is self-hosted on free tiers (Cloudflare Workers + GitHub Pages + GitHub repo storage). Re-open this only if we later want enterprise Claude Code seats, paid training, or external coaching.
 
@@ -68,30 +68,30 @@ These are intentionally not in scope for the initial ask but should be discussed
 
 ## Estimated time per level
 
-| Level | Theme | Reading | Practice | Video | Courses | **Total** |
-|---|---|---:|---:|---:|---:|---:|
-| **L1 Understand** | Use AI to read, not write | 1.5 h | 1 h | 3.5 h | 16–23 h (5 courses) | **22–29 h** |
-| **L2 Edit with Review** | Quality is the point | 2 h | 5–8 h | — | 3–4 h (1 course) | **15–20 h** |
-| **L3 Plan and Implement** | Think before building | 1 h | 4–8 h | — | 30 m–1 h (rewatch) | **10–15 h** |
-| **L4 Orchestrate** | Multiply your output | 2 h | 10–16 h | — | 4–6 h (2 courses) | **16–24 h** |
-| **L5 AI as Architecture Partner** | Use AI for thinking | 20 m | 5–8 h | — | 23–32 h (3 courses) | **29–40 h** |
-| **Whole curriculum** |  | ~7 h | ~25–43 h | 3.5 h | ~47–66 h | **~92–128 h** |
+| Level | Theme | Reading | Practice | Video | Courses | Assess. | **Total** |
+|---|---|---:|---:|---:|---:|---:|---:|
+| **L1 Understand** | Use AI to read, not write | 2 h | 1–2 h | 3.5 h (optional) | 19–26 h (6 courses) | 2–3 h | **28–37 h** |
+| **L2 Edit with Review** | Quality is the point | 6–9 h | 8–11 h | — | 7–10 h (2 courses) | 2–3 h | **25–33 h** |
+| **L3 Plan and Implement** | Think before building | 3–5 h | 4–8 h | — | 9–12 h (3 courses) | 3–4 h | **20–28 h** |
+| **L4 Orchestrate** | Multiply your output | 5–8 h | 10–16 h | — | 16–22 h (5 courses) | 3–5 h | **35–50 h** |
+| **L5 AI as Architecture Partner** | Use AI for thinking | 1 h | 5–8 h | — | 26–35 h (4 courses) | 3–4 h | **35–48 h** |
+| **Whole curriculum** |  | ~17–25 h | ~28–45 h | 3.5 h | ~77–105 h | ~13–19 h | **143–196 h** |
 
-Practice hours across all levels reflect habit-formation cost, not single-sitting task completion. Examples: L2's "diff-review habit for one week" is ~3-5 hours of slowdown during real work; L3's "one real multi-file change end-to-end with Plan mode" is one full afternoon; L4's "Run a spec-driven implementation end-to-end" implies a real shipped feature; L5's anti-sycophancy and evaluator-optimizer techniques applied to a real architecture decision span days, not minutes.
+The per-level **Total** column is authoritative — it is the `estimated_hours_min`–`estimated_hours_max` range from [`public/curriculum.json`](public/curriculum.json). The component columns (Reading / Practice / Video / Courses / Assess.) are **approximate** — per-task hours aren't tracked, so the splits are hand-estimates and don't always sum exactly to the Total. Practice hours reflect habit-formation cost, not single-sitting completion: L2's "diff-review habit for one week" is ~3-5 hours of slowdown during real work; L3's "one real multi-file change end-to-end with Plan mode" is one full afternoon; L4's "Run a spec-driven implementation end-to-end" implies a real shipped feature; L5's anti-sycophancy and evaluator-optimizer techniques applied to a real architecture decision span days, not minutes. The Karpathy video is now optional (synthesized notes are the required read).
 
 ## Calendar projection
 
-Most engineers will work through this part-time alongside their normal workload. Translating hour-ranges into calendar time at common cadences:
+Most engineers will work through this part-time alongside their normal workload. Translating cumulative hour-ranges into calendar time at common cadences (4, 5, and 10 hours per week):
 
-| Level | Hours | @ 5 h/week | @ 10 h/week |
-|---|---:|---|---|
-| L1 only | 22–29 h | 4.5–6 weeks | ~3 weeks |
-| Through L2 (target for most engineers) | 37–49 h | 7–10 weeks | 4–5 weeks |
-| Through L3 (feature leads) | 47–64 h | 9–13 weeks | 5–6.5 weeks |
-| Through L4 (platform engineers) | 63–88 h | 13–18 weeks | 6.5–9 weeks |
-| Through L5 (architects) | 92–128 h | 18–26 weeks | 9–13 weeks |
+| Level | Hours | @ 4 h/week | @ 5 h/week | @ 10 h/week |
+|---|---:|---|---|---|
+| L1 only | 28–37 h | 7–9 weeks | 6–7.5 weeks | 3–4 weeks |
+| Through L2 (target for most engineers) | 53–70 h | 13–18 weeks | 11–14 weeks | 5–7 weeks |
+| Through L3 (feature leads) | 73–98 h | 18–25 weeks | 15–20 weeks | 7–10 weeks |
+| Through L4 (platform engineers) | 108–148 h | 27–37 weeks | 22–30 weeks | 11–15 weeks |
+| Through L5 (architects) | 143–196 h | 36–49 weeks | 29–39 weeks | 14–20 weeks |
 
-**Practical reading:** at 5 hours/week of dedicated upskilling time, an engineer reaches the target steady state (L2) in **7–10 weeks** — roughly 2 months. Reaching L3 takes another 2–3 weeks. L4 and L5 are substantial additional commitments (each adds ~4–8 weeks) and are not the default destination.
+**Practical reading:** at 5 hours/week of dedicated upskilling time, an engineer reaches the target steady state (L2) in **11–14 weeks** — roughly 3 months. At a lighter 4 hours/week that's **13–18 weeks**. Reaching L3 takes another **4–6 weeks**. L4 and L5 are substantial additional commitments (each adds **~7–10 weeks** at 5 h/week) and are not the default destination.
 
 ## Who should reach which level
 

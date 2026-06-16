@@ -93,7 +93,9 @@ export async function computeAggregate(
 import type { Env } from "./index";
 import { verifySession, tokenFromRequest } from "./session";
 
-const CACHE_KEY = "aggregate-v1";
+// Bump when the aggregate's shape changes so a deploy invalidates stale entries
+// immediately (v2 adds per-engineer `competency`).
+export const CACHE_KEY = "aggregate-v2";
 const CACHE_TTL_SECONDS = 300;
 
 export async function handleApiAggregate(

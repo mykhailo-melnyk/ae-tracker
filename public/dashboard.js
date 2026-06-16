@@ -1,11 +1,18 @@
 const WORKER = window.WORKER_URL;
 let AGG = null;
+let CUR = null;
 
 async function loadAgg() {
   const res = await apiFetch(WORKER + "/api/aggregate");
   if (res.status === 401) { window.location = "tracker.html"; return null; }
   if (res.status === 403) { document.getElementById("not-admin").classList.remove("hidden"); return null; }
   if (!res.ok) throw new Error("aggregate failed: " + res.status);
+  return res.json();
+}
+
+async function loadCurriculum() {
+  const res = await fetch("curriculum.json");
+  if (!res.ok) throw new Error("curriculum load failed");
   return res.json();
 }
 
@@ -37,24 +44,46 @@ function renderBars() {
   }).join("");
 }
 
-function renderTaskRates() {
+const LEVEL_LABELS = { L1: "Understand", L2: "Edit w/ Review", L3: "Plan", L4: "Orchestrate", L5: "Architecture" };
+
+function renderLevelCompletion() {
   const total = AGG.engineers_started || 1;
-  const rows = Object.entries(AGG.by_task)
-    .sort(([, a], [, b]) => b - a)
-    .map(([id, n]) => {
-      const pct = Math.round((n / total) * 100);
+  const html = CUR.levels.map((lvl) => {
+    const done = lvl.tasks.reduce((n, t) => n + (AGG.by_task[t.id] ?? 0), 0);
+    const levelPct = Math.round((done / (total * lvl.tasks.length)) * 100);
+    const taskRows = lvl.tasks.map((t) => {
+      const pct = Math.round(((AGG.by_task[t.id] ?? 0) / total) * 100);
       return `<div class="task-row">
-        <span class="tid">${id}</span>
-        <span class="tname">${id}</span>
+        <span class="tid">${t.id}</span>
+        <span class="tname">${t.title || t.id}</span>
         <span class="tbar"><div style="width:${pct}%"></div></span>
         <span class="tpct">${pct}%</span>
       </div>`;
     }).join("");
-  document.getElementById("task-rates").innerHTML = rows;
+    return `<details class="lvl-acc">
+      <summary>
+        <span class="lvl-caret">▸</span>
+        <span class="lvl-name"><strong>${lvl.id}</strong> ${lvl.title || LEVEL_LABELS[lvl.id] || ""}</span>
+        <span class="tbar"><div style="width:${levelPct}%"></div></span>
+        <span class="tpct">${levelPct}%</span>
+        <span class="lvl-count">${lvl.tasks.length} tasks</span>
+      </summary>
+      <div class="lvl-tasks">${taskRows}</div>
+    </details>`;
+  }).join("");
+  document.getElementById("task-rates").innerHTML = html;
 }
 
 let FILTER = "all";
 let SEARCH = "";
+let COMP_FILTER = "all";
+
+function buildCompetencyPills() {
+  const box = document.getElementById("competency-pills");
+  const comps = CUR.competencies || [];
+  box.innerHTML = `<div class="comp-pill active" data-comp="all">All</div>`
+    + comps.map((c) => `<div class="comp-pill" data-comp="${c.id}">${c.label}</div>`).join("");
+}
 
 function renderTable() {
   const filtered = AGG.engineers.filter((e) => {
@@ -66,6 +95,7 @@ function renderTable() {
     } else if (FILTER !== "all") {
       if (e.current_level !== FILTER) return false;
     }
+    if (COMP_FILTER !== "all" && e.competency !== COMP_FILTER) return false;
     if (SEARCH) {
       const q = SEARCH.toLowerCase();
       return e.username.toLowerCase().includes(q)
@@ -73,7 +103,12 @@ function renderTable() {
     }
     return true;
   });
-  document.getElementById("engineers-body").innerHTML = filtered.map((e) => `
+  const allComps = CUR.competencies || [];
+  document.getElementById("engineers-body").innerHTML = filtered.map((e) => {
+    const options = [`<option value=""${!e.competency ? " selected" : ""}>—</option>`]
+      .concat(allComps.map((c) => `<option value="${c.id}"${e.competency === c.id ? " selected" : ""}>${c.label}</option>`))
+      .join("");
+    return `
     <tr>
       <td><div class="who"><div class="avatar">${(e.display_name || e.username).slice(0, 2).toUpperCase()}</div>
           <div><div class="name">${e.display_name || e.username}</div>
@@ -81,9 +116,37 @@ function renderTable() {
       <td><span class="level-chip ${e.current_level}">${e.current_level}</span></td>
       <td><div class="pct-cell"><div class="pct-bar"><div style="width:${Math.round(e.completion_pct * 100)}%"></div></div>
           <span class="pct-num">${Math.round(e.completion_pct * 100)}%</span></div></td>
+      <td><select class="comp-select" data-user="${e.username}" data-prev="${e.competency || ""}">${options}</select></td>
       <td><span class="last-active">${new Date(e.last_active).toLocaleDateString()}</span></td>
       <td style="text-align:right"><a href="tracker.html?as=${e.username}" style="color:#2563eb;font-weight:600">View →</a></td>
-    </tr>`).join("");
+    </tr>`;
+  }).join("");
+  document.querySelectorAll(".comp-select").forEach((sel) => {
+    sel.addEventListener("change", () => saveCompetency(sel));
+  });
+}
+
+async function saveCompetency(sel) {
+  const username = sel.dataset.user;
+  const id = sel.value;
+  sel.disabled = true;
+  try {
+    const res = await apiFetch(WORKER + "/api/user/" + encodeURIComponent(username) + "/competencies", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ competency: id || null }),
+    });
+    if (!res.ok) throw new Error("save failed: " + res.status);
+    const updated = await res.json();
+    const eng = AGG.engineers.find((e) => e.username === username);
+    if (eng) eng.competency = updated.competency;
+    sel.dataset.prev = updated.competency || "";
+    sel.disabled = false;
+  } catch (e) {
+    sel.value = sel.dataset.prev; // roll back the selection
+    sel.disabled = false;
+    alert("Could not save competency for " + username + ". Try again in a moment.");
+  }
 }
 
 function wireFilters() {
@@ -95,6 +158,14 @@ function wireFilters() {
       renderTable();
     });
   });
+  document.querySelectorAll(".comp-pill").forEach((el) => {
+    el.addEventListener("click", () => {
+      document.querySelectorAll(".comp-pill").forEach((p) => p.classList.remove("active"));
+      el.classList.add("active");
+      COMP_FILTER = el.dataset.comp;
+      renderTable();
+    });
+  });
   document.getElementById("search").addEventListener("input", (e) => {
     SEARCH = e.target.value;
     renderTable();
@@ -102,14 +173,17 @@ function wireFilters() {
 }
 
 async function init() {
-  AGG = await loadAgg();
+  const [agg, cur] = await Promise.all([loadAgg(), loadCurriculum()]);
+  AGG = agg;
+  CUR = cur;
   if (!AGG) return;
   document.getElementById("admin").classList.remove("hidden");
   document.getElementById("as-of").textContent = "As of " + new Date(AGG.as_of).toLocaleString();
   // Topbar: sign-out link (admin identity is implicit from session — no need to fetch /api/me)
   document.getElementById("who").innerHTML =
     `<a class="signout-link" href="${WORKER}/auth/logout" onclick="clearAuthToken()">Sign out</a>`;
-  renderKpis(); renderBars(); renderTaskRates(); renderTable();
+  buildCompetencyPills();
+  renderKpis(); renderBars(); renderLevelCompletion(); renderTable();
   wireFilters();
 }
 

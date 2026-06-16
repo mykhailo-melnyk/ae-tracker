@@ -10,6 +10,12 @@ describe("session cookies", () => {
     expect(result).toEqual({ username: "mykhailo-melnyk", valid: true });
   });
 
+  it("round-trips an optional display name", async () => {
+    const cookie = await signSession("mykhailo-melnyk", SECRET, 3600, "Mykhailo Melnyk");
+    const result = await verifySession(cookie, SECRET);
+    expect(result).toEqual({ username: "mykhailo-melnyk", displayName: "Mykhailo Melnyk", valid: true });
+  });
+
   it("rejects a tampered payload", async () => {
     const cookie = await signSession("mykhailo-melnyk", SECRET, 3600);
     // Swap the payload portion for a different one (different username)

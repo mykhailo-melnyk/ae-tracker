@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { handleApiMe, handleApiMark, handleApiUser } from "../src/api";
+import { handleApiMe, handleApiMark, handleApiUser, handleApiCompetencies, handleApiUserCompetencies } from "../src/api";
 import { signSession } from "../src/session";
 
 const ENV = {
@@ -7,6 +7,14 @@ const ENV = {
   DATA_REPO_OWNER: "mykhailo-melnyk",
   DATA_REPO_NAME: "ae-tracker-data",
   BOT_PAT: "bot-token",
+} as any;
+
+const CUR = {
+  competencies: [
+    { id: "web", label: "Web" },
+    { id: "mobile", label: "Mobile" },
+    { id: "backend", label: "Backend" },
+  ],
 } as any;
 
 describe("/api/me", () => {
@@ -41,6 +49,40 @@ describe("/api/me", () => {
     expect(res.status).toBe(200);
     const body = await res.json() as any;
     expect(body.github_username).toBe("mykhailo-melnyk");
+  });
+
+  it("returns the GitHub display name (from the token) when no file exists, without creating one", async () => {
+    const session = await signSession("anna", ENV.SESSION_SECRET, 3600, "Anna Smith");
+    const calls: any[] = [];
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      calls.push({ method: init?.method ?? "GET" });
+      return new Response("not found", { status: 404 });
+    }) as typeof fetch;
+    const req = new Request("https://w.example/api/me", { headers: { Authorization: `Bearer ${session}` } });
+    const res = await handleApiMe(req, ENV, fetchMock);
+    expect(res.status).toBe(200);
+    const body = await res.json() as any;
+    expect(body.display_name).toBe("Anna Smith");
+    expect(calls.some((c) => c.method === "PUT")).toBe(false); // no file created on a mere load
+  });
+
+  it("backfills the display name into an existing file that lacks one", async () => {
+    const session = await signSession("anna", ENV.SESSION_SECRET, 3600, "Anna Smith");
+    const stored = { github_username: "anna", created_at: "x", updated_at: "y", tasks: {} };
+    const calls: any[] = [];
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      calls.push({ method: init?.method ?? "GET", body: init?.body });
+      if (init?.method === "PUT") return new Response(JSON.stringify({ content: { sha: "s2" } }), { status: 200 });
+      return new Response(JSON.stringify({ sha: "s1", content: btoa(JSON.stringify(stored)), encoding: "base64" }),
+        { headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+    const req = new Request("https://w.example/api/me", { headers: { Authorization: `Bearer ${session}` } });
+    const res = await handleApiMe(req, ENV, fetchMock);
+    expect(res.status).toBe(200);
+    const body = await res.json() as any;
+    expect(body.display_name).toBe("Anna Smith");
+    const put = calls.find((c) => c.method === "PUT")!;
+    expect(JSON.parse(atob(JSON.parse(put.body).content)).display_name).toBe("Anna Smith");
   });
 
   it("returns existing progress when file exists", async () => {
@@ -94,6 +136,23 @@ describe("/api/mark", () => {
     const written = JSON.parse(atob(putBody.content));
     expect(written.tasks["L1.T1"].done).toBe(true);
     expect(written.tasks["L1.T1"].at).toBeTruthy();
+  });
+
+  it("stamps the GitHub display name (from the token) onto a newly created file", async () => {
+    const session = await signSession("anna", ENV.SESSION_SECRET, 3600, "Anna Smith");
+    let putBody: string | undefined;
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      if (init?.method === "PUT") { putBody = init.body as string; return new Response(JSON.stringify({ content: { sha: "new-sha" } }), { status: 201 }); }
+      return new Response("not found", { status: 404 });
+    }) as typeof fetch;
+    const req = new Request("https://w.example/api/mark", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ task_id: "L1.T1", done: true }),
+    });
+    const res = await handleApiMark(req, ENV, fetchMock);
+    expect(res.status).toBe(200);
+    expect(JSON.parse(atob(JSON.parse(putBody!).content)).display_name).toBe("Anna Smith");
   });
 
   it("retries on a 409 SHA-conflict and succeeds on re-read", async () => {
@@ -162,5 +221,175 @@ describe("/api/user/:username (admin only)", () => {
     expect(res.status).toBe(200);
     const body = await res.json() as any;
     expect(body.github_username).toBe("anna");
+  });
+});
+
+describe("/api/competencies (self)", () => {
+  it("returns 401 with no session", async () => {
+    const req = new Request("https://w.example/api/competencies", { method: "POST", body: "{}" });
+    const res = await handleApiCompetencies(req, ENV, CUR, globalThis.fetch);
+    expect(res.status).toBe(401);
+  });
+
+  it("writes the caller's competency and records who set it", async () => {
+    const session = await signSession("anna", ENV.SESSION_SECRET, 3600);
+    const calls: any[] = [];
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      calls.push({ method: init?.method ?? "GET", body: init?.body });
+      if (init?.method === "PUT") return new Response(JSON.stringify({ content: { sha: "new-sha" } }), { status: 201 });
+      return new Response("not found", { status: 404 }); // no existing file
+    }) as typeof fetch;
+    const req = new Request("https://w.example/api/competencies", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ competency: "web" }),
+    });
+    const res = await handleApiCompetencies(req, ENV, CUR, fetchMock);
+    expect(res.status).toBe(200);
+    const put = calls.find((c) => c.method === "PUT")!;
+    const written = JSON.parse(atob(JSON.parse(put.body).content));
+    expect(written.competency).toBe("web");
+    expect(written.competency_set_by).toBe("anna");
+  });
+
+  it("clears the competency when given null", async () => {
+    const session = await signSession("anna", ENV.SESSION_SECRET, 3600);
+    const stored = { github_username: "anna", created_at: "x", updated_at: "y", competency: "web", tasks: {} };
+    let putBody: string | undefined;
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      if (init?.method === "PUT") { putBody = init.body as string; return new Response(JSON.stringify({ content: { sha: "s" } }), { status: 200 }); }
+      return new Response(JSON.stringify({ sha: "s", content: btoa(JSON.stringify(stored)), encoding: "base64" }),
+        { headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+    const req = new Request("https://w.example/api/competencies", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ competency: null }),
+    });
+    const res = await handleApiCompetencies(req, ENV, CUR, fetchMock);
+    expect(res.status).toBe(200);
+    expect(JSON.parse(atob(JSON.parse(putBody!).content)).competency).toBeUndefined();
+  });
+
+  it("rejects an unknown competency id with 400", async () => {
+    const session = await signSession("anna", ENV.SESSION_SECRET, 3600);
+    const req = new Request("https://w.example/api/competencies", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ competency: "nonsense" }),
+    });
+    const res = await handleApiCompetencies(req, ENV, CUR, globalThis.fetch);
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects an array body with 400 (single-select only)", async () => {
+    const session = await signSession("anna", ENV.SESSION_SECRET, 3600);
+    const req = new Request("https://w.example/api/competencies", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ competency: ["web", "backend"] }),
+    });
+    const res = await handleApiCompetencies(req, ENV, CUR, globalThis.fetch);
+    expect(res.status).toBe(400);
+  });
+
+  it("retries on a 409 SHA-conflict and succeeds on re-read", async () => {
+    const session = await signSession("anna", ENV.SESSION_SECRET, 3600);
+    let putAttempts = 0;
+    const stored = { github_username: "anna", created_at: "x", updated_at: "y", tasks: {} };
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      if (init?.method === "PUT") {
+        putAttempts += 1;
+        if (putAttempts === 1) return new Response('{"message":"file does not match sha","status":"409"}', { status: 409 });
+        return new Response(JSON.stringify({ content: { sha: "new-sha" } }), { status: 200 });
+      }
+      return new Response(JSON.stringify({ sha: "fresh-sha", content: btoa(JSON.stringify(stored)), encoding: "base64" }),
+        { headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+    const req = new Request("https://w.example/api/competencies", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ competency: "mobile" }),
+    });
+    const res = await handleApiCompetencies(req, ENV, CUR, fetchMock);
+    expect(res.status).toBe(200);
+    expect(putAttempts).toBe(2);
+  });
+
+  it("preserves existing tasks when setting a competency", async () => {
+    const session = await signSession("anna", ENV.SESSION_SECRET, 3600);
+    const stored = { github_username: "anna", created_at: "x", updated_at: "y",
+      tasks: { "L1.T1": { done: true, at: "2026-05-01T00:00:00Z" } } };
+    let putBody: string | undefined;
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      if (init?.method === "PUT") { putBody = init.body as string; return new Response(JSON.stringify({ content: { sha: "s" } }), { status: 200 }); }
+      return new Response(JSON.stringify({ sha: "s", content: btoa(JSON.stringify(stored)), encoding: "base64" }),
+        { headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+    const req = new Request("https://w.example/api/competencies", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ competency: "web" }),
+    });
+    const res = await handleApiCompetencies(req, ENV, CUR, fetchMock);
+    expect(res.status).toBe(200);
+    expect(JSON.parse(atob(JSON.parse(putBody!).content)).tasks["L1.T1"].done).toBe(true);
+  });
+});
+
+describe("/api/user/:username/competencies (admin override)", () => {
+  it("returns 403 when caller is not an admin", async () => {
+    const session = await signSession("randomguy", ENV.SESSION_SECRET, 3600);
+    const env = { ...ENV, ADMIN_USERNAMES: "mykhailo-melnyk" };
+    const req = new Request("https://w.example/api/user/anna/competencies", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ competency: "web" }),
+    });
+    const res = await handleApiUserCompetencies(req, env, CUR, globalThis.fetch, "anna");
+    expect(res.status).toBe(403);
+  });
+
+  it("an admin sets a target's competency and is recorded as the setter", async () => {
+    const session = await signSession("mykhailo-melnyk", ENV.SESSION_SECRET, 3600);
+    const env = { ...ENV, ADMIN_USERNAMES: "mykhailo-melnyk" };
+    const calls: any[] = [];
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      calls.push({ url, method: init?.method ?? "GET", body: init?.body });
+      if (init?.method === "PUT") return new Response(JSON.stringify({ content: { sha: "s" } }), { status: 200 });
+      return new Response("not found", { status: 404 });
+    }) as typeof fetch;
+    const req = new Request("https://w.example/api/user/anna/competencies", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ competency: "backend" }),
+    });
+    const res = await handleApiUserCompetencies(req, env, CUR, fetchMock, "anna");
+    expect(res.status).toBe(200);
+    const put = calls.find((c) => c.method === "PUT")!;
+    expect(put.url).toContain("progress/anna.json");
+    const written = JSON.parse(atob(JSON.parse(put.body).content));
+    expect(written.competency).toBe("backend");
+    expect(written.competency_set_by).toBe("mykhailo-melnyk");
+  });
+
+  it("does NOT stamp the admin's display name onto the target", async () => {
+    const session = await signSession("mykhailo-melnyk", ENV.SESSION_SECRET, 3600, "Admin Person");
+    const env = { ...ENV, ADMIN_USERNAMES: "mykhailo-melnyk" };
+    let putBody: string | undefined;
+    const stored = { github_username: "anna", display_name: "Anna Smith", created_at: "x", updated_at: "y", tasks: {} };
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      if (init?.method === "PUT") { putBody = init.body as string; return new Response(JSON.stringify({ content: { sha: "s" } }), { status: 200 }); }
+      return new Response(JSON.stringify({ sha: "s", content: btoa(JSON.stringify(stored)), encoding: "base64" }),
+        { headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+    const req = new Request("https://w.example/api/user/anna/competencies", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ competency: "web" }),
+    });
+    const res = await handleApiUserCompetencies(req, env, CUR, fetchMock, "anna");
+    expect(res.status).toBe(200);
+    expect(JSON.parse(atob(JSON.parse(putBody!).content)).display_name).toBe("Anna Smith"); // unchanged
   });
 });

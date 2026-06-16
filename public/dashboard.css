@@ -115,6 +115,42 @@
 .task-row .tbar > div { height: 100%; background: #2563eb; }
 .task-row .tpct { color: #475569; font-weight: 600; min-width: 44px; text-align: right; }
 
+/* ---- Level completion accordion ---- */
+.lvl-acc { border-bottom: 1px solid #f1f5f9; }
+.lvl-acc:last-child { border-bottom: none; }
+.lvl-acc > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  cursor: pointer;
+  font-size: 12.5px;
+  list-style: none;
+}
+.lvl-acc > summary::-webkit-details-marker { display: none; }
+.lvl-acc > summary:hover .lvl-name { color: #2563eb; }
+.lvl-acc .lvl-caret {
+  color: #94a3b8;
+  font-size: 11px;
+  transition: transform 0.15s ease;
+  flex: 0 0 auto;
+}
+.lvl-acc[open] > summary .lvl-caret { transform: rotate(90deg); }
+.lvl-acc .lvl-name { flex: 1; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lvl-acc .lvl-name strong { color: #0f172a; }
+.lvl-acc .lvl-count { flex: 0 0 auto; color: #94a3b8; font-size: 11px; min-width: 52px; text-align: right; }
+.lvl-acc summary .tbar {
+  flex: 0 0 130px;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.lvl-acc summary .tbar > div { height: 100%; background: #2563eb; }
+.lvl-acc summary .tpct { color: #475569; font-weight: 600; min-width: 44px; text-align: right; }
+.lvl-tasks { padding: 2px 0 10px 22px; }
+.lvl-tasks .task-row { padding: 5px 0; }
+
 /* ---- Engineer table toolbar ---- */
 .toolbar {
   display: flex;
@@ -140,6 +176,42 @@
   cursor: pointer;
 }
 .filter-pill.active { background: #0f172a; color: white; border-color: #0f172a; }
+
+/* ---- Competency filter row ---- */
+.comp-toolbar { align-items: center; margin-top: -4px; }
+.comp-toolbar-label {
+  font-size: 11px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+.comp-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.comp-pill {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #475569;
+  cursor: pointer;
+}
+.comp-pill.active { background: #2563eb; color: white; border-color: #2563eb; }
+
+/* ---- Competency cell (table) — admin dropdown ---- */
+.comp-select {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12.5px;
+  color: #475569;
+  font-family: inherit;
+  cursor: pointer;
+}
+.comp-select:hover { border-color: #94a3b8; }
+.comp-select:disabled { opacity: 0.5; cursor: default; }
 
 /* ---- Engineer table ---- */
 table.engineers {

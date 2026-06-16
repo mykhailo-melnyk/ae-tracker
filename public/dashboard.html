@@ -28,7 +28,7 @@
     <div class="kpis" id="kpis"></div>
     <div class="two-col">
       <div class="card"><h3>Current level distribution</h3><div class="bars" id="bars"></div></div>
-      <div class="card"><h3>Task completion rate</h3><div id="task-rates"></div></div>
+      <div class="card"><h3>Completion by level</h3><div class="card-sub">Avg across engineers · click a level for task detail</div><div id="task-rates"></div></div>
     </div>
     <div class="card">
       <h3>Engineers</h3>
@@ -41,8 +41,12 @@
         <div class="filter-pill" data-filter="L4">L4+</div>
         <div class="filter-pill" data-filter="stalled">Stalled</div>
       </div>
+      <div class="toolbar comp-toolbar">
+        <span class="comp-toolbar-label">Competency</span>
+        <div class="comp-pills" id="competency-pills"></div>
+      </div>
       <table class="engineers"><thead><tr>
-        <th>Engineer</th><th>Current</th><th>Completion</th><th>Last active</th><th></th>
+        <th>Engineer</th><th>Current</th><th>Completion</th><th>Competency</th><th>Last active</th><th></th>
       </tr></thead><tbody id="engineers-body"></tbody></table>
     </div>
   </div>

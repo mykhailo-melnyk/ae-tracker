@@ -1,5 +1,5 @@
 import { handleLogin, handleCallback, handleLogout } from "./auth";
-import { handleApiMe, handleApiMark, handleApiUser } from "./api";
+import { handleApiMe, handleApiMark, handleApiUser, handleApiCompetencies, handleApiUserCompetencies } from "./api";
 import { handleApiAggregate } from "./aggregate";
 import curriculum from "../../public/curriculum.json";
 
@@ -48,8 +48,17 @@ export default {
     // /api/*
     if (url.pathname === "/api/me") return withCors(await handleApiMe(request, env), env, request);
     if (url.pathname === "/api/mark") return withCors(await handleApiMark(request, env), env, request);
+    if (url.pathname === "/api/competencies") return withCors(
+      await handleApiCompetencies(request, env, curriculum as any),
+      env, request,
+    );
     if (url.pathname === "/api/aggregate") return withCors(
       await handleApiAggregate(request, env, curriculum as any),
+      env, request,
+    );
+    const compMatch = url.pathname.match(/^\/api\/user\/([\w-]+)\/competencies$/);
+    if (compMatch) return withCors(
+      await handleApiUserCompetencies(request, env, curriculum as any, fetch, compMatch[1]),
       env, request,
     );
     const userMatch = url.pathname.match(/^\/api\/user\/([\w-]+)$/);

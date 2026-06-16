@@ -17,6 +17,7 @@ export interface Aggregate {
     current_level: string;
     completion_pct: number;
     last_active: string;
+    competency?: string;
   }>;
 }
 
@@ -75,6 +76,7 @@ export async function computeAggregate(
       current_level: cl,
       completion_pct: done / totalTasks,
       last_active: la,
+      competency: p.competency,
     });
   }
 

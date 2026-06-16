@@ -18,6 +18,7 @@ describe("computeAggregate", () => {
         github_username: "anna", display_name: "Anna",
         created_at: "2026-05-01T00:00:00Z",
         updated_at: "2026-05-27T00:00:00Z",
+        competency: "web",
         tasks: { "L1.T1": { done: true, at: "2026-05-27T00:00:00Z" } },
       },
       "ben.json": {
@@ -55,6 +56,9 @@ describe("computeAggregate", () => {
     expect(agg.by_task["L2.T1"]).toBe(0);
     expect(agg.stalled_14d).toBe(1); // ben hasn't updated in >14d
     expect(agg.engineers).toHaveLength(2);
+    // competency surfaces as-is; engineers without the field are undefined
+    expect(agg.engineers.find((e) => e.username === "anna")!.competency).toBe("web");
+    expect(agg.engineers.find((e) => e.username === "ben")!.competency).toBeUndefined();
   });
 });
 

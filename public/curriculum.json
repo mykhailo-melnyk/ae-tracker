@@ -2,6 +2,11 @@
   "version": "1.0",
   "source": "general/getting-started/levels.md",
   "last_reviewed": "2026-06-16",
+  "competencies": [
+    { "id": "web", "label": "Web" },
+    { "id": "mobile", "label": "Mobile" },
+    { "id": "backend", "label": "Backend" }
+  ],
   "levels": [
     {
       "id": "L1",

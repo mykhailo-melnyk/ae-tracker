@@ -146,6 +146,49 @@ async function toggleTask(taskId) {
   }
 }
 
+function renderCompetencyPicker() {
+  const box = document.getElementById("competency-picker");
+  const options = CURRICULUM.competencies || [];
+  if (!options.length) { box.innerHTML = ""; return; }
+  const selected = PROGRESS.competency || null;
+  const label = READONLY ? "Competency" : "My competency";
+  const hint = READONLY ? "" : `<span class="comp-hint">Pick the one area you work in</span>`;
+  const chips = options.map((c) => {
+    const on = selected === c.id;
+    return `<button type="button" class="comp-chip ${on ? "on" : ""}" data-comp="${c.id}"${READONLY ? " disabled" : ""}>${c.label}</button>`;
+  }).join("");
+  box.innerHTML = `<div class="comp-label">${label}</div>${hint}<div class="comp-chips">${chips}</div>`;
+  if (READONLY) return;
+  box.querySelectorAll(".comp-chip").forEach((el) => {
+    el.addEventListener("click", () => selectCompetency(el.dataset.comp));
+  });
+}
+
+async function selectCompetency(compId) {
+  if (READONLY) return;
+  const prev = PROGRESS.competency || null;
+  // Single-select: clicking the active one clears it, otherwise it replaces.
+  const next = prev === compId ? null : compId;
+  // Optimistic
+  PROGRESS.competency = next || undefined;
+  renderCompetencyPicker();
+  try {
+    const res = await apiFetch(WORKER + "/api/competencies", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ competency: next }),
+    });
+    if (!res.ok) throw new Error("competency save failed: " + res.status);
+    PROGRESS = await res.json();
+    renderCompetencyPicker();
+  } catch (e) {
+    // Roll back
+    PROGRESS.competency = prev || undefined;
+    renderCompetencyPicker();
+    alert("Could not save your competency. Try again in a moment.");
+  }
+}
+
 async function init() {
   CURRICULUM = await loadCurriculum();
   const result = await loadProgress();
@@ -182,6 +225,7 @@ async function init() {
 
   const lvl = CURRICULUM.levels.find((l) => l.id === FOCUS_LEVEL);
   document.getElementById("greeting-sub").textContent = "Currently at " + lvl.title;
+  renderCompetencyPicker();
   renderTotals();
   renderPillBar();
   renderFocusCard();

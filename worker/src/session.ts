@@ -1,8 +1,8 @@
 // HMAC-SHA256 session cookie sign/verify.
 // Format: <payloadBase64>.<macHex>
-// Payload: { u: username, e: expUnixSeconds }
+// Payload: { u: username, e: expUnixSeconds, n?: displayName }
 
-interface Payload { u: string; e: number; }
+interface Payload { u: string; e: number; n?: string; }
 
 async function hmac(key: string, data: string): Promise<string> {
   const enc = new TextEncoder();
@@ -49,14 +49,15 @@ export function tokenFromRequest(request: Request): string | null {
   return null;
 }
 
-export async function signSession(username: string, secret: string, ttlSeconds: number): Promise<string> {
+export async function signSession(username: string, secret: string, ttlSeconds: number, displayName?: string): Promise<string> {
   const payload: Payload = { u: username, e: Math.floor(Date.now() / 1000) + ttlSeconds };
+  if (displayName) payload.n = displayName;
   const payloadB64 = btoa(JSON.stringify(payload));
   const mac = await hmac(secret, payloadB64);
   return `${payloadB64}.${mac}`;
 }
 
-export async function verifySession(cookie: string, secret: string): Promise<{ username?: string; valid: boolean }> {
+export async function verifySession(cookie: string, secret: string): Promise<{ username?: string; displayName?: string; valid: boolean }> {
   const parts = cookie.split(".");
   if (parts.length !== 2) return { valid: false };
   const [payloadB64, providedMac] = parts;
@@ -70,5 +71,5 @@ export async function verifySession(cookie: string, secret: string): Promise<{ u
   }
   if (typeof payload.u !== "string" || typeof payload.e !== "number") return { valid: false };
   if (payload.e < Math.floor(Date.now() / 1000)) return { valid: false };
-  return { username: payload.u, valid: true };
+  return { username: payload.u, displayName: typeof payload.n === "string" ? payload.n : undefined, valid: true };
 }

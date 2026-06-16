@@ -100,8 +100,11 @@ export async function handleCallback(
   }
   const user = await userRes.json() as { login: string; name?: string };
 
-  // Mint session cookie
-  const session = await signSession(user.login, env.SESSION_SECRET, SESSION_TTL_SECONDS);
+  // Mint session cookie. Carry the GitHub display name in the token so authenticated
+  // requests can persist it into the engineer's own progress file without re-hitting
+  // the GitHub API. Falls back to the login when the profile has no name set.
+  const displayName = user.name?.trim() || user.login;
+  const session = await signSession(user.login, env.SESSION_SECRET, SESSION_TTL_SECONDS, displayName);
 
   const basePath = env.FRONTEND_BASE_PATH ?? "";
   // Hand the token to the frontend in the URL *fragment* (#t=...). Safari and

@@ -75,13 +75,6 @@
           "link": "https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers"
         },
         {
-          "id": "L1.T16",
-          "kind": "checkpoint",
-          "title": "Assessment: AI-claims practical exam",
-          "desc": "Graded exercise: quiz AI on a domain you know (including false-premise questions), predict correct-vs-guessing before verifying, then score yourself. Rubric and optional GLAT/MAILS literacy references in the linked doc.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L1.md"
-        },
-        {
           "id": "L1.T9",
           "kind": "course",
           "title": "Claude 101",
@@ -122,6 +115,13 @@
           "title": "Spot confident-correct vs confident-guessing AI",
           "desc": "You've caught AI hallucinating a few times and know what that looks like.",
           "self_assessment": true
+        },
+        {
+          "id": "L1.T16",
+          "kind": "checkpoint",
+          "title": "Assessment: AI-claims practical exam",
+          "desc": "Graded exercise: quiz AI on a domain you know (including false-premise questions), predict correct-vs-guessing before verifying, then score yourself. Rubric and optional GLAT/MAILS literacy references in the linked doc.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L1.md"
         }
       ]
     },

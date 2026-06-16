@@ -1,6 +1,7 @@
 import type { Env } from "./index";
 import { verifySession, tokenFromRequest } from "./session";
 import { readJsonFile, writeJsonFile, type RepoConfig } from "./github";
+import { CACHE_KEY } from "./aggregate";
 import type { ProgressFile } from "./types";
 
 /** Just the slice of the curriculum the competency endpoints need to validate ids. */
@@ -211,6 +212,7 @@ export async function handleApiCompetencies(
 
   const cfg = { owner: env.DATA_REPO_OWNER, repo: env.DATA_REPO_NAME, token: env.BOT_PAT };
   const progress = await writeCompetency(cfg, username, parsed.value, username, fetchFn, displayName);
+  await env.AGGREGATE_CACHE?.delete(CACHE_KEY); // so the dashboard reflects the change on next load
   return Response.json(progress);
 }
 
@@ -234,5 +236,6 @@ export async function handleApiUserCompetencies(
 
   const cfg = { owner: env.DATA_REPO_OWNER, repo: env.DATA_REPO_NAME, token: env.BOT_PAT };
   const progress = await writeCompetency(cfg, targetUsername, parsed.value, auth.username, fetchFn);
+  await env.AGGREGATE_CACHE?.delete(CACHE_KEY); // so the dashboard reflects the change on next load
   return Response.json(progress);
 }

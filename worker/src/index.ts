@@ -1,5 +1,5 @@
 import { handleLogin, handleCallback, handleLogout } from "./auth";
-import { handleApiMe, handleApiMark, handleApiUser, handleApiCompetencies, handleApiUserCompetencies } from "./api";
+import { handleApiMe, handleApiMark, handleApiUser, handleApiCompetencies, handleApiUserCompetencies, handleApiUserDisabled } from "./api";
 import { handleApiAggregate } from "./aggregate";
 import curriculum from "../../public/curriculum.json";
 
@@ -7,6 +7,7 @@ export interface Env {
   DATA_REPO_OWNER: string;
   DATA_REPO_NAME: string;
   ADMIN_USERNAMES: string;
+  SUPERADMIN_USERNAMES: string;
   FRONTEND_ORIGIN: string;
   FRONTEND_BASE_PATH?: string;
   SESSION_SECRET: string;
@@ -59,6 +60,11 @@ export default {
     const compMatch = url.pathname.match(/^\/api\/user\/([\w-]+)\/competencies$/);
     if (compMatch) return withCors(
       await handleApiUserCompetencies(request, env, curriculum as any, fetch, compMatch[1]),
+      env, request,
+    );
+    const disabledMatch = url.pathname.match(/^\/api\/user\/([\w-]+)\/disabled$/);
+    if (disabledMatch) return withCors(
+      await handleApiUserDisabled(request, env, fetch, disabledMatch[1]),
       env, request,
     );
     const userMatch = url.pathname.match(/^\/api\/user\/([\w-]+)$/);

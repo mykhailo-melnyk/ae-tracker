@@ -94,6 +94,9 @@ export async function handleApiMark(
   const MAX_ATTEMPTS = 4;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     const existing = await readJsonFile<ProgressFile>(cfg, progressPath(username), fetchFn);
+    // A disabled engineer is locked out of all self-writes (defense-in-depth: the
+    // frontend hides the UI, but a hand-crafted request must be rejected too).
+    if (existing?.data.disabled) return Response.json({ error: "disabled" }, { status: 403 });
     const progress = existing?.data ?? emptyProgress(username, displayName);
     const now = new Date().toISOString();
     applyDisplayName(progress, displayName);
@@ -118,8 +121,18 @@ export async function handleApiMark(
   throw new Error("unreachable");
 }
 
+function parseList(raw: string | undefined): string[] {
+  return (raw ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+}
+
+export function isSuperAdmin(username: string, env: Env): boolean {
+  return parseList(env.SUPERADMIN_USERNAMES).includes(username);
+}
+
+// Super admins are a superset of admins — they see everything an admin sees,
+// plus the disable/enable controls. So the admin check accepts either list.
 function isAdmin(username: string, env: Env): boolean {
-  return env.ADMIN_USERNAMES.split(",").map((s) => s.trim()).includes(username);
+  return parseList(env.ADMIN_USERNAMES).includes(username) || isSuperAdmin(username, env);
 }
 
 export async function handleApiUser(
@@ -211,6 +224,10 @@ export async function handleApiCompetencies(
   if (parsed === null) return new Response("invalid body", { status: 400 });
 
   const cfg = { owner: env.DATA_REPO_OWNER, repo: env.DATA_REPO_NAME, token: env.BOT_PAT };
+  // A disabled engineer is locked out of self-writes (the admin override path below
+  // is intentionally NOT blocked, so admins can still manage a disabled engineer).
+  const existing = await readJsonFile<ProgressFile>(cfg, progressPath(username), fetchFn);
+  if (existing?.data.disabled) return Response.json({ error: "disabled" }, { status: 403 });
   const progress = await writeCompetency(cfg, username, parsed.value, username, fetchFn, displayName);
   await env.AGGREGATE_CACHE?.delete(CACHE_KEY); // so the dashboard reflects the change on next load
   return Response.json(progress);
@@ -238,4 +255,58 @@ export async function handleApiUserCompetencies(
   const progress = await writeCompetency(cfg, targetUsername, parsed.value, auth.username, fetchFn);
   await env.AGGREGATE_CACHE?.delete(CACHE_KEY); // so the dashboard reflects the change on next load
   return Response.json(progress);
+}
+
+/**
+ * POST /api/user/{username}/disabled — a super admin soft-disables (or re-enables)
+ * an engineer. The progress file stays in place (never moved/deleted) so it can be
+ * inspected later; we just flip the `disabled` flag and stamp who/when. Same 409
+ * optimistic-concurrency retry as the other write paths.
+ */
+export async function handleApiUserDisabled(
+  request: Request,
+  env: Env,
+  fetchFn: typeof fetch,
+  targetUsername: string,
+): Promise<Response> {
+  const auth = await requireSession(request, env);
+  if (auth instanceof Response) return auth;
+  if (!isSuperAdmin(auth.username, env)) return new Response("forbidden", { status: 403 });
+
+  let body: { disabled?: unknown };
+  try { body = await request.json(); } catch { return new Response("invalid json", { status: 400 }); }
+  if (typeof body.disabled !== "boolean") return new Response("invalid body", { status: 400 });
+  const disabled = body.disabled;
+
+  const cfg = { owner: env.DATA_REPO_OWNER, repo: env.DATA_REPO_NAME, token: env.BOT_PAT };
+  const msg = `disabled(${targetUsername})=${disabled} set by ${auth.username}`;
+  const MAX_ATTEMPTS = 4;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const existing = await readJsonFile<ProgressFile>(cfg, progressPath(targetUsername), fetchFn);
+    // Can only disable an engineer who exists in the data — i.e. who appears on the
+    // dashboard. There's nothing to disable for someone who never started.
+    if (!existing) return new Response("no such engineer", { status: 404 });
+    const progress = existing.data;
+    const now = new Date().toISOString();
+    progress.disabled = disabled;
+    progress.disabled_by = auth.username;
+    progress.disabled_at = now;
+    progress.updated_at = now;
+    try {
+      await writeJsonFile(cfg, progressPath(targetUsername), progress, existing.sha, msg, fetchFn);
+      await env.AGGREGATE_CACHE?.delete(CACHE_KEY); // so the dashboard reflects the change on next load
+      return Response.json(progress);
+    } catch (e) {
+      const errStr = e instanceof Error ? e.message : String(e);
+      const isConflict = errStr.includes("writeJsonFile 409");
+      if (!isConflict || attempt === MAX_ATTEMPTS) {
+        console.error(`disabled write failed: target=${targetUsername} attempt=${attempt}/${MAX_ATTEMPTS} conflict=${isConflict} err=${errStr.slice(0, 300)}`);
+        throw e;
+      }
+      console.warn(`disabled 409 conflict: target=${targetUsername} attempt=${attempt}/${MAX_ATTEMPTS}, retrying`);
+      await new Promise((r) => setTimeout(r, 50 * attempt));
+    }
+  }
+  // Unreachable — loop either returns or throws.
+  throw new Error("unreachable");
 }

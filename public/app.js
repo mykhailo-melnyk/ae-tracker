@@ -206,11 +206,21 @@ async function init() {
   }
   PROGRESS = result.progress;
   READONLY = result.readonly;
+
+  // A disabled engineer viewing their OWN page is locked out: show the explanatory
+  // screen instead of the tracker. (Admins viewing via ?as= still see the progress.)
+  if (!READONLY && PROGRESS.disabled) {
+    document.getElementById("disabled").classList.remove("hidden");
+    document.getElementById("user-box").innerHTML =
+      `<a class="signout-link" href="${WORKER}/auth/logout" onclick="clearAuthToken()">Sign out</a>`;
+    return;
+  }
+
   FOCUS_LEVEL = computeCurrentLevel();
   document.getElementById("signed-in").classList.remove("hidden");
 
   const title = READONLY
-    ? "Viewing " + (PROGRESS.display_name || PROGRESS.github_username)
+    ? "Viewing " + (PROGRESS.display_name || PROGRESS.github_username) + (PROGRESS.disabled ? " (disabled)" : "")
     : "Welcome back, " + (PROGRESS.display_name || PROGRESS.github_username);
   document.getElementById("greeting-title").textContent = title;
 

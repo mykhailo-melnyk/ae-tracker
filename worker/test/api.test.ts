@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { handleApiMe, handleApiMark, handleApiUser, handleApiCompetencies, handleApiUserCompetencies } from "../src/api";
+import { handleApiMe, handleApiMark, handleApiUser, handleApiCompetencies, handleApiUserCompetencies, handleApiUserDisabled } from "../src/api";
 import { signSession } from "../src/session";
 
 const ENV = {
@@ -194,6 +194,26 @@ describe("/api/mark", () => {
     const res = await handleApiMark(req, ENV, globalThis.fetch);
     expect(res.status).toBe(400);
   });
+
+  it("returns 403 {error:disabled} and does NOT write when the engineer is disabled", async () => {
+    const session = await signSession("anna", ENV.SESSION_SECRET, 3600);
+    const stored = { github_username: "anna", created_at: "x", updated_at: "y", disabled: true, tasks: {} };
+    const calls: any[] = [];
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      calls.push({ method: init?.method ?? "GET" });
+      return new Response(JSON.stringify({ sha: "s", content: btoa(JSON.stringify(stored)), encoding: "base64" }),
+        { headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+    const req = new Request("https://w.example/api/mark", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ task_id: "L1.T1", done: true }),
+    });
+    const res = await handleApiMark(req, ENV, fetchMock);
+    expect(res.status).toBe(403);
+    expect((await res.json() as any).error).toBe("disabled");
+    expect(calls.some((c) => c.method === "PUT")).toBe(false); // never wrote
+  });
 });
 
 describe("/api/user/:username (admin only)", () => {
@@ -334,6 +354,118 @@ describe("/api/competencies (self)", () => {
     const res = await handleApiCompetencies(req, ENV, CUR, fetchMock);
     expect(res.status).toBe(200);
     expect(JSON.parse(atob(JSON.parse(putBody!).content)).tasks["L1.T1"].done).toBe(true);
+  });
+
+  it("returns 403 {error:disabled} and does NOT write when the engineer is disabled", async () => {
+    const session = await signSession("anna", ENV.SESSION_SECRET, 3600);
+    const stored = { github_username: "anna", created_at: "x", updated_at: "y", disabled: true, tasks: {} };
+    const calls: any[] = [];
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      calls.push({ method: init?.method ?? "GET" });
+      return new Response(JSON.stringify({ sha: "s", content: btoa(JSON.stringify(stored)), encoding: "base64" }),
+        { headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+    const req = new Request("https://w.example/api/competencies", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ competency: "web" }),
+    });
+    const res = await handleApiCompetencies(req, ENV, CUR, fetchMock);
+    expect(res.status).toBe(403);
+    expect((await res.json() as any).error).toBe("disabled");
+    expect(calls.some((c) => c.method === "PUT")).toBe(false);
+  });
+});
+
+describe("/api/user/:username/disabled (super-admin only)", () => {
+  const SUPER_ENV = { ...ENV, ADMIN_USERNAMES: "alice", SUPERADMIN_USERNAMES: "sam" } as any;
+
+  it("returns 403 when caller is a plain engineer", async () => {
+    const session = await signSession("anna", SUPER_ENV.SESSION_SECRET, 3600);
+    const req = new Request("https://w.example/api/user/ben/disabled", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ disabled: true }),
+    });
+    const res = await handleApiUserDisabled(req, SUPER_ENV, globalThis.fetch, "ben");
+    expect(res.status).toBe(403);
+  });
+
+  it("returns 403 when caller is an admin but NOT a super admin", async () => {
+    const session = await signSession("alice", SUPER_ENV.SESSION_SECRET, 3600);
+    const req = new Request("https://w.example/api/user/ben/disabled", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ disabled: true }),
+    });
+    const res = await handleApiUserDisabled(req, SUPER_ENV, globalThis.fetch, "ben");
+    expect(res.status).toBe(403);
+  });
+
+  it("returns 404 when the target engineer has no progress file", async () => {
+    const session = await signSession("sam", SUPER_ENV.SESSION_SECRET, 3600);
+    const fetchMock = (async () => new Response("not found", { status: 404 })) as typeof fetch;
+    const req = new Request("https://w.example/api/user/ghost/disabled", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ disabled: true }),
+    });
+    const res = await handleApiUserDisabled(req, SUPER_ENV, fetchMock, "ghost");
+    expect(res.status).toBe(404);
+  });
+
+  it("a super admin disables an engineer, stamping disabled/by/at without touching tasks", async () => {
+    const session = await signSession("sam", SUPER_ENV.SESSION_SECRET, 3600);
+    const stored = { github_username: "ben", created_at: "x", updated_at: "y",
+      tasks: { "L1.T1": { done: true, at: "2026-05-01T00:00:00Z" } } };
+    let putBody: string | undefined;
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      if (init?.method === "PUT") { putBody = init.body as string; return new Response(JSON.stringify({ content: { sha: "s2" } }), { status: 200 }); }
+      return new Response(JSON.stringify({ sha: "s1", content: btoa(JSON.stringify(stored)), encoding: "base64" }),
+        { headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+    const req = new Request("https://w.example/api/user/ben/disabled", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ disabled: true }),
+    });
+    const res = await handleApiUserDisabled(req, SUPER_ENV, fetchMock, "ben");
+    expect(res.status).toBe(200);
+    const written = JSON.parse(atob(JSON.parse(putBody!).content));
+    expect(written.disabled).toBe(true);
+    expect(written.disabled_by).toBe("sam");
+    expect(written.disabled_at).toBeTruthy();
+    expect(written.tasks["L1.T1"].done).toBe(true); // progress preserved
+  });
+
+  it("re-enables an engineer (disabled:false)", async () => {
+    const session = await signSession("sam", SUPER_ENV.SESSION_SECRET, 3600);
+    const stored = { github_username: "ben", created_at: "x", updated_at: "y", disabled: true, tasks: {} };
+    let putBody: string | undefined;
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      if (init?.method === "PUT") { putBody = init.body as string; return new Response(JSON.stringify({ content: { sha: "s2" } }), { status: 200 }); }
+      return new Response(JSON.stringify({ sha: "s1", content: btoa(JSON.stringify(stored)), encoding: "base64" }),
+        { headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+    const req = new Request("https://w.example/api/user/ben/disabled", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ disabled: false }),
+    });
+    const res = await handleApiUserDisabled(req, SUPER_ENV, fetchMock, "ben");
+    expect(res.status).toBe(200);
+    expect(JSON.parse(atob(JSON.parse(putBody!).content)).disabled).toBe(false);
+  });
+
+  it("rejects a non-boolean body with 400", async () => {
+    const session = await signSession("sam", SUPER_ENV.SESSION_SECRET, 3600);
+    const req = new Request("https://w.example/api/user/ben/disabled", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ disabled: "yes" }),
+    });
+    const res = await handleApiUserDisabled(req, SUPER_ENV, globalThis.fetch, "ben");
+    expect(res.status).toBe(400);
   });
 });
 

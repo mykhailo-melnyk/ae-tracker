@@ -60,6 +60,47 @@ describe("computeAggregate", () => {
     expect(agg.engineers.find((e) => e.username === "anna")!.competency).toBe("web");
     expect(agg.engineers.find((e) => e.username === "ben")!.competency).toBeUndefined();
   });
+
+  it("excludes disabled engineers from headline counts but still lists them with a flag", async () => {
+    const curriculum = {
+      levels: [
+        { id: "L1", tasks: [{ id: "L1.T1" }], level_complete_when: "all_tasks_done" },
+      ],
+    };
+    const files: Record<string, any> = {
+      "anna.json": {
+        github_username: "anna", created_at: "2026-05-01T00:00:00Z", updated_at: "2026-05-27T00:00:00Z",
+        tasks: { "L1.T1": { done: true, at: "2026-05-27T00:00:00Z" } },
+      },
+      "cara.json": {
+        github_username: "cara", created_at: "2026-05-01T00:00:00Z", updated_at: "2026-05-27T00:00:00Z",
+        disabled: true,
+        tasks: { "L1.T1": { done: true, at: "2026-05-27T00:00:00Z" } },
+      },
+    };
+    const fetchMock = (async (url: string) => {
+      if (url.endsWith("/contents/progress")) {
+        return new Response(JSON.stringify([
+          { name: "anna.json", type: "file", path: "progress/anna.json" },
+          { name: "cara.json", type: "file", path: "progress/cara.json" },
+        ]), { headers: { "content-type": "application/json" } });
+      }
+      const name = url.split("/").pop()!;
+      return new Response(JSON.stringify({ sha: "s", content: btoa(JSON.stringify(files[name])), encoding: "base64" }),
+        { headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+
+    const agg = await computeAggregate(cfg, curriculum as any, fetchMock, new Date("2026-05-27T12:00:00Z"));
+
+    // cara is disabled: not counted, but cara's L1.T1 completion is not tallied either
+    expect(agg.engineers_started).toBe(1);
+    expect(agg.by_current_level).toEqual({ L1: 1 });
+    expect(agg.by_task["L1.T1"]).toBe(1); // only anna
+    // ...yet cara is still present in the list, flagged disabled (for the dashboard filter)
+    expect(agg.engineers).toHaveLength(2);
+    expect(agg.engineers.find((e) => e.username === "cara")!.disabled).toBe(true);
+    expect(agg.engineers.find((e) => e.username === "anna")!.disabled).toBeUndefined();
+  });
 });
 
 describe("handleApiAggregate (auth gate)", () => {
@@ -88,5 +129,33 @@ describe("handleApiAggregate (auth gate)", () => {
     });
     const res = await handleApiAggregate(req, baseEnv, minimalCurriculum as any, globalThis.fetch);
     expect(res.status).toBe(403);
+  });
+
+  it("allows a super admin who is NOT in ADMIN_USERNAMES, and stamps is_superadmin", async () => {
+    const env = { ...baseEnv, ADMIN_USERNAMES: "alice", SUPERADMIN_USERNAMES: "sam" };
+    const session = await signSession("sam", env.SESSION_SECRET, 3600);
+    const fetchMock = (async (url: string) => {
+      if (url.endsWith("/contents/progress")) return new Response("[]", { headers: { "content-type": "application/json" } });
+      return new Response("not found", { status: 404 });
+    }) as typeof fetch;
+    const req = new Request("https://w.example/api/aggregate", { headers: { Cookie: `session=${session}` } });
+    const res = await handleApiAggregate(req, env, minimalCurriculum as any, fetchMock);
+    expect(res.status).toBe(200);
+    const body = await res.json() as any;
+    expect(body.is_superadmin).toBe(true);
+  });
+
+  it("a plain admin gets is_superadmin:false", async () => {
+    const env = { ...baseEnv, ADMIN_USERNAMES: "alice", SUPERADMIN_USERNAMES: "sam" };
+    const session = await signSession("alice", env.SESSION_SECRET, 3600);
+    const fetchMock = (async (url: string) => {
+      if (url.endsWith("/contents/progress")) return new Response("[]", { headers: { "content-type": "application/json" } });
+      return new Response("not found", { status: 404 });
+    }) as typeof fetch;
+    const req = new Request("https://w.example/api/aggregate", { headers: { Cookie: `session=${session}` } });
+    const res = await handleApiAggregate(req, env, minimalCurriculum as any, fetchMock);
+    expect(res.status).toBe(200);
+    const body = await res.json() as any;
+    expect(body.is_superadmin).toBe(false);
   });
 });

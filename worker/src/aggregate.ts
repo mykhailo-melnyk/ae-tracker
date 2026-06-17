@@ -11,6 +11,9 @@ export interface Aggregate {
   by_current_level: Record<string, number>;
   by_task: Record<string, number>;
   stalled_14d: number;
+  // Whether the requesting session is a super admin (controls disable/enable UI).
+  // Set per-request — never part of the cached body, which is shared across viewers.
+  is_superadmin: boolean;
   engineers: Array<{
     username: string;
     display_name?: string;
@@ -18,6 +21,7 @@ export interface Aggregate {
     completion_pct: number;
     last_active: string;
     competency?: string;
+    disabled?: boolean;
   }>;
 }
 
@@ -56,20 +60,25 @@ export async function computeAggregate(
   const by_current_level: Record<string, number> = {};
   const by_task: Record<string, number> = Object.fromEntries(allTaskIds.map((id) => [id, 0]));
   let stalled_14d = 0;
+  let engineers_started = 0;
   const engineers: Aggregate["engineers"] = [];
 
   const stallThresholdMs = STALLED_DAYS * 86_400_000;
 
   for (const p of progresses) {
     const cl = currentLevel(p, curriculum);
-    by_current_level[cl] = (by_current_level[cl] ?? 0) + 1;
-    for (const id of allTaskIds) {
-      if (p.tasks[id]?.done) by_task[id] += 1;
-    }
     const la = lastActive(p);
-    const isStalled = now.getTime() - new Date(la).getTime() > stallThresholdMs;
-    if (isStalled) stalled_14d += 1;
     const done = allTaskIds.filter((id) => p.tasks[id]?.done).length;
+    // Disabled engineers are still surfaced in the list (behind a dashboard filter)
+    // but are excluded from every headline count so they don't skew adoption stats.
+    if (!p.disabled) {
+      engineers_started += 1;
+      by_current_level[cl] = (by_current_level[cl] ?? 0) + 1;
+      for (const id of allTaskIds) {
+        if (p.tasks[id]?.done) by_task[id] += 1;
+      }
+      if (now.getTime() - new Date(la).getTime() > stallThresholdMs) stalled_14d += 1;
+    }
     engineers.push({
       username: p.github_username,
       display_name: p.display_name,
@@ -77,26 +86,39 @@ export async function computeAggregate(
       completion_pct: done / totalTasks,
       last_active: la,
       competency: p.competency,
+      disabled: p.disabled,
     });
   }
 
   return {
     as_of: now.toISOString(),
-    engineers_started: progresses.length,
+    engineers_started,
     by_current_level,
     by_task,
     stalled_14d,
+    is_superadmin: false, // overwritten per-request in handleApiAggregate (not cached)
     engineers,
   };
 }
 
 import type { Env } from "./index";
 import { verifySession, tokenFromRequest } from "./session";
+import { isSuperAdmin } from "./api";
 
 // Bump when the aggregate's shape changes so a deploy invalidates stale entries
-// immediately (v2 adds per-engineer `competency`).
-export const CACHE_KEY = "aggregate-v2";
+// immediately (v2 adds per-engineer `competency`; v3 adds per-engineer `disabled`
+// and excludes disabled engineers from the headline counts).
+export const CACHE_KEY = "aggregate-v3";
 const CACHE_TTL_SECONDS = 300;
+
+// `is_superadmin` is viewer-specific, so it can't live in the shared cached body.
+// We cache the aggregate without it and stamp the requesting viewer's value on the
+// way out (whether the body came from cache or a fresh compute).
+function withViewer(body: string, superadmin: boolean): Response {
+  const agg = JSON.parse(body) as Aggregate;
+  agg.is_superadmin = superadmin;
+  return new Response(JSON.stringify(agg), { headers: { "content-type": "application/json" } });
+}
 
 export async function handleApiAggregate(
   request: Request,
@@ -109,17 +131,19 @@ export async function handleApiAggregate(
   const session = await verifySession(token, env.SESSION_SECRET);
   if (!session.valid || !session.username) return new Response("unauthenticated", { status: 401 });
   const admins = env.ADMIN_USERNAMES.split(",").map((s) => s.trim());
-  if (!admins.includes(session.username)) return new Response("forbidden", { status: 403 });
+  const superadmin = isSuperAdmin(session.username, env);
+  // Super admins are a superset of admins (see api.ts) — either role may view.
+  if (!admins.includes(session.username) && !superadmin) return new Response("forbidden", { status: 403 });
 
   if (env.AGGREGATE_CACHE) {
     const cached = await env.AGGREGATE_CACHE.get(CACHE_KEY);
-    if (cached) return new Response(cached, { headers: { "content-type": "application/json" } });
+    if (cached) return withViewer(cached, superadmin);
   }
   const cfg = { owner: env.DATA_REPO_OWNER, repo: env.DATA_REPO_NAME, token: env.BOT_PAT };
   const agg = await computeAggregate(cfg, curriculum, fetchFn);
-  const body = JSON.stringify(agg);
+  const body = JSON.stringify(agg); // cached body carries is_superadmin:false; the viewer's value is stamped below
   if (env.AGGREGATE_CACHE) {
     await env.AGGREGATE_CACHE.put(CACHE_KEY, body, { expirationTtl: CACHE_TTL_SECONDS });
   }
-  return new Response(body, { headers: { "content-type": "application/json" } });
+  return withViewer(body, superadmin);
 }

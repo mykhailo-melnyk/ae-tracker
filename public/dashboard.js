@@ -17,14 +17,17 @@ async function loadCurriculum() {
 }
 
 function renderKpis() {
+  // Disabled engineers are excluded from every headline number (the worker already
+  // excludes them from engineers_started/stalled; do the same for client-side KPIs).
+  const active = AGG.engineers.filter((e) => !e.disabled);
   document.getElementById("kpis").innerHTML = `
     <div class="kpi"><div class="lbl">Engineers started</div><div class="val">${AGG.engineers_started}</div></div>
     <div class="kpi"><div class="lbl">At Level 2+</div><div class="val">${
-      AGG.engineers.filter((e) => e.current_level !== "L1").length
+      active.filter((e) => e.current_level !== "L1").length
     }</div></div>
     <div class="kpi"><div class="lbl">Avg completion</div><div class="val">${
-      AGG.engineers.length
-        ? Math.round(100 * AGG.engineers.reduce((n, e) => n + e.completion_pct, 0) / AGG.engineers.length)
+      active.length
+        ? Math.round(100 * active.reduce((n, e) => n + e.completion_pct, 0) / active.length)
         : 0
     }%</div></div>
     <div class="kpi"><div class="lbl">Stalled (14+ days)</div><div class="val">${AGG.stalled_14d}</div></div>
@@ -87,13 +90,19 @@ function buildCompetencyPills() {
 
 function renderTable() {
   const filtered = AGG.engineers.filter((e) => {
-    if (FILTER === "stalled") {
-      const ageMs = Date.now() - new Date(e.last_active).getTime();
-      if (ageMs < 14 * 86400_000) return false;
-    } else if (FILTER === "L4") {
-      if (e.current_level !== "L4" && e.current_level !== "L5") return false;
-    } else if (FILTER !== "all") {
-      if (e.current_level !== FILTER) return false;
+    // The "Disabled" pill shows ONLY disabled engineers; every other view hides them.
+    if (FILTER === "disabled") {
+      if (!e.disabled) return false;
+    } else {
+      if (e.disabled) return false;
+      if (FILTER === "stalled") {
+        const ageMs = Date.now() - new Date(e.last_active).getTime();
+        if (ageMs < 14 * 86400_000) return false;
+      } else if (FILTER === "L4") {
+        if (e.current_level !== "L4" && e.current_level !== "L5") return false;
+      } else if (FILTER !== "all") {
+        if (e.current_level !== FILTER) return false;
+      }
     }
     if (COMP_FILTER !== "all" && e.competency !== COMP_FILTER) return false;
     if (SEARCH) {
@@ -108,22 +117,56 @@ function renderTable() {
     const options = [`<option value=""${!e.competency ? " selected" : ""}>—</option>`]
       .concat(allComps.map((c) => `<option value="${c.id}"${e.competency === c.id ? " selected" : ""}>${c.label}</option>`))
       .join("");
+    const disabledBadge = e.disabled ? `<span class="disabled-badge">disabled</span>` : "";
+    // Disable/Enable is a super-admin-only power (AGG.is_superadmin is stamped per-viewer).
+    const toggleBtn = AGG.is_superadmin
+      ? `<button class="disable-btn${e.disabled ? " enable" : ""}" data-user="${e.username}" data-disabled="${e.disabled ? "1" : "0"}">${e.disabled ? "Enable" : "Disable"}</button>`
+      : "";
     return `
-    <tr>
+    <tr${e.disabled ? ' class="row-disabled"' : ""}>
       <td><div class="who"><div class="avatar">${(e.display_name || e.username).slice(0, 2).toUpperCase()}</div>
-          <div><div class="name">${e.display_name || e.username}</div>
+          <div><div class="name">${e.display_name || e.username}${disabledBadge}</div>
                <div class="handle">@${e.username}</div></div></div></td>
       <td><span class="level-chip ${e.current_level}">${e.current_level}</span></td>
       <td><div class="pct-cell"><div class="pct-bar"><div style="width:${Math.round(e.completion_pct * 100)}%"></div></div>
           <span class="pct-num">${Math.round(e.completion_pct * 100)}%</span></div></td>
       <td><select class="comp-select" data-user="${e.username}" data-prev="${e.competency || ""}">${options}</select></td>
       <td><span class="last-active">${new Date(e.last_active).toLocaleDateString()}</span></td>
-      <td style="text-align:right"><a href="tracker.html?as=${e.username}" style="color:#2563eb;font-weight:600">View →</a></td>
+      <td style="text-align:right">${toggleBtn}<a href="tracker.html?as=${e.username}" style="color:#2563eb;font-weight:600">View →</a></td>
     </tr>`;
   }).join("");
   document.querySelectorAll(".comp-select").forEach((sel) => {
     sel.addEventListener("change", () => saveCompetency(sel));
   });
+  document.querySelectorAll(".disable-btn").forEach((btn) => {
+    btn.addEventListener("click", () => toggleDisabled(btn));
+  });
+}
+
+async function toggleDisabled(btn) {
+  const username = btn.dataset.user;
+  const next = btn.dataset.disabled !== "1"; // currently disabled? then we're enabling
+  const verb = next ? "disable" : "enable";
+  if (!confirm(`Are you sure you want to ${verb} @${username}?`
+      + (next ? "\n\nThey will be blocked from the tracker until re-enabled." : ""))) return;
+  btn.disabled = true;
+  try {
+    const res = await apiFetch(WORKER + "/api/user/" + encodeURIComponent(username) + "/disabled", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ disabled: next }),
+    });
+    if (!res.ok) throw new Error("toggle failed: " + res.status);
+    const updated = await res.json();
+    const eng = AGG.engineers.find((e) => e.username === username);
+    if (eng) eng.disabled = updated.disabled;
+    // Re-render: counts and which rows are visible both change.
+    renderKpis();
+    renderTable();
+  } catch (e) {
+    btn.disabled = false;
+    alert("Could not " + verb + " @" + username + ". Try again in a moment.");
+  }
 }
 
 async function saveCompetency(sel) {

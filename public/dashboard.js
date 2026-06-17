@@ -185,6 +185,7 @@ async function init() {
   buildCompetencyPills();
   renderKpis(); renderBars(); renderLevelCompletion(); renderTable();
   wireFilters();
+  document.getElementById("export-btn").addEventListener("click", () => openExportDialog(AGG, CUR));
 }
 
 init().catch((e) => {

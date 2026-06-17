@@ -1,0 +1,219 @@
+// export.js — admin-only export of engineers by competency.
+// Reads the already-loaded AGG (aggregate) and CUR (curriculum); never mutates
+// them. Produces a flat CSV (zero dependencies) and a true .xlsx workbook with a
+// leading Summary sheet (SheetJS, loaded lazily from CDN on first Excel export).
+
+// Pinned SheetJS build from the official CDN (the npm `xlsx` mirrors are stale).
+const SHEETJS_URL = "https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js";
+
+const UNASSIGNED = "__unassigned__";
+
+function compLabel(CUR, id) {
+  if (!id) return "Unassigned";
+  const c = (CUR.competencies || []).find((c) => c.id === id);
+  return c ? c.label : id;
+}
+
+// Engineers whose competency is in chosenIds, plus the competency-less ones when
+// includeUnassigned. Mirrors the filter idiom in dashboard.js renderTable().
+function selectedEngineers(AGG, chosenIds, includeUnassigned) {
+  return AGG.engineers.filter((e) =>
+    (e.competency && chosenIds.has(e.competency)) || (!e.competency && includeUnassigned),
+  );
+}
+
+function buildRows(engineers, CUR) {
+  return engineers.map((e) => ({
+    Name: e.display_name || e.username,
+    GitHub: "@" + e.username,
+    Competency: compLabel(CUR, e.competency),
+    "Current level": e.current_level,
+    "Completion %": Math.round(e.completion_pct * 100),
+    "Last active": new Date(e.last_active).toLocaleDateString(),
+  }));
+}
+
+function fileDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+// ---- CSV ----
+
+function csvCell(v) {
+  const s = String(v == null ? "" : v);
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+function downloadCsv(rows) {
+  const headers = Object.keys(rows[0] || {
+    Name: "", GitHub: "", Competency: "", "Current level": "", "Completion %": "", "Last active": "",
+  });
+  const lines = [headers.map(csvCell).join(",")]
+    .concat(rows.map((r) => headers.map((h) => csvCell(r[h])).join(",")));
+  // BOM so Excel reads UTF-8 (accented names) correctly.
+  const blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
+  triggerDownload(blob, "ae-progress-" + fileDate() + ".csv");
+}
+
+function triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+// ---- xlsx (lazy SheetJS) ----
+
+let sheetJsPromise = null;
+function loadSheetJs() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  if (sheetJsPromise) return sheetJsPromise;
+  sheetJsPromise = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = SHEETJS_URL;
+    s.onload = () => (window.XLSX ? resolve(window.XLSX) : reject(new Error("SheetJS failed to load")));
+    s.onerror = () => { sheetJsPromise = null; reject(new Error("Could not load the Excel library")); };
+    document.head.appendChild(s);
+  });
+  return sheetJsPromise;
+}
+
+function summaryAoa(engineers, CUR, chosenIds, includeUnassigned) {
+  const aoa = [];
+  aoa.push(["AE Tracker — engineer export"]);
+  aoa.push(["Generated", new Date().toLocaleString()]);
+  const chosenLabels = (CUR.competencies || [])
+    .filter((c) => chosenIds.has(c.id))
+    .map((c) => c.label)
+    .concat(includeUnassigned ? ["Unassigned"] : []);
+  aoa.push(["Competencies", chosenLabels.join(", ")]);
+  aoa.push(["Total engineers", engineers.length]);
+  const avg = engineers.length
+    ? Math.round((100 * engineers.reduce((n, e) => n + e.completion_pct, 0)) / engineers.length)
+    : 0;
+  aoa.push(["Avg completion %", avg]);
+  aoa.push([]);
+
+  aoa.push(["By competency", "Count"]);
+  for (const c of CUR.competencies || []) {
+    if (!chosenIds.has(c.id)) continue;
+    aoa.push([c.label, engineers.filter((e) => e.competency === c.id).length]);
+  }
+  if (includeUnassigned) {
+    aoa.push(["Unassigned", engineers.filter((e) => !e.competency).length]);
+  }
+  aoa.push([]);
+
+  aoa.push(["By current level", "Count"]);
+  for (const lvl of ["L1", "L2", "L3", "L4", "L5"]) {
+    aoa.push([lvl, engineers.filter((e) => e.current_level === lvl).length]);
+  }
+  return aoa;
+}
+
+async function downloadXlsx(engineers, rows, CUR, chosenIds, includeUnassigned) {
+  const XLSX = await loadSheetJs();
+  const wb = XLSX.utils.book_new();
+
+  const summary = XLSX.utils.aoa_to_sheet(summaryAoa(engineers, CUR, chosenIds, includeUnassigned));
+  summary["!cols"] = [{ wch: 24 }, { wch: 40 }];
+  XLSX.utils.book_append_sheet(wb, summary, "Summary");
+
+  const people = XLSX.utils.json_to_sheet(rows);
+  people["!cols"] = [{ wch: 24 }, { wch: 20 }, { wch: 16 }, { wch: 13 }, { wch: 12 }, { wch: 13 }];
+  XLSX.utils.book_append_sheet(wb, people, "Engineers");
+
+  XLSX.writeFile(wb, "ae-progress-" + fileDate() + ".xlsx");
+}
+
+// ---- Modal ----
+
+function openExportDialog(AGG, CUR) {
+  const comps = CUR.competencies || [];
+
+  const backdrop = document.createElement("div");
+  backdrop.className = "export-backdrop";
+  backdrop.innerHTML = `
+    <div class="export-modal" role="dialog" aria-modal="true" aria-label="Export engineers">
+      <div class="export-head">
+        <h3>Export engineers</h3>
+        <button class="export-close" aria-label="Close">×</button>
+      </div>
+      <div class="export-body">
+        <div class="export-section-label">Competencies to include</div>
+        <div class="export-checks">
+          <label class="export-check"><input type="checkbox" data-all> <span>Select all</span></label>
+          ${comps.map((c) => `<label class="export-check"><input type="checkbox" value="${c.id}" checked> <span>${c.label}</span></label>`).join("")}
+          <label class="export-check"><input type="checkbox" value="${UNASSIGNED}" checked> <span>Unassigned</span></label>
+        </div>
+        <div class="export-count" id="export-count"></div>
+      </div>
+      <div class="export-actions">
+        <button class="export-dl" data-fmt="csv">Download CSV</button>
+        <button class="export-dl primary" data-fmt="xlsx">Download Excel (.xlsx)</button>
+      </div>
+    </div>`;
+
+  const close = () => backdrop.remove();
+  backdrop.addEventListener("click", (e) => { if (e.target === backdrop) close(); });
+  backdrop.querySelector(".export-close").addEventListener("click", close);
+  document.addEventListener("keydown", function esc(e) {
+    if (e.key === "Escape") { close(); document.removeEventListener("keydown", esc); }
+  });
+
+  const itemBoxes = () => Array.from(backdrop.querySelectorAll('.export-checks input[value]'));
+  const allBox = backdrop.querySelector("input[data-all]");
+  const countEl = backdrop.querySelector("#export-count");
+
+  function currentSelection() {
+    const checked = itemBoxes().filter((b) => b.checked).map((b) => b.value);
+    const includeUnassigned = checked.includes(UNASSIGNED);
+    const chosenIds = new Set(checked.filter((v) => v !== UNASSIGNED));
+    return { chosenIds, includeUnassigned };
+  }
+
+  function refreshCount() {
+    const boxes = itemBoxes();
+    allBox.checked = boxes.every((b) => b.checked);
+    const { chosenIds, includeUnassigned } = currentSelection();
+    const n = selectedEngineers(AGG, chosenIds, includeUnassigned).length;
+    countEl.textContent = n + (n === 1 ? " engineer selected" : " engineers selected");
+  }
+
+  allBox.addEventListener("change", () => {
+    itemBoxes().forEach((b) => { b.checked = allBox.checked; });
+    refreshCount();
+  });
+  itemBoxes().forEach((b) => b.addEventListener("change", refreshCount));
+
+  backdrop.querySelectorAll(".export-dl").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const { chosenIds, includeUnassigned } = currentSelection();
+      const engineers = selectedEngineers(AGG, chosenIds, includeUnassigned);
+      if (!engineers.length) { countEl.textContent = "No engineers match — pick at least one competency."; return; }
+      const rows = buildRows(engineers, CUR);
+      if (btn.dataset.fmt === "csv") {
+        downloadCsv(rows);
+      } else {
+        const label = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = "Preparing…";
+        try {
+          await downloadXlsx(engineers, rows, CUR, chosenIds, includeUnassigned);
+        } catch (e) {
+          alert(e.message || "Excel export failed.");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = label;
+        }
+      }
+    });
+  });
+
+  document.body.appendChild(backdrop);
+  refreshCount();
+}

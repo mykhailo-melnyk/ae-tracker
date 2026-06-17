@@ -31,7 +31,10 @@
       <div class="card"><h3>Completion by level</h3><div class="card-sub">Avg across engineers · click a level for task detail</div><div id="task-rates"></div></div>
     </div>
     <div class="card">
-      <h3>Engineers</h3>
+      <div class="card-head">
+        <h3>Engineers</h3>
+        <button id="export-btn" class="export-btn">⬇ Export</button>
+      </div>
       <div class="toolbar">
         <input class="search" id="search" placeholder="🔍 Search by name or GitHub handle…">
         <div class="filter-pill active" data-filter="all">All</div>
@@ -57,6 +60,7 @@
       : "https://ae-tracker.mihael-melnyk.workers.dev";
   </script>
   <script src="auth.js"></script>
+  <script src="export.js"></script>
   <script src="dashboard.js"></script>
 </body>
 </html>

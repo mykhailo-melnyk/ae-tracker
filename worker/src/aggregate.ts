@@ -1,8 +1,12 @@
 import { listDirectory, readJsonFile, type RepoConfig } from "./github";
 import type { ProgressFile } from "./types";
+import type { ResolvedCurriculum } from "./curriculum";
 
-interface Curriculum {
-  levels: Array<{ id: string; tasks: Array<{ id: string }>; level_complete_when: string }>;
+// The aggregate resolves each engineer's path by their competency. A registry is any
+// object exposing pathFor() (the ./curriculum module satisfies this structurally; tests
+// pass a fake). Returns null for an engineer with no/unknown competency.
+interface CurriculumRegistry {
+  pathFor(competencyId?: string): ResolvedCurriculum | null;
 }
 
 export interface Aggregate {
@@ -27,12 +31,12 @@ export interface Aggregate {
 
 const STALLED_DAYS = 14;
 
-function currentLevel(progress: ProgressFile, curriculum: Curriculum): string {
-  for (const lvl of curriculum.levels) {
+function currentLevel(progress: ProgressFile, path: ResolvedCurriculum): string {
+  for (const lvl of path.levels) {
     const allDone = lvl.tasks.every((t) => progress.tasks[t.id]?.done === true);
     if (!allDone) return lvl.id;
   }
-  return curriculum.levels[curriculum.levels.length - 1].id;
+  return path.levels[path.levels.length - 1].id;
 }
 
 function lastActive(progress: ProgressFile): string {
@@ -44,7 +48,7 @@ function lastActive(progress: ProgressFile): string {
 
 export async function computeAggregate(
   cfg: RepoConfig,
-  curriculum: Curriculum,
+  registry: CurriculumRegistry,
   fetchFn: typeof fetch,
   now: Date = new Date(),
 ): Promise<Aggregate> {
@@ -54,11 +58,11 @@ export async function computeAggregate(
     const result = await readJsonFile<ProgressFile>(cfg, e.path, fetchFn);
     if (result) progresses.push(result.data);
   }
-  const totalTasks = curriculum.levels.reduce((n, l) => n + l.tasks.length, 0);
-  const allTaskIds = curriculum.levels.flatMap((l) => l.tasks.map((t) => t.id));
 
   const by_current_level: Record<string, number> = {};
-  const by_task: Record<string, number> = Object.fromEntries(allTaskIds.map((id) => [id, 0]));
+  // by_task is keyed by globally-unique task ids (e.g. web-L1.T1), so paths never
+  // collide. Keys are seeded lazily from each active engineer's own path.
+  const by_task: Record<string, number> = {};
   let stalled_14d = 0;
   let engineers_started = 0;
   const engineers: Aggregate["engineers"] = [];
@@ -66,16 +70,21 @@ export async function computeAggregate(
   const stallThresholdMs = STALLED_DAYS * 86_400_000;
 
   for (const p of progresses) {
-    const cl = currentLevel(p, curriculum);
+    // Each engineer's progress is measured against THEIR competency's path. An engineer
+    // with no/unknown competency has no path yet: current level L1, 0% complete.
+    const path = registry.pathFor(p.competency);
+    const pathTaskIds = path ? path.levels.flatMap((l) => l.tasks.map((t) => t.id)) : [];
+    const totalTasks = pathTaskIds.length;
+    const cl = path ? currentLevel(p, path) : "L1";
     const la = lastActive(p);
-    const done = allTaskIds.filter((id) => p.tasks[id]?.done).length;
+    const done = pathTaskIds.filter((id) => p.tasks[id]?.done).length;
     // Disabled engineers are still surfaced in the list (behind a dashboard filter)
     // but are excluded from every headline count so they don't skew adoption stats.
     if (!p.disabled) {
       engineers_started += 1;
       by_current_level[cl] = (by_current_level[cl] ?? 0) + 1;
-      for (const id of allTaskIds) {
-        if (p.tasks[id]?.done) by_task[id] += 1;
+      for (const id of pathTaskIds) {
+        by_task[id] = (by_task[id] ?? 0) + (p.tasks[id]?.done ? 1 : 0);
       }
       if (now.getTime() - new Date(la).getTime() > stallThresholdMs) stalled_14d += 1;
     }
@@ -83,7 +92,7 @@ export async function computeAggregate(
       username: p.github_username,
       display_name: p.display_name,
       current_level: cl,
-      completion_pct: done / totalTasks,
+      completion_pct: totalTasks ? done / totalTasks : 0,
       last_active: la,
       competency: p.competency,
       disabled: p.disabled,
@@ -107,8 +116,10 @@ import { isSuperAdmin } from "./api";
 
 // Bump when the aggregate's shape changes so a deploy invalidates stale entries
 // immediately (v2 adds per-engineer `competency`; v3 adds per-engineer `disabled`
-// and excludes disabled engineers from the headline counts).
-export const CACHE_KEY = "aggregate-v3";
+// and excludes disabled engineers from the headline counts; v4 makes completion /
+// current-level per the engineer's own competency path and keys by_task by the
+// globally-unique prefixed task ids).
+export const CACHE_KEY = "aggregate-v4";
 const CACHE_TTL_SECONDS = 300;
 
 // `is_superadmin` is viewer-specific, so it can't live in the shared cached body.
@@ -123,7 +134,7 @@ function withViewer(body: string, superadmin: boolean): Response {
 export async function handleApiAggregate(
   request: Request,
   env: Env,
-  curriculum: Curriculum,
+  registry: CurriculumRegistry,
   fetchFn: typeof fetch = fetch,
 ): Promise<Response> {
   const token = tokenFromRequest(request);
@@ -140,7 +151,7 @@ export async function handleApiAggregate(
     if (cached) return withViewer(cached, superadmin);
   }
   const cfg = { owner: env.DATA_REPO_OWNER, repo: env.DATA_REPO_NAME, token: env.BOT_PAT };
-  const agg = await computeAggregate(cfg, curriculum, fetchFn);
+  const agg = await computeAggregate(cfg, registry, fetchFn);
   const body = JSON.stringify(agg); // cached body carries is_superadmin:false; the viewer's value is stamped below
   if (env.AGGREGATE_CACHE) {
     await env.AGGREGATE_CACHE.put(CACHE_KEY, body, { expirationTtl: CACHE_TTL_SECONDS });

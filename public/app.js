@@ -1,13 +1,36 @@
 const WORKER = window.WORKER_URL;
-let CURRICULUM = null;
+let MANIFEST = null;       // curriculum.json — competency registry + shared L1–L5 framework
+let CURRICULUM = null;     // the engineer's composed path (manifest levels + their competency's tasks)
 let PROGRESS = null;
 let FOCUS_LEVEL = null;
 let READONLY = false;
 
-async function loadCurriculum() {
+async function loadManifest() {
   const res = await fetch("curriculum.json");
   if (!res.ok) throw new Error("curriculum load failed");
   return res.json();
+}
+
+// Fetch a competency's path file and compose it with the shared manifest framework
+// into the {levels:[{id,title,...,tasks}]} shape the render code expects.
+async function loadPath(competencyId) {
+  const res = await fetch("curriculum." + competencyId + ".json");
+  if (!res.ok) throw new Error("path load failed: " + competencyId);
+  const path = await res.json();
+  const byId = {};
+  for (const l of path.levels) byId[l.id] = l;
+  return {
+    ...MANIFEST,
+    levels: MANIFEST.levels.map((m) => {
+      const p = byId[m.id] || { tasks: [] };
+      return {
+        ...m,
+        tasks: p.tasks || [],
+        estimated_hours_min: p.estimated_hours_min,
+        estimated_hours_max: p.estimated_hours_max,
+      };
+    }),
+  };
 }
 
 async function loadProgress() {
@@ -148,11 +171,16 @@ async function toggleTask(taskId) {
 
 function renderCompetencyPicker() {
   const box = document.getElementById("competency-picker");
-  const options = CURRICULUM.competencies || [];
+  const options = MANIFEST.competencies || [];
   if (!options.length) { box.innerHTML = ""; return; }
   const selected = PROGRESS.competency || null;
   const label = READONLY ? "Competency" : "My competency";
-  const hint = READONLY ? "" : `<span class="comp-hint">Pick the one area you work in</span>`;
+  // Before a competency is picked there's no path to show, so make the prompt explicit.
+  const hint = READONLY
+    ? ""
+    : selected
+      ? `<span class="comp-hint">Pick the one area you work in</span>`
+      : `<span class="comp-hint">Pick your competency to start — this loads your learning path.</span>`;
   const chips = options.map((c) => {
     const on = selected === c.id;
     return `<button type="button" class="comp-chip ${on ? "on" : ""}" data-comp="${c.id}"${READONLY ? " disabled" : ""}>${c.label}</button>`;
@@ -181,6 +209,9 @@ async function selectCompetency(compId) {
     if (!res.ok) throw new Error("competency save failed: " + res.status);
     PROGRESS = await res.json();
     renderCompetencyPicker();
+    // The path depends on the competency: load & render it, or fall back to the gate.
+    if (PROGRESS.competency) await renderPath();
+    else showNoCompetency();
   } catch (e) {
     // Roll back
     PROGRESS.competency = prev || undefined;
@@ -189,8 +220,35 @@ async function selectCompetency(compId) {
   }
 }
 
+// Render the engineer's learning path (competency already chosen).
+async function renderPath() {
+  CURRICULUM = await loadPath(PROGRESS.competency);
+  FOCUS_LEVEL = computeCurrentLevel();
+  const lvl = CURRICULUM.levels.find((l) => l.id === FOCUS_LEVEL);
+  document.getElementById("greeting-sub").textContent = lvl ? "Currently at " + lvl.title : "";
+  document.getElementById("totals").classList.remove("hidden");
+  document.getElementById("pill-bar-wrap").classList.remove("hidden");
+  renderTotals();
+  renderPillBar();
+  renderFocusCard();
+}
+
+// No competency yet: hide the path UI and prompt the engineer to pick one (or, for an
+// admin viewing read-only, explain there's nothing to show).
+function showNoCompetency() {
+  CURRICULUM = null;
+  document.getElementById("totals").classList.add("hidden");
+  document.getElementById("pill-bar-wrap").classList.add("hidden");
+  document.getElementById("greeting-sub").textContent = READONLY
+    ? "No competency selected"
+    : "Pick your competency to start";
+  document.getElementById("focus-card").innerHTML = READONLY
+    ? `<div class="empty-path">This engineer hasn't selected a competency yet, so there's no learning path to show.</div>`
+    : `<div class="empty-path">Choose your competency above to load your learning path.</div>`;
+}
+
 async function init() {
-  CURRICULUM = await loadCurriculum();
+  MANIFEST = await loadManifest();
   const result = await loadProgress();
   if (result.unauthenticated) {
     // A stale/expired token may be sitting in localStorage; drop it so we don't keep
@@ -216,7 +274,6 @@ async function init() {
     return;
   }
 
-  FOCUS_LEVEL = computeCurrentLevel();
   document.getElementById("signed-in").classList.remove("hidden");
 
   const title = READONLY
@@ -233,12 +290,10 @@ async function init() {
 
   if (READONLY) document.body.classList.add("readonly");
 
-  const lvl = CURRICULUM.levels.find((l) => l.id === FOCUS_LEVEL);
-  document.getElementById("greeting-sub").textContent = "Currently at " + lvl.title;
   renderCompetencyPicker();
-  renderTotals();
-  renderPillBar();
-  renderFocusCard();
+  // The learning path depends on the chosen competency — gate until one is picked.
+  if (PROGRESS.competency) await renderPath();
+  else showNoCompetency();
 }
 
 init().catch((e) => {

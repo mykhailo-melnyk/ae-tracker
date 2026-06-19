@@ -357,3 +357,13 @@ body.readonly .task .check:hover { background: inherit; }
   border-color: #2563eb;
 }
 .competency-picker .comp-chip[disabled] { cursor: default; }
+
+/* Shown in the focus area before a competency is picked (no path to render yet). */
+.empty-path {
+  padding: 40px 24px;
+  text-align: center;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+}

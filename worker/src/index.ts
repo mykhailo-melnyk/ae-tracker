@@ -1,7 +1,7 @@
 import { handleLogin, handleCallback, handleLogout } from "./auth";
 import { handleApiMe, handleApiMark, handleApiUser, handleApiCompetencies, handleApiUserCompetencies, handleApiUserDisabled } from "./api";
 import { handleApiAggregate } from "./aggregate";
-import curriculum from "../../public/curriculum.json";
+import * as curriculum from "./curriculum";
 
 export interface Env {
   DATA_REPO_OWNER: string;
@@ -50,16 +50,16 @@ export default {
     if (url.pathname === "/api/me") return withCors(await handleApiMe(request, env), env, request);
     if (url.pathname === "/api/mark") return withCors(await handleApiMark(request, env), env, request);
     if (url.pathname === "/api/competencies") return withCors(
-      await handleApiCompetencies(request, env, curriculum as any),
+      await handleApiCompetencies(request, env, curriculum.MANIFEST),
       env, request,
     );
     if (url.pathname === "/api/aggregate") return withCors(
-      await handleApiAggregate(request, env, curriculum as any),
+      await handleApiAggregate(request, env, curriculum),
       env, request,
     );
     const compMatch = url.pathname.match(/^\/api\/user\/([\w-]+)\/competencies$/);
     if (compMatch) return withCors(
-      await handleApiUserCompetencies(request, env, curriculum as any, fetch, compMatch[1]),
+      await handleApiUserCompetencies(request, env, curriculum.MANIFEST, fetch, compMatch[1]),
       env, request,
     );
     const disabledMatch = url.pathname.match(/^\/api\/user\/([\w-]+)\/disabled$/);

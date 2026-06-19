@@ -270,15 +270,26 @@
 }
 .filter-pill.active { background: #0f172a; color: white; border-color: #0f172a; }
 
-/* ---- Competency filter row ---- */
-.comp-toolbar { align-items: center; margin-top: -4px; }
-.comp-toolbar-label {
+/* ---- Competency scope selector (page-level) ---- */
+.comp-scope {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.comp-scope-label {
   font-size: 11px;
   color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-weight: 700;
   flex: 0 0 auto;
+}
+.empty-detail {
+  padding: 28px 16px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 13px;
 }
 .comp-pills { display: flex; gap: 8px; flex-wrap: wrap; }
 .comp-pill {

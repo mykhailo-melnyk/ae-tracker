@@ -1,6 +1,7 @@
 const WORKER = window.WORKER_URL;
 let AGG = null;
-let CUR = null;
+let CUR = null;          // curriculum.json — manifest: competency registry + shared L1–L5 framework
+const PATHS = {};        // competency id -> composed path ({levels:[{id,title,...,tasks}]}), cached
 
 async function loadAgg() {
   const res = await apiFetch(WORKER + "/api/aggregate");
@@ -16,30 +17,55 @@ async function loadCurriculum() {
   return res.json();
 }
 
+// Fetch (and cache) a competency's path file, composed with the manifest framework
+// into {levels:[{id,title,...,tasks}]}. Used only to render the per-competency accordion.
+async function loadPath(competencyId) {
+  if (PATHS[competencyId]) return PATHS[competencyId];
+  const res = await fetch("curriculum." + competencyId + ".json");
+  if (!res.ok) throw new Error("path load failed: " + competencyId);
+  const path = await res.json();
+  const byId = {};
+  for (const l of path.levels) byId[l.id] = l;
+  const composed = {
+    levels: CUR.levels.map((m) => ({ ...m, tasks: (byId[m.id] || {}).tasks || [] })),
+  };
+  PATHS[competencyId] = composed;
+  return composed;
+}
+
+// Active (non-disabled) engineers within the current competency scope. Every headline
+// number and the bars are derived from this set, so the whole dashboard rescopes when
+// SCOPE changes. Disabled engineers are excluded from all stats (as before).
+function scopedActive() {
+  return AGG.engineers.filter((e) => !e.disabled && (SCOPE === "all" || e.competency === SCOPE));
+}
+
+const STALL_MS = 14 * 86400_000;
+
 function renderKpis() {
-  // Disabled engineers are excluded from every headline number (the worker already
-  // excludes them from engineers_started/stalled; do the same for client-side KPIs).
-  const active = AGG.engineers.filter((e) => !e.disabled);
+  const active = scopedActive();
+  const avg = active.length
+    ? Math.round(100 * active.reduce((n, e) => n + e.completion_pct, 0) / active.length)
+    : 0;
+  const stalled = active.filter((e) => Date.now() - new Date(e.last_active).getTime() >= STALL_MS).length;
   document.getElementById("kpis").innerHTML = `
-    <div class="kpi"><div class="lbl">Engineers started</div><div class="val">${AGG.engineers_started}</div></div>
+    <div class="kpi"><div class="lbl">Engineers started</div><div class="val">${active.length}</div></div>
     <div class="kpi"><div class="lbl">At Level 2+</div><div class="val">${
       active.filter((e) => e.current_level !== "L1").length
     }</div></div>
-    <div class="kpi"><div class="lbl">Avg completion</div><div class="val">${
-      active.length
-        ? Math.round(100 * active.reduce((n, e) => n + e.completion_pct, 0) / active.length)
-        : 0
-    }%</div></div>
-    <div class="kpi"><div class="lbl">Stalled (14+ days)</div><div class="val">${AGG.stalled_14d}</div></div>
+    <div class="kpi"><div class="lbl">Avg completion</div><div class="val">${avg}%</div></div>
+    <div class="kpi"><div class="lbl">Stalled (14+ days)</div><div class="val">${stalled}</div></div>
   `;
 }
 
 function renderBars() {
-  const max = Math.max(...Object.values(AGG.by_current_level), 1);
+  const dist = {};
+  for (const e of scopedActive()) dist[e.current_level] = (dist[e.current_level] ?? 0) + 1;
+  const max = Math.max(...Object.values(dist), 1);
   const order = ["L1", "L2", "L3", "L4", "L5"];
   const labels = { L1: "Understand", L2: "Edit w/ Review", L3: "Plan", L4: "Orchestrate", L5: "Architecture" };
   document.getElementById("bars").innerHTML = order.map((id) => {
-    const v = AGG.by_current_level[id] ?? 0;
+    const v = dist[id] ?? 0;
     const h = (v / max) * 100;
     return `<div class="bar"><div class="bar-val">${v}</div>
             <div class="bar-fill" style="height:${h}%"></div>
@@ -49,11 +75,27 @@ function renderBars() {
 
 const LEVEL_LABELS = { L1: "Understand", L2: "Edit w/ Review", L3: "Plan", L4: "Orchestrate", L5: "Architecture" };
 
-function renderLevelCompletion() {
-  const total = AGG.engineers_started || 1;
-  const html = CUR.levels.map((lvl) => {
+// Task-level detail only makes sense within a single competency (each has its own task
+// list). In the "All" scope we hide it and prompt to pick a competency; otherwise we
+// load that competency's path and show its levels/tasks, with the denominator = active
+// engineers in that competency.
+async function renderLevelCompletion() {
+  const box = document.getElementById("task-rates");
+  if (SCOPE === "all") {
+    box.innerHTML = `<div class="empty-detail">Select a competency above to see task-level detail.</div>`;
+    return;
+  }
+  let path;
+  try {
+    path = await loadPath(SCOPE);
+  } catch (e) {
+    box.innerHTML = `<div class="empty-detail">Could not load the ${SCOPE} curriculum. Try again in a moment.</div>`;
+    return;
+  }
+  const total = scopedActive().length || 1;
+  const html = path.levels.map((lvl) => {
     const done = lvl.tasks.reduce((n, t) => n + (AGG.by_task[t.id] ?? 0), 0);
-    const levelPct = Math.round((done / (total * lvl.tasks.length)) * 100);
+    const levelPct = lvl.tasks.length ? Math.round((done / (total * lvl.tasks.length)) * 100) : 0;
     const taskRows = lvl.tasks.map((t) => {
       const pct = Math.round(((AGG.by_task[t.id] ?? 0) / total) * 100);
       return `<div class="task-row">
@@ -74,15 +116,15 @@ function renderLevelCompletion() {
       <div class="lvl-tasks">${taskRows}</div>
     </details>`;
   }).join("");
-  document.getElementById("task-rates").innerHTML = html;
+  box.innerHTML = html;
 }
 
 let FILTER = "all";
 let SEARCH = "";
-let COMP_FILTER = "all";
+let SCOPE = "all";       // page-level competency scope: "all" or a competency id
 
 function buildCompetencyPills() {
-  const box = document.getElementById("competency-pills");
+  const box = document.getElementById("scope-pills");
   const comps = CUR.competencies || [];
   box.innerHTML = `<div class="comp-pill active" data-comp="all">All</div>`
     + comps.map((c) => `<div class="comp-pill" data-comp="${c.id}">${c.label}</div>`).join("");
@@ -104,7 +146,7 @@ function renderTable() {
         if (e.current_level !== FILTER) return false;
       }
     }
-    if (COMP_FILTER !== "all" && e.competency !== COMP_FILTER) return false;
+    if (SCOPE !== "all" && e.competency !== SCOPE) return false;
     if (SEARCH) {
       const q = SEARCH.toLowerCase();
       return e.username.toLowerCase().includes(q)
@@ -201,12 +243,12 @@ function wireFilters() {
       renderTable();
     });
   });
-  document.querySelectorAll(".comp-pill").forEach((el) => {
+  document.querySelectorAll("#scope-pills .comp-pill").forEach((el) => {
     el.addEventListener("click", () => {
-      document.querySelectorAll(".comp-pill").forEach((p) => p.classList.remove("active"));
+      document.querySelectorAll("#scope-pills .comp-pill").forEach((p) => p.classList.remove("active"));
       el.classList.add("active");
-      COMP_FILTER = el.dataset.comp;
-      renderTable();
+      SCOPE = el.dataset.comp;
+      renderAll(); // scope drives the whole dashboard, not just the table
     });
   });
   document.getElementById("search").addEventListener("input", (e) => {
@@ -226,9 +268,17 @@ async function init() {
   document.getElementById("who").innerHTML =
     `<a class="signout-link" href="${WORKER}/auth/logout" onclick="clearAuthToken()">Sign out</a>`;
   buildCompetencyPills();
-  renderKpis(); renderBars(); renderLevelCompletion(); renderTable();
+  await renderAll();
   wireFilters();
   document.getElementById("export-btn").addEventListener("click", () => openExportDialog(AGG, CUR));
+}
+
+// Re-render everything that depends on the competency scope.
+async function renderAll() {
+  renderKpis();
+  renderBars();
+  await renderLevelCompletion();
+  renderTable();
 }
 
 init().catch((e) => {

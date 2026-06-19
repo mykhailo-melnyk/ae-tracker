@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AE Tracker Curriculum Manifest",
+  "type": "object",
+  "required": ["version", "source", "last_reviewed", "competencies", "levels"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "type": "string" },
+    "source": { "type": "string" },
+    "last_reviewed": { "type": "string", "format": "date" },
+    "competencies": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "file"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,31}$" },
+          "label": { "type": "string", "minLength": 1 },
+          "file": { "type": "string", "pattern": "^curriculum\\.[a-z0-9_-]+\\.json$" }
+        }
+      }
+    },
+    "levels": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "subtitle"],
+        "additionalProperties": false,
+        "not": { "required": ["tasks"] },
+        "properties": {
+          "id": { "type": "string", "pattern": "^L[1-5]$" },
+          "title": { "type": "string", "minLength": 1 },
+          "subtitle": { "type": "string", "minLength": 1 },
+          "move_on_when": { "type": "string" },
+          "link": { "type": "string", "format": "uri" },
+          "level_complete_when": { "type": "string", "enum": ["all_tasks_done"] }
+        }
+      }
+    }
+  }
+}

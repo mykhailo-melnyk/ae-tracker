@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AE Tracker Curriculum Path (per-competency)",
+  "type": "object",
+  "required": ["competency", "levels"],
+  "additionalProperties": false,
+  "properties": {
+    "competency": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,31}$" },
+    "levels": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["id", "tasks"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^L[1-5]$" },
+          "estimated_hours_min": { "type": "integer", "minimum": 1 },
+          "estimated_hours_max": { "type": "integer", "minimum": 1 },
+          "tasks": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["id", "kind", "title"],
+              "additionalProperties": false,
+              "properties": {
+                "id": { "type": "string", "pattern": "^[a-z0-9_-]+-L[1-5]\\.T[0-9]+$" },
+                "kind": { "type": "string", "enum": ["practice", "course", "checkpoint", "reading", "video"] },
+                "title": { "type": "string", "minLength": 1 },
+                "desc": { "type": "string" },
+                "link": { "type": "string", "format": "uri" },
+                "self_assessment": { "type": "boolean" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

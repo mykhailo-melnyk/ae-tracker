@@ -4,12 +4,14 @@ on:
   push:
     paths:
       - "public/curriculum.json"
-      - "schema/curriculum.schema.json"
+      - "public/curriculum.*.json"
+      - "schema/**"
       - ".github/workflows/validate-curriculum.yml"
   pull_request:
     paths:
       - "public/curriculum.json"
-      - "schema/curriculum.schema.json"
+      - "public/curriculum.*.json"
+      - "schema/**"
 
 jobs:
   validate:
@@ -19,5 +21,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - run: npm install -g ajv-cli ajv-formats
-      - run: ajv validate -s schema/curriculum.schema.json -d public/curriculum.json -c ajv-formats
+      # The validator (schema/validate-curriculum.mjs) is manifest-driven: it validates
+      # the manifest, then every per-competency path file it points to, plus cross-checks
+      # (file present, competency field matches, task ids globally unique and prefixed).
+      - run: npm install ajv@8 ajv-formats@2
+      - run: node schema/validate-curriculum.mjs

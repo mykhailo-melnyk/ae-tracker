@@ -403,6 +403,9 @@ body.readonly .task .check:hover { background: inherit; }
   padding: 16px;
   z-index: 50;
 }
+/* .fb-overlay sets display:flex and is declared after the generic `.hidden`
+   rule, so it would otherwise win on equal specificity — keep it hidden. */
+.fb-overlay.hidden { display: none; }
 .fb-dialog {
   position: relative;
   background: white;

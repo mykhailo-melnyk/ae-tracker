@@ -7,6 +7,8 @@ workers_dev = true
 [vars]
 DATA_REPO_OWNER = "mykhailo-melnyk"
 DATA_REPO_NAME = "ae-tracker-data"
+FEEDBACK_REPO_OWNER = "mykhailo-melnyk"  # repo where /api/feedback opens issues (public code repo)
+FEEDBACK_REPO_NAME = "ae-tracker"        # needs a `feedback` label to exist; uses the FEEDBACK_PAT secret
 ADMIN_USERNAMES = "mykhailo-melnyk,lucaskasprzyk,jackiehimel,venukanduri"  # comma-separated; e.g. "mykhailo-melnyk,jdoe"
 SUPERADMIN_USERNAMES = "mykhailo-melnyk"  # comma-separated; superset of admin — can disable/enable engineers
 FRONTEND_ORIGIN = "https://mykhailo-melnyk.github.io"

@@ -360,12 +360,14 @@ async function init() {
   const userBox = document.getElementById("user-box");
   userBox.innerHTML = `
     <span class="user-name">${PROGRESS.display_name || PROGRESS.github_username}</span>
-    ${READONLY ? "" : `<button type="button" id="feedback-open" class="feedback-btn">Send feedback</button>`}
     <a class="signout-link" href="${WORKER}/auth/logout" onclick="clearAuthToken()">Sign out</a>
   `;
 
   if (READONLY) document.body.classList.add("readonly");
-  if (!READONLY) initFeedback();
+  if (!READONLY) {
+    document.getElementById("feedback-open").classList.remove("hidden"); // reveal the floating button
+    initFeedback();
+  }
 
   renderCompetencyPicker();
   // The learning path depends on the chosen competency — gate until one is picked.

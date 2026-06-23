@@ -381,17 +381,23 @@ body.readonly .task .check:hover { background: inherit; }
 }
 .task-report:hover { color: #2563eb; text-decoration: underline; }
 
-.feedback-btn {
-  background: white;
-  border: 1px solid #cbd5e1;
-  color: #475569;
+.feedback-fab {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  background: #2563eb;
+  border: none;
+  color: white;
   font: inherit;
-  font-size: 13px;
-  padding: 5px 12px;
-  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 20px;
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
   cursor: pointer;
+  z-index: 40;
 }
-.feedback-btn:hover { border-color: #2563eb; color: #2563eb; }
+.feedback-fab:hover { background: #1d4ed8; }
 
 .fb-overlay {
   position: fixed;

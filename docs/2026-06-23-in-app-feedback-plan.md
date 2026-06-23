@@ -2,6 +2,8 @@
 
 > **For agentic workers:** Implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Run `npm run typecheck` and `npm test` from `worker/` after each backend part; verify the frontend manually (no build step / no frontend tests, per the original tracker spec).
 
+> **As shipped (2026-06-23):** two deltas from this plan — the general entry point is a fixed bottom-right "⚑ Feedback" FAB (not a topbar button), and issues are auto-assigned via a `FEEDBACK_ASSIGNEE` var. See the design doc's "Addendum — as shipped" section.
+
 **Goal:** Let engineers report a bug or suggest an improvement from the tracker — per-task or app-wide. A new authenticated `POST /api/feedback` creates a GitHub issue in the public `mykhailo-melnyk/ae-tracker` repo and returns the issue URL. GitHub Issues is the triage board; no new storage, no admin UI.
 
 **Architecture:** Implements `docs/superpowers/specs/2026-06-23-in-app-feedback-design.md`. The endpoint mirrors `handleApiMark` (request in → GitHub write → JSON out) with the same `requireSession` gate and injected `fetchFn`. A new `createIssue` lives in `github.ts`. Issue creation uses a separate least-privilege secret `FEEDBACK_PAT` (Issues:write on the code repo only); `BOT_PAT` is unchanged. The frontend adds a vanilla modal with per-task and general entry points.

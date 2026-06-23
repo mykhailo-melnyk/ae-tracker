@@ -189,3 +189,17 @@ only if spam becomes a real problem.
   `feedback` label must exist in the `ae-tracker` repo before the feature works.
 - Note in the deploy section that this needs a `wrangler deploy` (new route + var +
   secret) and the one-time `feedback` label creation.
+
+## Addendum — as shipped (2026-06-23)
+
+Two changes from the design above were made during/after implementation:
+
+- **General entry point is a floating button, not a topbar button.** Instead of a
+  "Send feedback" button in `#user-box`, the general entry point is a fixed
+  bottom-right "⚑ Feedback" FAB (`#feedback-open` in `tracker.html`) that stays
+  visible while scrolling. Revealed only for signed-in, non-readonly engineers. The
+  per-task "⚑ Report / suggest" links are unchanged.
+- **Issues are auto-assigned.** A new non-secret var `FEEDBACK_ASSIGNEE`
+  (comma-separated GitHub usernames, default `mykhailo-melnyk`) is passed through
+  `createIssue` as the issue `assignees`, so every bug/improvement lands assigned to
+  a maintainer. Non-collaborator assignees are silently dropped by GitHub.

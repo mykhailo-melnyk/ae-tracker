@@ -177,8 +177,13 @@ export async function handleApiFeedback(
   const issueBody = `${lines.join("\n")}\n\n---\n\n${message}`;
 
   const feedbackCfg = { owner: env.FEEDBACK_REPO_OWNER, repo: env.FEEDBACK_REPO_NAME, token: env.FEEDBACK_PAT };
+  const assignees = parseList(env.FEEDBACK_ASSIGNEE);
   try {
-    const { url } = await createIssue(feedbackCfg, { title, body: issueBody, labels: ["feedback"] }, fetchFn);
+    const { url } = await createIssue(
+      feedbackCfg,
+      { title, body: issueBody, labels: ["feedback"], assignees: assignees.length ? assignees : undefined },
+      fetchFn,
+    );
     return Response.json({ url });
   } catch (e) {
     const errStr = e instanceof Error ? e.message : String(e);

@@ -10,6 +10,7 @@ const ENV = {
   FEEDBACK_REPO_OWNER: "mykhailo-melnyk",
   FEEDBACK_REPO_NAME: "ae-tracker",
   FEEDBACK_PAT: "feedback-token",
+  FEEDBACK_ASSIGNEE: "mykhailo-melnyk",
 } as any;
 
 // A real task id from the bundled web path (validated against the actual curriculum).
@@ -99,6 +100,7 @@ describe("/api/feedback", () => {
     const sent = JSON.parse(issueCall.body as string);
     expect(sent.title).toBe(`[bug] ${TASK_ID} — The link 404s for me`);
     expect(sent.labels).toEqual(["feedback"]);
+    expect(sent.assignees).toEqual(["mykhailo-melnyk"]);
     expect(sent.body).toContain("@anna (Anna Smith)");
     expect(sent.body).toContain("**Competency:** Web");
     expect(sent.body).toContain(`**Task:** ${TASK_ID} — Tool Setup Guide (Level 1)`);

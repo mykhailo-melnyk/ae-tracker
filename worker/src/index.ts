@@ -17,6 +17,7 @@ export interface Env {
   FEEDBACK_REPO_OWNER: string;
   FEEDBACK_REPO_NAME: string;
   FEEDBACK_PAT: string;
+  FEEDBACK_ASSIGNEE?: string;  // comma-separated GitHub usernames auto-assigned to feedback issues
   AGGREGATE_CACHE?: KVNamespace;
 }
 

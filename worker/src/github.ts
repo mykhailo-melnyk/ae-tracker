@@ -51,13 +51,13 @@ export async function writeJsonFile(
 
 export async function createIssue(
   cfg: RepoConfig,
-  issue: { title: string; body: string; labels?: string[] },
+  issue: { title: string; body: string; labels?: string[]; assignees?: string[] },
   fetchFn: typeof fetch = fetch,
 ): Promise<{ url: string }> {
   const res = await fetchFn(`${API}/repos/${cfg.owner}/${cfg.repo}/issues`, {
     method: "POST",
     headers: { ...headers(cfg.token), "content-type": "application/json" },
-    body: JSON.stringify({ title: issue.title, body: issue.body, labels: issue.labels }),
+    body: JSON.stringify({ title: issue.title, body: issue.body, labels: issue.labels, assignees: issue.assignees }),
   });
   if (!res.ok) throw new Error(`createIssue ${res.status}: ${await res.text()}`);
   const out = await res.json() as { html_url: string };

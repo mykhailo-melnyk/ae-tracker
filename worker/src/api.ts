@@ -1,7 +1,8 @@
 import type { Env } from "./index";
 import { verifySession, tokenFromRequest } from "./session";
-import { readJsonFile, writeJsonFile, type RepoConfig } from "./github";
+import { readJsonFile, writeJsonFile, createIssue, type RepoConfig } from "./github";
 import { CACHE_KEY } from "./aggregate";
+import * as curriculum from "./curriculum";
 import type { ProgressFile } from "./types";
 
 /** Just the slice of the curriculum the competency endpoints need to validate ids. */
@@ -119,6 +120,71 @@ export async function handleApiMark(
   }
   // Unreachable — loop either returns or throws.
   throw new Error("unreachable");
+}
+
+/**
+ * POST /api/feedback — an engineer reports a bug or suggests an improvement. The
+ * report is turned into a GitHub issue in the public code repo (separate repo + a
+ * least-privilege FEEDBACK_PAT, distinct from the data repo's BOT_PAT). Per-task
+ * feedback carries the task id; general feedback omits it. Returns the issue url.
+ */
+export async function handleApiFeedback(
+  request: Request,
+  env: Env,
+  fetchFn: typeof fetch = fetch,
+): Promise<Response> {
+  const auth = await requireSession(request, env);
+  if (auth instanceof Response) return auth;
+  const { username, displayName } = auth;
+
+  let body: { type?: unknown; message?: unknown; task_id?: unknown };
+  try { body = await request.json(); } catch { return new Response("invalid json", { status: 400 }); }
+
+  const type = body.type;
+  if (type !== "bug" && type !== "improvement") return new Response("invalid body", { status: 400 });
+  if (typeof body.message !== "string") return new Response("invalid body", { status: 400 });
+  const message = body.message.trim();
+  if (message.length < 1 || message.length > 2000) return new Response("invalid body", { status: 400 });
+  let taskInfo: curriculum.TaskInfo | null = null;
+  if (body.task_id !== undefined) {
+    if (typeof body.task_id !== "string" || body.task_id.length > 32) return new Response("invalid body", { status: 400 });
+    taskInfo = curriculum.taskInfo(body.task_id);
+    if (!taskInfo) return new Response("invalid body", { status: 400 });
+  }
+  const taskId = taskInfo ? (body.task_id as string) : undefined;
+
+  // Read the submitter's own progress (data repo / BOT_PAT) for the disabled-lock and
+  // their competency. A disabled engineer is blocked from this self-write too.
+  const dataCfg = { owner: env.DATA_REPO_OWNER, repo: env.DATA_REPO_NAME, token: env.BOT_PAT };
+  const existing = await readJsonFile<ProgressFile>(dataCfg, progressPath(username), fetchFn);
+  if (existing?.data.disabled) return Response.json({ error: "disabled" }, { status: 403 });
+  const competency = existing?.data.competency;
+
+  // Build the issue. The [type] prefix carries the type even without labels; the
+  // single `feedback` label must pre-exist in the repo (GitHub rejects unknown labels).
+  const oneLine = message.replace(/\s+/g, " ");
+  const summary = oneLine.length > 60 ? oneLine.slice(0, 60) + "…" : oneLine;
+  const title = `[${type}] ${taskId ? taskId + " — " : ""}${summary}`;
+  const compLabel = competency ? (curriculum.competencyLabel(competency) ?? competency) : "—";
+  const lines = [
+    `**Type:** ${type}`,
+    `**From:** @${username} (${displayName || username})`,
+    `**Competency:** ${compLabel}`,
+  ];
+  if (taskInfo) lines.push(`**Task:** ${taskId} — ${taskInfo.title} (Level ${taskInfo.level.slice(1)})`);
+  lines.push(`**Page:** ${request.headers.get("referer") || "—"}`);
+  lines.push(`**Submitted:** ${new Date().toISOString()}`);
+  const issueBody = `${lines.join("\n")}\n\n---\n\n${message}`;
+
+  const feedbackCfg = { owner: env.FEEDBACK_REPO_OWNER, repo: env.FEEDBACK_REPO_NAME, token: env.FEEDBACK_PAT };
+  try {
+    const { url } = await createIssue(feedbackCfg, { title, body: issueBody, labels: ["feedback"] }, fetchFn);
+    return Response.json({ url });
+  } catch (e) {
+    const errStr = e instanceof Error ? e.message : String(e);
+    console.error(`feedback failed: user=${username} type=${type} task=${taskId ?? "-"} err=${errStr.slice(0, 300)}`);
+    throw e;
+  }
 }
 
 function parseList(raw: string | undefined): string[] {

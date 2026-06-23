@@ -49,6 +49,21 @@ export async function writeJsonFile(
   return { sha: out.content.sha };
 }
 
+export async function createIssue(
+  cfg: RepoConfig,
+  issue: { title: string; body: string; labels?: string[] },
+  fetchFn: typeof fetch = fetch,
+): Promise<{ url: string }> {
+  const res = await fetchFn(`${API}/repos/${cfg.owner}/${cfg.repo}/issues`, {
+    method: "POST",
+    headers: { ...headers(cfg.token), "content-type": "application/json" },
+    body: JSON.stringify({ title: issue.title, body: issue.body, labels: issue.labels }),
+  });
+  if (!res.ok) throw new Error(`createIssue ${res.status}: ${await res.text()}`);
+  const out = await res.json() as { html_url: string };
+  return { url: out.html_url };
+}
+
 export interface DirEntry { name: string; path: string; }
 
 export async function listDirectory(

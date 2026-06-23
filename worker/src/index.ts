@@ -1,5 +1,5 @@
 import { handleLogin, handleCallback, handleLogout } from "./auth";
-import { handleApiMe, handleApiMark, handleApiUser, handleApiCompetencies, handleApiUserCompetencies, handleApiUserDisabled } from "./api";
+import { handleApiMe, handleApiMark, handleApiUser, handleApiCompetencies, handleApiUserCompetencies, handleApiUserDisabled, handleApiFeedback } from "./api";
 import { handleApiAggregate } from "./aggregate";
 import * as curriculum from "./curriculum";
 
@@ -14,6 +14,10 @@ export interface Env {
   OAUTH_CLIENT_ID: string;
   OAUTH_CLIENT_SECRET: string;
   BOT_PAT: string;
+  FEEDBACK_REPO_OWNER: string;
+  FEEDBACK_REPO_NAME: string;
+  FEEDBACK_PAT: string;
+  FEEDBACK_ASSIGNEE?: string;  // comma-separated GitHub usernames auto-assigned to feedback issues
   AGGREGATE_CACHE?: KVNamespace;
 }
 
@@ -49,6 +53,7 @@ export default {
     // /api/*
     if (url.pathname === "/api/me") return withCors(await handleApiMe(request, env), env, request);
     if (url.pathname === "/api/mark") return withCors(await handleApiMark(request, env), env, request);
+    if (url.pathname === "/api/feedback") return withCors(await handleApiFeedback(request, env), env, request);
     if (url.pathname === "/api/competencies") return withCors(
       await handleApiCompetencies(request, env, curriculum.MANIFEST),
       env, request,

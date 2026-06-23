@@ -22,6 +22,7 @@ A static page where engineers self-report progress through the 5-level curriculu
 | Rotate the bot PAT | Issue a new fine-grained PAT scoped to `ae-tracker-data` (Contents R/W), run `wrangler secret put BOT_PAT`, revoke the old PAT. |
 | Update the curriculum | Edit `public/curriculum.json` (CI schema-validates on push); push to `main`; Pages redeploys automatically. |
 | Reset a stuck engineer | Delete or edit `progress/<username>.json` in the `ae-tracker-data` repo. |
+| Enable in-app feedback | Create a `feedback` label in `ae-tracker`, set `FEEDBACK_PAT` (a fine-grained PAT for `ae-tracker`, Issues R/W) via `wrangler secret put FEEDBACK_PAT`, then `wrangler deploy`. Auto-assignee(s) are set by `FEEDBACK_ASSIGNEE` in `wrangler.toml`. |
 | Watch logs | `wrangler tail` (live Worker logs). |
 
 ## Local development
@@ -44,6 +45,7 @@ SESSION_SECRET=<openssl rand -base64 48>
 OAUTH_CLIENT_ID=<from GitHub OAuth app>
 OAUTH_CLIENT_SECRET=<from GitHub OAuth app>
 BOT_PAT=<fine-grained PAT for ae-tracker-data, Contents R/W>
+FEEDBACK_PAT=<fine-grained PAT for ae-tracker, Issues R/W — for /api/feedback>
 FRONTEND_ORIGIN=http://localhost:8080
 ```
 
@@ -81,7 +83,7 @@ worker/                # Cloudflare Worker
     session.ts         # HMAC-signed session cookies
     auth.ts            # GitHub OAuth login + callback
     github.ts          # GitHub Contents API client (read, write, list)
-    api.ts             # /api/me, /api/mark, /api/user/:username
+    api.ts             # /api/me, /api/mark, /api/feedback, /api/user/:username
     aggregate.ts       # /api/aggregate (with KV cache)
     types.ts           # Shared types
   test/                # Vitest + @cloudflare/vitest-pool-workers

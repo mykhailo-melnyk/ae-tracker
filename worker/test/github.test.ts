@@ -1,6 +1,6 @@
 // worker/test/github.test.ts
 import { describe, it, expect } from "vitest";
-import { readJsonFile, writeJsonFile, listDirectory } from "../src/github";
+import { readJsonFile, writeJsonFile, listDirectory, createIssue } from "../src/github";
 
 const cfg = { owner: "mykhailo-melnyk", repo: "ae-tracker-data", token: "tok" };
 
@@ -56,6 +56,38 @@ describe("writeJsonFile", () => {
     await writeJsonFile(cfg, "progress/new.json", { tasks: {} }, null, "create", fetchMock);
 
     expect(capturedBody.sha).toBeUndefined();
+  });
+});
+
+describe("createIssue", () => {
+  const repoCfg = { owner: "mykhailo-melnyk", repo: "ae-tracker", token: "feedback-tok" };
+
+  it("POSTs the issue and returns the html_url", async () => {
+    let captured: { url: string; init: RequestInit } | null = null;
+    const fetchMock = (async (url: string, init: RequestInit) => {
+      captured = { url, init };
+      return new Response(JSON.stringify({ html_url: "https://github.com/mykhailo-melnyk/ae-tracker/issues/7" }), { status: 201 });
+    }) as typeof fetch;
+
+    const result = await createIssue(
+      repoCfg,
+      { title: "[bug] web-L1.T1 — broken link", body: "details", labels: ["feedback"] },
+      fetchMock,
+    );
+
+    expect(result).toEqual({ url: "https://github.com/mykhailo-melnyk/ae-tracker/issues/7" });
+    expect(captured!.url).toBe("https://api.github.com/repos/mykhailo-melnyk/ae-tracker/issues");
+    expect(captured!.init.method).toBe("POST");
+    expect((captured!.init.headers as Record<string, string>).authorization).toBe("Bearer feedback-tok");
+    const body = JSON.parse(captured!.init.body as string);
+    expect(body).toEqual({ title: "[bug] web-L1.T1 — broken link", body: "details", labels: ["feedback"] });
+  });
+
+  it("throws when GitHub rejects the issue (e.g. unknown label)", async () => {
+    const fetchMock = (async () => new Response("Validation Failed", { status: 422 })) as typeof fetch;
+    await expect(
+      createIssue(repoCfg, { title: "t", body: "b", labels: ["nope"] }, fetchMock),
+    ).rejects.toThrow("createIssue 422");
   });
 });
 

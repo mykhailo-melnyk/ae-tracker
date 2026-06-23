@@ -31,10 +31,35 @@ for (const p of [webPath, mobilePath, backendPath] as PathFile[]) {
   PATHS[p.competency] = p;
 }
 
+// Flat task lookup across every path file, for the feedback endpoint: validate a
+// submitted task id and enrich the issue with its competency / level / title.
+export interface TaskInfo { competency: string; level: string; title: string; }
+const TASK_INDEX: Record<string, TaskInfo> = {};
+for (const p of [webPath, mobilePath, backendPath] as Array<{
+  competency: string;
+  levels: Array<{ id: string; tasks: Array<{ id: string; title: string }> }>;
+}>) {
+  for (const lvl of p.levels) {
+    for (const t of lvl.tasks) {
+      TASK_INDEX[t.id] = { competency: p.competency, level: lvl.id, title: t.title };
+    }
+  }
+}
+
 export const MANIFEST = manifest;
 
 export function competencyIds(): string[] {
   return manifest.competencies.map((c) => c.id);
+}
+
+/** A submitted task id's competency/level/title, or null if the id is unknown. */
+export function taskInfo(taskId: string): TaskInfo | null {
+  return TASK_INDEX[taskId] ?? null;
+}
+
+/** Human label for a competency id (e.g. "web" → "Web"), or undefined if unknown. */
+export function competencyLabel(id: string): string | undefined {
+  return manifest.competencies.find((c) => c.id === id)?.label;
 }
 
 /** Resolve an engineer's path by competency id. Returns null for none/unknown. */

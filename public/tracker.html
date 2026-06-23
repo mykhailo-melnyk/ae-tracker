@@ -42,6 +42,29 @@
     <div class="focus-card" id="focus-card"></div>
   </div>
 
+  <button type="button" id="feedback-open" class="feedback-fab hidden" title="Report a bug or suggest an improvement">⚑ Feedback</button>
+
+  <div id="feedback-modal" class="fb-overlay hidden">
+    <div class="fb-dialog" role="dialog" aria-modal="true" aria-labelledby="fb-title">
+      <button type="button" class="fb-close" id="fb-close" aria-label="Close">×</button>
+      <h2 id="fb-title">Send feedback</h2>
+      <div class="fb-types">
+        <button type="button" class="fb-type on" data-type="bug">Bug</button>
+        <button type="button" class="fb-type" data-type="improvement">Improvement</button>
+      </div>
+      <textarea id="fb-message" maxlength="2000" rows="5" placeholder="Describe the bug or suggest an improvement…"></textarea>
+      <div class="fb-meta">
+        <span class="fb-count"><span id="fb-count">0</span>/2000</span>
+        <span class="fb-note">Posted as a public GitHub issue, including your username.</span>
+      </div>
+      <div class="fb-actions">
+        <button type="button" class="fb-cancel" id="fb-cancel">Cancel</button>
+        <button type="button" class="fb-submit" id="fb-submit">Send</button>
+      </div>
+      <div id="fb-result" class="fb-result"></div>
+    </div>
+  </div>
+
   <script>
     window.WORKER_URL = ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname)
       ? "http://localhost:8787"

@@ -358,8 +358,12 @@ async function init() {
 
   // Topbar: username + sign-out link
   const userBox = document.getElementById("user-box");
+  const dashboardLink = PROGRESS.is_admin
+    ? `<a class="dashboard-link" href="dashboard.html">Dashboard</a>`
+    : "";
   userBox.innerHTML = `
     <span class="user-name">${PROGRESS.display_name || PROGRESS.github_username}</span>
+    ${dashboardLink}
     <a class="signout-link" href="${WORKER}/auth/logout" onclick="clearAuthToken()">Sign out</a>
   `;
 

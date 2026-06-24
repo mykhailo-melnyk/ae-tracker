@@ -49,12 +49,15 @@ export async function handleApiMe(
   const auth = await requireSession(request, env);
   if (auth instanceof Response) return auth;
   const { username, displayName } = auth;
+  // is_admin is a transient flag for the frontend (e.g. to surface the dashboard link);
+  // it is derived from ADMIN_USERNAMES and never persisted to the progress file.
+  const is_admin = isAdmin(username, env);
   const cfg = { owner: env.DATA_REPO_OWNER, repo: env.DATA_REPO_NAME, token: env.BOT_PAT };
   const existing = await readJsonFile<ProgressFile>(cfg, progressPath(username), fetchFn);
   if (!existing) {
     // No file yet — return a name-stamped empty without persisting (don't count
     // "logged in" as "started"; the file is created on first mark/competency).
-    return Response.json(emptyProgress(username, displayName));
+    return Response.json({ ...emptyProgress(username, displayName), is_admin });
   }
   const progress = existing.data;
   // Backfill the display name into an existing file if GitHub now reports one (or it changed).
@@ -67,7 +70,7 @@ export async function handleApiMe(
       console.warn(`display-name backfill skipped for ${username}: ${e instanceof Error ? e.message : String(e)}`);
     }
   }
-  return Response.json(progress);
+  return Response.json({ ...progress, is_admin });
 }
 
 export async function handleApiMark(

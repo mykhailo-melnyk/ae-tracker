@@ -291,6 +291,20 @@ body.readonly .task .check:hover { background: inherit; }
   border-color: #cbd5e1;
   background: #f8fafc;
 }
+.user .dashboard-link {
+  font-size: 13px;
+  color: #2563eb;
+  text-decoration: none;
+  padding: 4px 10px;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  margin-left: 10px;
+}
+.user .dashboard-link:hover {
+  color: #1d4ed8;
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
 
 .focus-head .level-hours {
   margin-top: 8px;

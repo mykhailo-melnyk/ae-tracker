@@ -3,8 +3,8 @@
   "levels": [
     {
       "id": "L1",
-      "estimated_hours_min": 28,
-      "estimated_hours_max": 37,
+      "estimated_hours_min": 31,
+      "estimated_hours_max": 41,
       "tasks": [
         {
           "id": "web-L1.T5",
@@ -12,6 +12,12 @@
           "title": "Tool Setup Guide",
           "desc": "Install Claude Code (and iTerm 2 on macOS). After this you can install everything else by pasting prompts into Claude Code. Plan ~10 minutes for the manual bootstrap, then come back here.",
           "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/tool-setup.md"
+        },
+        {
+          "id": "web-L1.T17",
+          "kind": "practice",
+          "title": "Break the AI on purpose",
+          "desc": "Before the wall of reading below, get your hands dirty: spend 15 minutes deliberately making the AI fail. Ask it about a library version that doesn't exist, feed it a false premise, push it past what it can know. Watch HOW it fails — confidently, usually. This anchors everything the mindset readings then explain."
         },
         {
           "id": "web-L1.T6",
@@ -33,6 +39,20 @@
           "title": "Claude Code — Best Practices (Reference)",
           "desc": "Keep this open in a tab. Modes, slash commands, @-references, MCP, custom commands. You won't need every section at Level 1 — skim it now, return to specific sections as you hit them in later levels.",
           "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/tools/claude-code.md"
+        },
+        {
+          "id": "web-L1.T18",
+          "kind": "reading",
+          "title": "Golden example: a good CLAUDE.md",
+          "desc": "An annotated exemplar CLAUDE.md with notes on why each part earns its place — what to include, what to leave out, and the smells to avoid. This is what 'good' looks like before you write your own.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/examples/claude-md.md"
+        },
+        {
+          "id": "web-L1.T19",
+          "kind": "reading",
+          "title": "Your tools are portable (not just Claude Code)",
+          "desc": "A short note: the habits this path teaches — reading before writing, diff review, context engineering, planning, orchestration — transfer to any agentic tool (OpenCode, Codex). Only the specific commands and skills/MCP setup are Claude-specific. Keeps you from being stranded on a different stack.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/tool-agnostic.md"
         },
         {
           "id": "web-L1.T1",
@@ -112,16 +132,16 @@
         {
           "id": "web-L1.T16",
           "kind": "checkpoint",
-          "title": "Assessment: AI-claims practical exam",
-          "desc": "Graded exercise: quiz AI on a domain you know (including false-premise questions), predict correct-vs-guessing before verifying, then score yourself. Rubric and optional GLAT/MAILS literacy references in the linked doc.",
+          "title": "Capstone: spot & annotate AI behavior",
+          "desc": "Capstone deliverable: annotate an agent transcript — mark good vs bad AI behavior and say why — plus the AI-claims practical exam: quiz AI on a domain you know (including false-premise questions), predict correct-vs-guessing before verifying, then score yourself. Rubric, deliverables, and optional GLAT/MAILS references in the linked doc.",
           "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L1.md"
         }
       ]
     },
     {
       "id": "L2",
-      "estimated_hours_min": 25,
-      "estimated_hours_max": 33,
+      "estimated_hours_min": 27,
+      "estimated_hours_max": 36,
       "tasks": [
         {
           "id": "web-L2.T6",
@@ -143,6 +163,13 @@
           "title": "Code Review with AI",
           "desc": "First-pass review framework: Logic → Security → Performance → Maintainability → Style. AI catches patterns; humans validate architecture and business logic. Surgical-changes principle: every changed line traces to the request. Underpins the diff-review-habit practice below.",
           "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/workflows/code-review-with-ai.md"
+        },
+        {
+          "id": "web-L2.T15",
+          "kind": "reading",
+          "title": "Golden example: a good AI-assisted PR",
+          "desc": "An annotated exemplar PR: what makes AI-assisted work trustworthy is the visible review trail — the plausible-but-wrong parts caught, tests the author owns, scope held to the spec. The bar for your own PRs, and for the L2 capstone.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/examples/ai-assisted-pr.md"
         },
         {
           "id": "web-L2.T9",
@@ -173,7 +200,7 @@
           "id": "web-L2.T4",
           "kind": "course",
           "title": "Claude Code in Action",
-          "desc": "Modes, context control, and the habits that make daily AI usage productive. Free with certificate. Pairs directly with the Prompt Patterns and Code Review with AI readings — the readings provide the principles, the course shows them in motion.",
+          "desc": "Modes, context control, and the habits that make daily AI usage productive. Free with certificate. At Level 2, focus on the modes, context, and review chapters — you'll revisit the same course for the Plan Mode chapters at Level 3 (L3.T3), so this is one course viewed twice, not two courses. Pairs directly with the Prompt Patterns and Code Review with AI readings.",
           "link": "https://anthropic.skilljar.com/claude-code-in-action"
         },
         {
@@ -198,6 +225,13 @@
           "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/security-basics.md"
         },
         {
+          "id": "web-L2.T16",
+          "kind": "reading",
+          "title": "Cost & when not to use AI (intro)",
+          "desc": "A short, early note on what AI usage costs (you pay per token; big context is the main driver) and when NOT to hand a task to AI (you can't verify it; it's trivial and deterministic; the stakes are high and the change is subtle). The fuller quantitative treatment comes at L4.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/cost-awareness.md"
+        },
+        {
           "id": "web-L2.T12",
           "kind": "reading",
           "title": "The AI-Test Trap",
@@ -214,16 +248,16 @@
         {
           "id": "web-L2.T14",
           "kind": "checkpoint",
-          "title": "Assessment: one-week PR / session-log audit (SPACE)",
-          "desc": "Graded exercise: log a week of AI-assisted work — catches in review, simplifications, surgical-vs-drive-by changes — then audit it against the SPACE framework. Rubric in the linked doc.",
+          "title": "Capstone: bring an AI change to merge quality",
+          "desc": "Capstone deliverable: take an AI-generated multi-file change and bring it to merge quality yourself — review the diff, fix the plausible-but-wrong parts, write the tests the AI missed, and simplify. A short SPACE-framework reflection is the supporting evidence. Rubric and deliverables in the linked doc.",
           "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L2.md"
         }
       ]
     },
     {
       "id": "L3",
-      "estimated_hours_min": 20,
-      "estimated_hours_max": 28,
+      "estimated_hours_min": 22,
+      "estimated_hours_max": 31,
       "tasks": [
         {
           "id": "web-L3.T5",
@@ -231,6 +265,13 @@
           "title": "Spec-Driven Development",
           "desc": "Write a specification before writing code. Use AI to draft the spec, then generate architecture, then implement step-by-step with explicit STOP points. This is the workflow the 3-step practice below operationalizes — read this first so 'Context → Plan → Implement' has weight behind each word.",
           "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/workflows/spec-driven-dev.md"
+        },
+        {
+          "id": "web-L3.T11",
+          "kind": "reading",
+          "title": "Golden example: a good spec",
+          "desc": "An annotated exemplar spec: problem before solution, acceptance criteria you could turn into tests, and explicit non-goals to stop scope creep. The bar for the spec you write in the L3 capstone.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/examples/spec.md"
         },
         {
           "id": "web-L3.T6",
@@ -272,6 +313,13 @@
           "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/evaluating-ai-systems.md"
         },
         {
+          "id": "web-L3.T12",
+          "kind": "reading",
+          "title": "Golden example: a good eval",
+          "desc": "An annotated exemplar eval: an adversarial-by-design dataset, the right check per criterion (rule-based vs model-graded), and gates that actually block a bad change. The bar for the evals you build at L4/L5.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/examples/eval.md"
+        },
+        {
           "id": "web-L3.T8",
           "kind": "course",
           "title": "Evaluating AI Agents",
@@ -288,8 +336,8 @@
         {
           "id": "web-L3.T10",
           "kind": "checkpoint",
-          "title": "Assessment: ship a spec-first backlog item (>3 files)",
-          "desc": "Graded exercise: take a real backlog item touching more than 3 files and ship it Context → Spec → Plan → Implement, pushing back on the plan before approving. Rubric and required evidence in the linked doc.",
+          "title": "Capstone: ship a spec-first backlog item (>3 files)",
+          "desc": "Capstone deliverable: take a real backlog item touching more than 3 files and ship it Context → Spec → Plan → Implement, pushing back on the plan before approving. Hand in the spec, the approved plan, and the merged PR. Rubric and required evidence in the linked doc.",
           "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L3.md"
         }
       ]
@@ -416,16 +464,16 @@
         {
           "id": "web-L4.T18",
           "kind": "checkpoint",
-          "title": "Assessment: team-shared command/skill + finbot CTF",
-          "desc": "Graded exercise in two parts: ship a custom command or skill another engineer actually adopts, and complete the OWASP finbot CTF against an AI/agentic app. Rubric and links in the doc.",
+          "title": "Capstone: team-adopted skill + eval suite + finbot CTF",
+          "desc": "Capstone deliverable in two parts: ship a custom command or skill another engineer actually adopts, backed by a small eval suite that gates it; and complete the OWASP finbot CTF against an AI/agentic app. Rubric, deliverables, and links in the doc.",
           "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L4.md"
         }
       ]
     },
     {
       "id": "L5",
-      "estimated_hours_min": 35,
-      "estimated_hours_max": 48,
+      "estimated_hours_min": 40,
+      "estimated_hours_max": 56,
       "tasks": [
         {
           "id": "web-L5.T5",
@@ -484,6 +532,13 @@
           "title": "Assessment: AI as architecture partner",
           "desc": "Graded exercise: take a real, consequential decision and use anti-sycophancy prompting plus the evaluator-optimizer pattern to make AI argue against your instinct and surface unexamined assumptions. Rubric and required evidence in the linked doc.",
           "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L5.md"
+        },
+        {
+          "id": "web-L5.T10",
+          "kind": "checkpoint",
+          "title": "Capstone: verification harness + team rules",
+          "desc": "Capstone deliverable: build a verification harness for a real codebase area (eval suite, contract tests, or a small MCP server), show it catching a bad change before merge, and write the team rules that codify the lesson. The build counterpart to the architecture-partner reflection above. Rubric and deliverables in the linked doc.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L5-capstone.md"
         }
       ]
     }

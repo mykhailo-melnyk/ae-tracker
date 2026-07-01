@@ -140,8 +140,8 @@
     },
     {
       "id": "L2",
-      "estimated_hours_min": 27,
-      "estimated_hours_max": 36,
+      "estimated_hours_min": 28,
+      "estimated_hours_max": 38,
       "tasks": [
         {
           "id": "web-L2.T6",
@@ -197,6 +197,12 @@
           "desc": "When AI doesn't get it right in 3 attempts, the problem is your prompt or context. Reframe instead of retrying."
         },
         {
+          "id": "web-L2.T18",
+          "kind": "practice",
+          "title": "Peer AI-PR review exchange",
+          "desc": "Swap an AI-assisted PR with a teammate and review each other's diffs. Each of you flags at least one plausible-but-wrong spot and one place to simplify, then compare notes: what did the author miss that the reviewer caught? Builds the team review habit — the social half of L2's 'quality is the point'."
+        },
+        {
           "id": "web-L2.T4",
           "kind": "course",
           "title": "Claude Code in Action",
@@ -230,6 +236,13 @@
           "title": "Cost & when not to use AI (intro)",
           "desc": "A short, early note on what AI usage costs (you pay per token; big context is the main driver) and when NOT to hand a task to AI (you can't verify it; it's trivial and deterministic; the stakes are high and the change is subtle). The fuller quantitative treatment comes at L4.",
           "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/cost-awareness.md"
+        },
+        {
+          "id": "web-L2.T17",
+          "kind": "checkpoint",
+          "title": "I can tell when NOT to hand a task to AI",
+          "desc": "You instinctively recognize when AI is the wrong tool — you can't verify the output, the task is trivial and deterministic, or the stakes are high and the change is subtle — and reach for it by default everywhere else.",
+          "self_assessment": true
         },
         {
           "id": "web-L2.T12",

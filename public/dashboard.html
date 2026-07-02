@@ -25,38 +25,55 @@
       <div><h1>Business unit progress</h1><div class="sub">All engineers in the AE pilot · self-reported</div></div>
       <div class="as-of" id="as-of"></div>
     </div>
-    <div class="comp-scope">
-      <span class="comp-scope-label">Competency</span>
-      <div class="comp-pills" id="scope-pills"></div>
+    <div class="dash-tabs">
+      <button class="dash-tab active" data-view="levels">Level progress</button>
+      <button class="dash-tab" data-view="certs">Certifications</button>
     </div>
-    <div class="kpis" id="kpis"></div>
-    <div class="two-col">
-      <div class="card"><h3>Current level distribution</h3><div class="bars" id="bars"></div></div>
-      <div class="card"><h3>Completion by level</h3><div class="card-sub">Avg across engineers · click a level for task detail</div><div id="task-rates"></div></div>
-    </div>
-    <div class="card">
-      <h3>Certification readiness</h3>
-      <div class="card-sub">Per external certification · non-disabled engineers</div>
-      <div id="cert-readiness"></div>
-    </div>
-    <div class="card">
-      <div class="card-head">
-        <h3>Engineers</h3>
-        <button id="export-btn" class="export-btn">⬇ Export</button>
+
+    <div id="view-levels">
+      <div class="comp-scope">
+        <span class="comp-scope-label">Competency</span>
+        <div class="comp-pills" id="scope-pills"></div>
       </div>
-      <div class="toolbar">
-        <input class="search" id="search" placeholder="🔍 Search by name or GitHub handle…">
-        <div class="filter-pill active" data-filter="all">All</div>
-        <div class="filter-pill" data-filter="L1">L1</div>
-        <div class="filter-pill" data-filter="L2">L2</div>
-        <div class="filter-pill" data-filter="L3">L3</div>
-        <div class="filter-pill" data-filter="L4">L4+</div>
-        <div class="filter-pill" data-filter="stalled">Stalled</div>
-        <div class="filter-pill" data-filter="disabled">Disabled</div>
+      <div class="kpis" id="kpis"></div>
+      <div class="two-col">
+        <div class="card"><h3>Current level distribution</h3><div class="bars" id="bars"></div></div>
+        <div class="card"><h3>Completion by level</h3><div class="card-sub">Avg across engineers · click a level for task detail</div><div id="task-rates"></div></div>
       </div>
-      <table class="engineers"><thead><tr>
-        <th>Engineer</th><th>Current</th><th>Completion</th><th>Competency</th><th>Certifications</th><th>Last active</th><th></th>
-      </tr></thead><tbody id="engineers-body"></tbody></table>
+      <div class="card">
+        <div class="card-head">
+          <h3>Engineers</h3>
+          <button id="export-btn" class="export-btn">⬇ Export</button>
+        </div>
+        <div class="toolbar">
+          <input class="search" id="search" placeholder="🔍 Search by name or GitHub handle…">
+          <div class="filter-pill active" data-filter="all">All</div>
+          <div class="filter-pill" data-filter="L1">L1</div>
+          <div class="filter-pill" data-filter="L2">L2</div>
+          <div class="filter-pill" data-filter="L3">L3</div>
+          <div class="filter-pill" data-filter="L4">L4+</div>
+          <div class="filter-pill" data-filter="stalled">Stalled</div>
+          <div class="filter-pill" data-filter="disabled">Disabled</div>
+        </div>
+        <table class="engineers"><thead><tr>
+          <th>Engineer</th><th>Current</th><th>Completion</th><th>Competency</th><th>Last active</th><th></th>
+        </tr></thead><tbody id="engineers-body"></tbody></table>
+      </div>
+    </div>
+
+    <div id="view-certs" class="hidden">
+      <div class="card">
+        <h3>Certification readiness</h3>
+        <div class="card-sub">Per external certification · non-disabled engineers</div>
+        <div id="cert-readiness"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Engineers · certifications</h3></div>
+        <div class="toolbar">
+          <input class="search" id="cert-search" placeholder="🔍 Search by name or GitHub handle…">
+        </div>
+        <div id="cert-table"></div>
+      </div>
     </div>
   </div>
 

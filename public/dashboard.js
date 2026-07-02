@@ -135,8 +135,51 @@ function renderCertReadiness() {
   }).join("");
 }
 
+function competencyLabel(id) {
+  if (!id) return "—";
+  const c = (CUR.competencies || []).find((x) => x.id === id);
+  return c ? c.label : id;
+}
+
+// Certifications-only engineers table (its own dashboard tab). One column per cert,
+// cross-cutting: NOT scoped by the competency pills. Disabled engineers excluded.
+function renderCertTable() {
+  const box = document.getElementById("cert-table");
+  const certs = AGG.certifications || [];
+  if (!certs.length) { box.innerHTML = `<div class="empty-detail">No certifications configured.</div>`; return; }
+  const q = CERT_SEARCH.toLowerCase();
+  const rows = AGG.engineers
+    .filter((e) => !e.disabled)
+    .filter((e) => !q || e.username.toLowerCase().includes(q) || (e.display_name || "").toLowerCase().includes(q))
+    .map((e) => ({ e, sum: certs.reduce((n, c) => n + ((e.certifications || {})[c.id]?.pct || 0), 0) }))
+    .sort((a, b) => b.sum - a.sum);
+
+  const head = `<tr><th>Engineer</th><th>Competency</th>${
+    certs.map((c) => `<th>${c.label}</th>`).join("")
+  }<th>Last active</th></tr>`;
+
+  const body = rows.map(({ e }) => {
+    const certCells = certs.map((c) => {
+      const cp = (e.certifications || {})[c.id] || { pct: 0, ready: false };
+      const pct = Math.round((cp.pct || 0) * 100);
+      return `<td><span class="cert-chip${cp.ready ? " ready" : ""}">${pct}%</span></td>`;
+    }).join("");
+    return `<tr>
+      <td><div class="who"><div class="avatar">${(e.display_name || e.username).slice(0, 2).toUpperCase()}</div>
+          <div><div class="name">${e.display_name || e.username}</div>
+               <div class="handle">@${e.username}</div></div></div></td>
+      <td>${competencyLabel(e.competency)}</td>
+      ${certCells}
+      <td><span class="last-active">${new Date(e.last_active).toLocaleDateString()}</span></td>
+    </tr>`;
+  }).join("") || `<tr><td colspan="${certs.length + 3}"><div class="empty-detail">No engineers match.</div></td></tr>`;
+
+  box.innerHTML = `<table class="engineers"><thead>${head}</thead><tbody>${body}</tbody></table>`;
+}
+
 let FILTER = "all";
 let SEARCH = "";
+let CERT_SEARCH = "";
 let SCOPE = "all";       // page-level competency scope: "all" or a competency id
 
 function buildCompetencyPills() {
@@ -180,12 +223,6 @@ function renderTable() {
     const toggleBtn = AGG.is_superadmin
       ? `<button class="disable-btn${e.disabled ? " enable" : ""}" data-user="${e.username}" data-disabled="${e.disabled ? "1" : "0"}">${e.disabled ? "Enable" : "Disable"}</button>`
       : "";
-    const certChips = Object.entries(e.certifications || {})
-      .map(([id, cp]) => {
-        const label = (AGG.certifications.find((c) => c.id === id) || {}).label || id;
-        const pct = Math.round((cp.pct || 0) * 100);
-        return `<span class="cert-chip${cp.ready ? " ready" : ""}" title="${label}">${label}: ${pct}%</span>`;
-      }).join(" ") || "—";
     return `
     <tr${e.disabled ? ' class="row-disabled"' : ""}>
       <td><div class="who"><div class="avatar">${(e.display_name || e.username).slice(0, 2).toUpperCase()}</div>
@@ -195,7 +232,6 @@ function renderTable() {
       <td><div class="pct-cell"><div class="pct-bar"><div style="width:${Math.round(e.completion_pct * 100)}%"></div></div>
           <span class="pct-num">${Math.round(e.completion_pct * 100)}%</span></div></td>
       <td><select class="comp-select" data-user="${e.username}" data-prev="${e.competency || ""}">${options}</select></td>
-      <td>${certChips}</td>
       <td><span class="last-active">${new Date(e.last_active).toLocaleDateString()}</span></td>
       <td style="text-align:right">${toggleBtn}<a href="tracker.html?as=${e.username}" style="color:#2563eb;font-weight:600">View →</a></td>
     </tr>`;
@@ -278,6 +314,24 @@ function wireFilters() {
     SEARCH = e.target.value;
     renderTable();
   });
+  document.getElementById("cert-search").addEventListener("input", (e) => {
+    CERT_SEARCH = e.target.value;
+    renderCertTable();
+  });
+}
+
+// Top-level view switch: "Level progress" (competency/level) vs "Certifications".
+// Cert and level data are kept on separate tabs so they never mix in one view.
+function wireTabs() {
+  document.querySelectorAll(".dash-tab").forEach((el) => {
+    el.addEventListener("click", () => {
+      document.querySelectorAll(".dash-tab").forEach((t) => t.classList.remove("active"));
+      el.classList.add("active");
+      const view = el.dataset.view;
+      document.getElementById("view-levels").classList.toggle("hidden", view !== "levels");
+      document.getElementById("view-certs").classList.toggle("hidden", view !== "certs");
+    });
+  });
 }
 
 async function init() {
@@ -293,6 +347,7 @@ async function init() {
   buildCompetencyPills();
   await renderAll();
   wireFilters();
+  wireTabs();
   document.getElementById("export-btn").addEventListener("click", () => openExportDialog(AGG, CUR));
 }
 
@@ -302,6 +357,7 @@ async function renderAll() {
   renderBars();
   await renderLevelCompletion();
   renderCertReadiness();
+  renderCertTable();
   renderTable();
 }
 

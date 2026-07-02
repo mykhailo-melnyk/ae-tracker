@@ -60,6 +60,26 @@ The aggregate dashboard (`src/aggregate.ts`) lists the `progress/` directory, re
 
 `POST /api/feedback` (`handleApiFeedback` in `api.ts`) lets a signed-in engineer report a bug or suggest an improvement (per-task or general). It validates `{ type: "bug"|"improvement", message, task_id? }` (message ≤ 2000 chars; `task_id`, if present, must be a known curriculum ID), reads the submitter's progress for the disabled-lock and their competency, then opens a GitHub issue via `createIssue` (`github.ts`). Unlike every other write, this targets a **different repo and token**: the public code repo (`FEEDBACK_REPO_OWNER`/`FEEDBACK_REPO_NAME`) using a separate least-privilege secret **`FEEDBACK_PAT`** (Issues R/W), kept distinct from `BOT_PAT`. Issues carry a single `feedback` label (which **must pre-exist** in the repo — GitHub rejects unknown labels); the `[bug]`/`[improvement]` title prefix encodes the type. Every issue is auto-assigned to the comma-separated `FEEDBACK_ASSIGNEE` usernames (must be repo collaborators, else GitHub silently drops them). Submissions (including the `@username`) are publicly visible. The frontend entry points are the per-task "⚑ Report / suggest" link and a floating bottom-right "⚑ Feedback" button (`#feedback-open` in `tracker.html`, revealed for signed-in non-readonly engineers in `public/app.js`); both open the same modal.
 
+### Certifications
+
+A **generic certifications axis** parallel to the competency curriculum, for
+self-service prep toward external certification exams (Claude Code first). Like
+the curriculum, it is a **registry + path files**: `public/certifications.json`
+(the registry: `certifications[].{id,code,label,file}`) and one
+`public/certification.<id>.json` per cert (`sections[].items[]`). **Progress
+reuses the existing store** — cert prep items are ordinary entries in
+`progress/<username>.json`'s `tasks` map, ticked via `POST /api/mark` (which
+does not validate ids against the curriculum) and read via `GET /api/me`. Item
+IDs are globally unique, prefixed with the cert `code`, and **must be ≤ 32
+chars** (the `/api/mark` limit) — enforced by `schema/validate-certifications.mjs`
+in CI. The frontend page is `public/cert.html` + `cert.js` (signed-in; token
+shared from the tracker). The Worker imports the registry + every path file via
+`worker/src/certifications.ts` (`certList()`), and `src/aggregate.ts` runs a
+**cert pass** so the dashboard shows per-cert readiness (`engineers_started` /
+`engineers_ready`) and per-engineer completion. **Editing cert data needs a
+Worker redeploy** for the aggregate to reflect it; **adding a new certification**
+additionally needs a new static import in `worker/src/certifications.ts`.
+
 ## Conventions & gotchas
 
 - **The curriculum is a manifest + per-competency path files.** `public/curriculum.json` is the **manifest**: the competency registry (`competencies[].file`) and the shared L1–L5 framework (level `id`/`title`/`subtitle`/`move_on_when`/`link`, **no tasks**). Each `public/curriculum.<id>.json` (e.g. `curriculum.web.json`) is a **path file**: per-level `tasks[]` (+ optional per-level `estimated_hours_*`). **Engineers follow the path for their competency** — there is no single shared task list. **Task IDs are globally unique, competency-prefixed** (`web-L1.T1`); progress is keyed by task ID, so switching competency never collides and preserves prior ticks. Both tiers consume these: the frontend fetches the manifest then the engineer's path file and composes them; the Worker imports the manifest + every path file via the registry (`worker/src/curriculum.ts`, `pathFor(competencyId)`) to compute the aggregate. CI validates everything via `node schema/validate-curriculum.mjs` (manifest → `schema/curriculum.manifest.schema.json`, each path file → `schema/curriculum.path.schema.json`, plus cross-checks: file present, `competency` matches, IDs globally unique + prefixed). When changing curriculum structure, update the relevant schema too. **Editing tasks in an existing path file needs a Worker redeploy** for the aggregate to reflect it (the Worker bundles the JSON); **adding a new competency** additionally needs a new static import in `worker/src/curriculum.ts`.
@@ -82,6 +102,8 @@ The aggregate dashboard (`src/aggregate.ts`) lists the `progress/` directory, re
 | Disable / re-enable an engineer | As a super admin, use the per-row **Disable / Enable** button on the dashboard (or `POST /api/user/<username>/disabled` with `{disabled:true\|false}`). Soft-disable only: it flips `disabled` in `progress/<username>.json` (never moves/deletes the file) — a disabled engineer is blocked from the tracker and hidden from default dashboard stats (surface them via the **Disabled** filter). |
 | Update a competency's tasks | Edit that competency's `public/curriculum.<id>.json` (keep task IDs prefixed `<id>-L<n>.T<m>`); push to `main` (CI validates, Pages redeploys the frontend). For the dashboard aggregate to reflect it, also `wrangler deploy` the Worker (it bundles the JSON). |
 | Add a competency | Add `public/curriculum.<id>.json`, add an entry (with `file`) to `public/curriculum.json`'s `competencies`, add a static import for it in `worker/src/curriculum.ts`, then push (CI validates, Pages redeploys) and `wrangler deploy`. |
+| Add a certification | Add `public/certification.<id>.json`, add an entry (with `file`, short `code`) to `public/certifications.json`, add a static import in `worker/src/certifications.ts`, then push (CI validates, Pages redeploys) and `wrangler deploy`. |
+| Update a cert's prep tasks | Edit that cert's `public/certification.<id>.json` (keep item ids `<code>.<section>.<n>`, ≤ 32 chars); push (CI validates, Pages redeploys). For the dashboard readiness to reflect it, also `wrangler deploy` (the Worker bundles the JSON). |
 | Validate the curriculum locally | `npm install ajv@8 ajv-formats@2 && node schema/validate-curriculum.mjs` (same check CI runs). |
 | Rotate the bot PAT | New fine-grained PAT scoped to `ae-tracker-data` (Contents R/W), `wrangler secret put BOT_PAT`, revoke old. |
 | Set up / rotate the feedback PAT | Fine-grained PAT scoped **only** to `ae-tracker` (Issues R/W), `wrangler secret put FEEDBACK_PAT`, revoke old. Used by `/api/feedback`. |

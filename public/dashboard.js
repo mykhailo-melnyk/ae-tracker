@@ -123,16 +123,14 @@ function renderCertReadiness() {
   const box = document.getElementById("cert-readiness");
   const certs = AGG.certifications || [];
   if (!certs.length) { box.innerHTML = `<div class="empty-detail">No certifications configured.</div>`; return; }
-  box.innerHTML = certs.map((c) => {
-    const started = c.engineers_started || 0;
-    const readyPct = started ? Math.round((c.engineers_ready / started) * 100) : 0;
-    return `<div class="task-row">
-      <span class="tname"><strong>${c.label}</strong></span>
-      <span class="tbar"><div style="width:${readyPct}%"></div></span>
-      <span class="tpct">${readyPct}%</span>
-      <span class="lvl-count">${c.engineers_ready} ready / ${c.engineers_started} started of ${c.total_items} items</span>
-    </div>`;
-  }).join("");
+  box.innerHTML = certs.map((c) => `
+    <div class="cert-readiness-row">
+      <div class="cert-readiness-name">${c.label}</div>
+      <div class="cert-stats">
+        <div class="kpi"><div class="lbl">Started preparation</div><div class="val">${c.engineers_started || 0}</div></div>
+        <div class="kpi"><div class="lbl">Ready to pass exam</div><div class="val">${c.engineers_ready || 0}</div></div>
+      </div>
+    </div>`).join("");
 }
 
 function competencyLabel(id) {

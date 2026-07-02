@@ -38,6 +38,22 @@
           "estimated_minutes": 20
         },
         {
+          "id": "web-L1.T13",
+          "kind": "video",
+          "title": "Deep Dive into LLMs like ChatGPT — Andrej Karpathy",
+          "desc": "Optional — recommended for depth. Andrej Karpathy's ~3.5-hour lecture on how LLMs are actually built — pretraining, post-training, hallucinations, why models are good at some things and bad at others. The synthesized notes in the next task (L1.T14) are the primary required read and cover the essentials; watch this when you want the full long-form treatment.",
+          "link": "https://youtu.be/7xTGNNLPyMI",
+          "estimated_minutes": 210
+        },
+        {
+          "id": "web-L1.T14",
+          "kind": "reading",
+          "title": "LLM Mechanics — Synthesized Notes",
+          "desc": "The required, ~10-minute version of the Karpathy lecture: the two training stages, why models hallucinate, knowledge vs. working memory, and what models are good and bad at. This is the mechanical mental model every later course assumes — read it before the Anthropic Academy courses below.",
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/llm-mechanics-notes.md",
+          "estimated_minutes": 10
+        },
+        {
           "id": "web-L1.T8",
           "kind": "reading",
           "title": "Claude Code — Best Practices (Reference)",
@@ -74,22 +90,6 @@
           "title": "Use /btw for side questions",
           "desc": "Try the /btw command mid-task to get quick factual answers without interrupting your flow.",
           "estimated_minutes": 15
-        },
-        {
-          "id": "web-L1.T13",
-          "kind": "video",
-          "title": "Deep Dive into LLMs like ChatGPT — Andrej Karpathy",
-          "desc": "Optional — recommended for depth. Andrej Karpathy's ~3.5-hour lecture on how LLMs are actually built — pretraining, post-training, hallucinations, why models are good at some things and bad at others. The synthesized notes in the next task (L1.T14) are the primary required read and cover the essentials; watch this when you want the full long-form treatment.",
-          "link": "https://youtu.be/7xTGNNLPyMI",
-          "estimated_minutes": 210
-        },
-        {
-          "id": "web-L1.T14",
-          "kind": "reading",
-          "title": "LLM Mechanics — Synthesized Notes",
-          "desc": "The required, ~10-minute version of the Karpathy lecture: the two training stages, why models hallucinate, knowledge vs. working memory, and what models are good and bad at. This is the mechanical mental model every later course assumes — read it before the Anthropic Academy courses below.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/llm-mechanics-notes.md",
-          "estimated_minutes": 10
         },
         {
           "id": "web-L1.T15",

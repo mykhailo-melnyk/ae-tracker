@@ -851,9 +851,12 @@ git commit -m "feat(cert): signed-in certification prep page + tracker link"
 
 ## Task 5: Dashboard certification-readiness view
 
+> **AMENDED after review (commit `336c034`):** per user request, certification data must NOT mix with level progress in one view. The final implementation adds a **top-level tab switch on the dashboard** ("Level progress" | "Certifications"). The level view is unchanged (no cert card, no cert column). The **Certifications tab** holds the readiness summary (`renderCertReadiness`) plus a **cert-only engineers table** (`renderCertTable`: one column per cert, cross-cutting — not competency-scoped, disabled excluded, its own `#cert-search`). The steps below describe the original single-view chips approach and are kept for history; the shipped structure is the tabbed one.
+
 **Files:**
-- Modify: `public/dashboard.html` (add a Certifications card + a table column header)
-- Modify: `public/dashboard.js` (render per-cert summary + per-engineer chips)
+- Modify: `public/dashboard.html` (tab switch; `#view-levels` wrapper; `#view-certs` with readiness card + cert table)
+- Modify: `public/dashboard.js` (`renderCertReadiness`, `renderCertTable`, `competencyLabel`, `wireTabs`, cert-search wiring)
+- Modify: `public/dashboard.css` (`.cert-chip`, `.dash-tabs`/`.dash-tab`)
 
 **Interfaces:**
 - Consumes: `AGG.certifications` (top-level summary) and `e.certifications` (per-engineer) from Task 3's aggregate.

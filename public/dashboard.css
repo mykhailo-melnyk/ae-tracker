@@ -416,3 +416,7 @@ tr.row-disabled .handle { color: #94a3b8; }
 .disable-btn.enable { border-color: #bbf7d0; color: #15803d; }
 .disable-btn.enable:hover { background: #f0fdf4; border-color: #4ade80; }
 .disable-btn:disabled { opacity: 0.5; cursor: default; }
+
+/* ---- Certification chips (table) ---- */
+.cert-chip { display:inline-block; font-size:11px; padding:1px 6px; border-radius:10px; background:#e2e8f0; color:#334155; white-space:nowrap; }
+.cert-chip.ready { background:#dcfce7; color:#166534; }

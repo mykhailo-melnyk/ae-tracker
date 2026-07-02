@@ -119,6 +119,22 @@ async function renderLevelCompletion() {
   box.innerHTML = html;
 }
 
+function renderCertReadiness() {
+  const box = document.getElementById("cert-readiness");
+  const certs = AGG.certifications || [];
+  if (!certs.length) { box.innerHTML = `<div class="empty-detail">No certifications configured.</div>`; return; }
+  box.innerHTML = certs.map((c) => {
+    const started = c.engineers_started || 0;
+    const readyPct = started ? Math.round((c.engineers_ready / started) * 100) : 0;
+    return `<div class="task-row">
+      <span class="tname"><strong>${c.label}</strong></span>
+      <span class="tbar"><div style="width:${readyPct}%"></div></span>
+      <span class="tpct">${readyPct}%</span>
+      <span class="lvl-count">${c.engineers_ready} ready / ${c.engineers_started} started of ${c.total_items} items</span>
+    </div>`;
+  }).join("");
+}
+
 let FILTER = "all";
 let SEARCH = "";
 let SCOPE = "all";       // page-level competency scope: "all" or a competency id
@@ -164,6 +180,12 @@ function renderTable() {
     const toggleBtn = AGG.is_superadmin
       ? `<button class="disable-btn${e.disabled ? " enable" : ""}" data-user="${e.username}" data-disabled="${e.disabled ? "1" : "0"}">${e.disabled ? "Enable" : "Disable"}</button>`
       : "";
+    const certChips = Object.entries(e.certifications || {})
+      .map(([id, cp]) => {
+        const label = (AGG.certifications.find((c) => c.id === id) || {}).label || id;
+        const pct = Math.round((cp.pct || 0) * 100);
+        return `<span class="cert-chip${cp.ready ? " ready" : ""}" title="${label}">${label}: ${pct}%</span>`;
+      }).join(" ") || "—";
     return `
     <tr${e.disabled ? ' class="row-disabled"' : ""}>
       <td><div class="who"><div class="avatar">${(e.display_name || e.username).slice(0, 2).toUpperCase()}</div>
@@ -173,6 +195,7 @@ function renderTable() {
       <td><div class="pct-cell"><div class="pct-bar"><div style="width:${Math.round(e.completion_pct * 100)}%"></div></div>
           <span class="pct-num">${Math.round(e.completion_pct * 100)}%</span></div></td>
       <td><select class="comp-select" data-user="${e.username}" data-prev="${e.competency || ""}">${options}</select></td>
+      <td>${certChips}</td>
       <td><span class="last-active">${new Date(e.last_active).toLocaleDateString()}</span></td>
       <td style="text-align:right">${toggleBtn}<a href="tracker.html?as=${e.username}" style="color:#2563eb;font-weight:600">View →</a></td>
     </tr>`;
@@ -278,6 +301,7 @@ async function renderAll() {
   renderKpis();
   renderBars();
   await renderLevelCompletion();
+  renderCertReadiness();
   renderTable();
 }
 

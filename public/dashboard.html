@@ -35,6 +35,11 @@
       <div class="card"><h3>Completion by level</h3><div class="card-sub">Avg across engineers · click a level for task detail</div><div id="task-rates"></div></div>
     </div>
     <div class="card">
+      <h3>Certification readiness</h3>
+      <div class="card-sub">Per external certification · non-disabled engineers</div>
+      <div id="cert-readiness"></div>
+    </div>
+    <div class="card">
       <div class="card-head">
         <h3>Engineers</h3>
         <button id="export-btn" class="export-btn">⬇ Export</button>
@@ -50,7 +55,7 @@
         <div class="filter-pill" data-filter="disabled">Disabled</div>
       </div>
       <table class="engineers"><thead><tr>
-        <th>Engineer</th><th>Current</th><th>Completion</th><th>Competency</th><th>Last active</th><th></th>
+        <th>Engineer</th><th>Current</th><th>Completion</th><th>Competency</th><th>Certifications</th><th>Last active</th><th></th>
       </tr></thead><tbody id="engineers-body"></tbody></table>
     </div>
   </div>

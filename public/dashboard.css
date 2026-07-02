@@ -421,10 +421,7 @@ tr.row-disabled .handle { color: #94a3b8; }
 .cert-chip { display:inline-block; font-size:11px; padding:1px 6px; border-radius:10px; background:#e2e8f0; color:#334155; white-space:nowrap; }
 .cert-chip.ready { background:#dcfce7; color:#166534; }
 
-/* ---- Certification readiness (two stat tiles per cert) ---- */
-.cert-readiness-row { margin-bottom: 16px; }
-.cert-readiness-row:last-child { margin-bottom: 0; }
-.cert-readiness-name { font-weight: 700; font-size: 15px; color: #0f172a; margin-bottom: 8px; }
+/* ---- Certification readiness (two stat tiles for the selected cert) ---- */
 .cert-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 220px)); gap: 16px; }
 
 /* ---- Dashboard view tabs (Level progress | Certifications) ---- */

@@ -851,7 +851,12 @@ git commit -m "feat(cert): signed-in certification prep page + tracker link"
 
 ## Task 5: Dashboard certification-readiness view
 
-> **AMENDED after review (commit `336c034`):** per user request, certification data must NOT mix with level progress in one view. The final implementation adds a **top-level tab switch on the dashboard** ("Level progress" | "Certifications"). The level view is unchanged (no cert card, no cert column). The **Certifications tab** holds the readiness summary (`renderCertReadiness`) plus a **cert-only engineers table** (`renderCertTable`: one column per cert, cross-cutting — not competency-scoped, disabled excluded, its own `#cert-search`). The steps below describe the original single-view chips approach and are kept for history; the shipped structure is the tabbed one.
+> **AMENDED after review:** per user requests, certification data must NOT mix with level progress, and must scale to many certs without an ever-wider table. Shipped design:
+> - **Top-level tab switch** on the dashboard ("Level progress" | "Certifications"). Level view unchanged (no cert card/column).
+> - **Certifications tab** has a **certification filter** (`#cert-pills`, reusing the competency-scope pill style) — pick ONE cert at a time (`CERT_SEL`). It drives both the readiness card and the engineers table, so the table is **fixed-width** (Engineer · Competency · `<cert> progress` · Exam ready · Last active) no matter how many certs exist.
+> - **Readiness card** shows two plain counts for the selected cert: **Started preparation** and **Ready to pass exam** (`renderCertReadiness`).
+> - **Engineers table** (`renderCertTable`) is cross-cutting (not competency-scoped), excludes disabled engineers, has its own `#cert-search`, sorted by that cert's completion.
+> The steps below describe the original single-view chips approach and are kept for history; the shipped structure is the tabbed + filtered one.
 
 **Files:**
 - Modify: `public/dashboard.html` (tab switch; `#view-levels` wrapper; `#view-certs` with readiness card + cert table)

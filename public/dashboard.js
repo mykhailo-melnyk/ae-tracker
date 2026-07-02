@@ -119,18 +119,33 @@ async function renderLevelCompletion() {
   box.innerHTML = html;
 }
 
+// The currently-selected certification (drives the readiness card + table). Certs are
+// filtered one-at-a-time via #cert-pills so the table stays a fixed width as certs grow.
+let CERT_SEL = null;
+
+function selectedCert() {
+  const certs = AGG.certifications || [];
+  return certs.find((c) => c.id === CERT_SEL) || certs[0] || null;
+}
+
+function buildCertPills() {
+  const box = document.getElementById("cert-pills");
+  const certs = AGG.certifications || [];
+  if (!certs.length) { box.innerHTML = ""; return; }
+  if (!CERT_SEL || !certs.some((c) => c.id === CERT_SEL)) CERT_SEL = certs[0].id;
+  box.innerHTML = certs.map((c) =>
+    `<div class="comp-pill ${c.id === CERT_SEL ? "active" : ""}" data-cert="${c.id}">${c.label}</div>`).join("");
+}
+
 function renderCertReadiness() {
   const box = document.getElementById("cert-readiness");
-  const certs = AGG.certifications || [];
-  if (!certs.length) { box.innerHTML = `<div class="empty-detail">No certifications configured.</div>`; return; }
-  box.innerHTML = certs.map((c) => `
-    <div class="cert-readiness-row">
-      <div class="cert-readiness-name">${c.label}</div>
-      <div class="cert-stats">
-        <div class="kpi"><div class="lbl">Started preparation</div><div class="val">${c.engineers_started || 0}</div></div>
-        <div class="kpi"><div class="lbl">Ready to pass exam</div><div class="val">${c.engineers_ready || 0}</div></div>
-      </div>
-    </div>`).join("");
+  const c = selectedCert();
+  if (!c) { box.innerHTML = `<div class="empty-detail">No certifications configured.</div>`; return; }
+  box.innerHTML = `
+    <div class="cert-stats">
+      <div class="kpi"><div class="lbl">Started preparation</div><div class="val">${c.engineers_started || 0}</div></div>
+      <div class="kpi"><div class="lbl">Ready to pass exam</div><div class="val">${c.engineers_ready || 0}</div></div>
+    </div>`;
 }
 
 function competencyLabel(id) {
@@ -139,40 +154,36 @@ function competencyLabel(id) {
   return c ? c.label : id;
 }
 
-// Certifications-only engineers table (its own dashboard tab). One column per cert,
-// cross-cutting: NOT scoped by the competency pills. Disabled engineers excluded.
+// Certifications-only engineers table (its own dashboard tab), scoped to the ONE
+// selected certification (#cert-pills). Fixed width regardless of how many certs
+// exist. Cross-cutting: NOT scoped by the competency pills. Disabled engineers excluded.
 function renderCertTable() {
   const box = document.getElementById("cert-table");
-  const certs = AGG.certifications || [];
-  if (!certs.length) { box.innerHTML = `<div class="empty-detail">No certifications configured.</div>`; return; }
+  const sel = selectedCert();
+  if (!sel) { box.innerHTML = `<div class="empty-detail">No certifications configured.</div>`; return; }
   const q = CERT_SEARCH.toLowerCase();
   const rows = AGG.engineers
     .filter((e) => !e.disabled)
     .filter((e) => !q || e.username.toLowerCase().includes(q) || (e.display_name || "").toLowerCase().includes(q))
-    .map((e) => ({ e, sum: certs.reduce((n, c) => n + ((e.certifications || {})[c.id]?.pct || 0), 0) }))
-    .sort((a, b) => b.sum - a.sum);
+    .map((e) => ({ e, cp: (e.certifications || {})[sel.id] || { pct: 0, ready: false } }))
+    .sort((a, b) => b.cp.pct - a.cp.pct);
 
-  const head = `<tr><th>Engineer</th><th>Competency</th>${
-    certs.map((c) => `<th>${c.label}</th>`).join("")
-  }<th>Last active</th></tr>`;
-
-  const body = rows.map(({ e }) => {
-    const certCells = certs.map((c) => {
-      const cp = (e.certifications || {})[c.id] || { pct: 0, ready: false };
-      const pct = Math.round((cp.pct || 0) * 100);
-      return `<td><span class="cert-chip${cp.ready ? " ready" : ""}">${pct}%</span></td>`;
-    }).join("");
+  const body = rows.map(({ e, cp }) => {
+    const pct = Math.round((cp.pct || 0) * 100);
     return `<tr>
       <td><div class="who"><div class="avatar">${(e.display_name || e.username).slice(0, 2).toUpperCase()}</div>
           <div><div class="name">${e.display_name || e.username}</div>
                <div class="handle">@${e.username}</div></div></div></td>
       <td>${competencyLabel(e.competency)}</td>
-      ${certCells}
+      <td><span class="cert-chip${cp.ready ? " ready" : ""}">${pct}%</span></td>
+      <td>${cp.ready ? `<span class="cert-chip ready">Ready</span>` : `<span class="handle">Not yet</span>`}</td>
       <td><span class="last-active">${new Date(e.last_active).toLocaleDateString()}</span></td>
     </tr>`;
-  }).join("") || `<tr><td colspan="${certs.length + 3}"><div class="empty-detail">No engineers match.</div></td></tr>`;
+  }).join("") || `<tr><td colspan="5"><div class="empty-detail">No engineers match.</div></td></tr>`;
 
-  box.innerHTML = `<table class="engineers"><thead>${head}</thead><tbody>${body}</tbody></table>`;
+  box.innerHTML = `<table class="engineers"><thead><tr>
+    <th>Engineer</th><th>Competency</th><th>${sel.label} progress</th><th>Exam ready</th><th>Last active</th>
+  </tr></thead><tbody>${body}</tbody></table>`;
 }
 
 let FILTER = "all";
@@ -316,6 +327,15 @@ function wireFilters() {
     CERT_SEARCH = e.target.value;
     renderCertTable();
   });
+  document.querySelectorAll("#cert-pills .comp-pill").forEach((el) => {
+    el.addEventListener("click", () => {
+      document.querySelectorAll("#cert-pills .comp-pill").forEach((p) => p.classList.remove("active"));
+      el.classList.add("active");
+      CERT_SEL = el.dataset.cert;
+      renderCertReadiness();
+      renderCertTable();
+    });
+  });
 }
 
 // Top-level view switch: "Level progress" (competency/level) vs "Certifications".
@@ -343,6 +363,7 @@ async function init() {
   document.getElementById("who").innerHTML =
     `<a class="signout-link" href="${WORKER}/auth/logout" onclick="clearAuthToken()">Sign out</a>`;
   buildCompetencyPills();
+  buildCertPills();
   await renderAll();
   wireFilters();
   wireTabs();

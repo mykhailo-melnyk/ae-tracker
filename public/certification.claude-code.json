@@ -1,0 +1,63 @@
+{
+  "certification": "claude-code",
+  "draft": true,
+  "exam": {
+    "name": "Anthropic Claude Code Certification",
+    "link": "https://docs.claude.com/en/docs/claude-code/overview",
+    "notes": "Starter prep path — item list is under review against the official Anthropic exam blueprint. Verify the official registration page and domains before relying on this."
+  },
+  "sections": [
+    {
+      "id": "fundamentals",
+      "title": "Fundamentals",
+      "items": [
+        { "id": "cc.fund.1", "kind": "reading", "title": "Install & set up Claude Code", "desc": "Install Claude Code (and iTerm2 on macOS). Know how to launch it and run the basic loop.", "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/tool-setup.md", "estimated_minutes": 15 },
+        { "id": "cc.fund.2", "kind": "reading", "title": "How we work with AI at Solvd", "desc": "Why AI fails the way it does and the core principles. Orientation before the tool specifics.", "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/start-here.md", "estimated_minutes": 10 },
+        { "id": "cc.fund.3", "kind": "reading", "title": "Claude Code best practices (reference)", "desc": "Modes, slash commands, @-references, MCP, custom commands. Skim now; return per section.", "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/tools/claude-code.md", "estimated_minutes": 30 }
+      ]
+    },
+    {
+      "id": "workflows",
+      "title": "Core workflows",
+      "items": [
+        { "id": "cc.flow.1", "kind": "practice", "title": "Read before you write", "desc": "Use Claude Code to explain an unfamiliar file before changing it. Confirm claims against the code.", "estimated_minutes": 20 },
+        { "id": "cc.flow.2", "kind": "practice", "title": "Diff review discipline", "desc": "Generate a change and review the diff hunk-by-hunk; reject overcomplicated output and ask for simpler.", "estimated_minutes": 20 },
+        { "id": "cc.flow.3", "kind": "practice", "title": "Plan mode for multi-file work", "desc": "Use Plan mode before a multi-file edit; verify the plan before executing.", "estimated_minutes": 20 }
+      ]
+    },
+    {
+      "id": "context",
+      "title": "Context & customization",
+      "items": [
+        { "id": "cc.ctx.1", "kind": "reading", "title": "A good CLAUDE.md (golden example)", "desc": "Annotated exemplar CLAUDE.md — what to include, what to leave out.", "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/examples/claude-md.md", "estimated_minutes": 15 },
+        { "id": "cc.ctx.2", "kind": "practice", "title": "Write a CLAUDE.md for a repo", "desc": "Author a focused CLAUDE.md for a project you know; keep it tight.", "estimated_minutes": 30 },
+        { "id": "cc.ctx.3", "kind": "reading", "title": "Settings, permissions & hooks", "desc": "Understand settings.json, permission modes, and hooks at a level you can explain.", "estimated_minutes": 20 }
+      ]
+    },
+    {
+      "id": "mcp",
+      "title": "MCP & extensions",
+      "items": [
+        { "id": "cc.mcp.1", "kind": "reading", "title": "What MCP is and when to use it", "desc": "MCP servers/tools and how Claude Code consumes them.", "estimated_minutes": 20 },
+        { "id": "cc.mcp.2", "kind": "practice", "title": "Wire up one MCP server", "desc": "Connect a single MCP server and call one of its tools from Claude Code.", "estimated_minutes": 30 }
+      ]
+    },
+    {
+      "id": "orchestration",
+      "title": "Orchestration & advanced",
+      "items": [
+        { "id": "cc.orch.1", "kind": "reading", "title": "Subagents & custom commands", "desc": "How subagents and reusable slash commands multiply output.", "estimated_minutes": 20 },
+        { "id": "cc.orch.2", "kind": "practice", "title": "Build one automated feedback loop", "desc": "Set up a loop where Claude Code runs tests/lint and self-corrects.", "estimated_minutes": 30 }
+      ]
+    },
+    {
+      "id": "exam",
+      "title": "Exam logistics & mock",
+      "items": [
+        { "id": "cc.exam.1", "kind": "reading", "title": "Confirm exam format & registration", "desc": "Read the official exam page: format, domains, cost, eligibility. Update this path if it differs.", "estimated_minutes": 15 },
+        { "id": "cc.exam.2", "kind": "practice", "title": "Timed mock run", "desc": "Do a timed self-quiz across the domains above; note weak spots and revisit.", "estimated_minutes": 45 },
+        { "id": "cc.exam.3", "kind": "practice", "title": "Take the certification exam", "desc": "The finish line: register and sit the exam.", "estimated_minutes": 60 }
+      ]
+    }
+  ]
+}

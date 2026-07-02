@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "certifications": [
+    {
+      "id": "claude-code",
+      "code": "cc",
+      "label": "Claude Code",
+      "file": "certification.claude-code.json"
+    }
+  ]
+}

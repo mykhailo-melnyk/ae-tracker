@@ -2,6 +2,7 @@ import { handleLogin, handleCallback, handleLogout } from "./auth";
 import { handleApiMe, handleApiMark, handleApiUser, handleApiCompetencies, handleApiUserCompetencies, handleApiUserDisabled, handleApiFeedback } from "./api";
 import { handleApiAggregate } from "./aggregate";
 import * as curriculum from "./curriculum";
+import * as certifications from "./certifications";
 
 export interface Env {
   DATA_REPO_OWNER: string;
@@ -59,7 +60,7 @@ export default {
       env, request,
     );
     if (url.pathname === "/api/aggregate") return withCors(
-      await handleApiAggregate(request, env, curriculum),
+      await handleApiAggregate(request, env, curriculum, fetch, certifications),
       env, request,
     );
     const compMatch = url.pathname.match(/^\/api\/user\/([\w-]+)\/competencies$/);

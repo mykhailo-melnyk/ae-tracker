@@ -138,6 +138,58 @@ describe("computeAggregate", () => {
     expect(agg.engineers.find((e) => e.username === "cara")!.disabled).toBe(true);
     expect(agg.engineers.find((e) => e.username === "anna")!.disabled).toBeUndefined();
   });
+
+  it("computes per-cert readiness and per-engineer cert progress, excluding disabled", async () => {
+    const registry = registryOf({ web: WEB });
+    const certRegistry = {
+      certList: () => [{ id: "claude-code", label: "Claude Code", itemIds: ["cc.a.1", "cc.a.2"] }],
+    };
+
+    const files: Record<string, any> = {
+      "anna.json": {
+        github_username: "anna", created_at: "2026-05-01T00:00:00Z", updated_at: "2026-05-27T00:00:00Z",
+        competency: "web",
+        tasks: { "cc.a.1": { done: true, at: "2026-05-27T00:00:00Z" }, "cc.a.2": { done: true, at: "2026-05-27T00:00:00Z" } },
+      },
+      "ben.json": {
+        github_username: "ben", created_at: "2026-05-01T00:00:00Z", updated_at: "2026-05-27T00:00:00Z",
+        competency: "web",
+        tasks: { "cc.a.1": { done: true, at: "2026-05-27T00:00:00Z" } },
+      },
+      "cara.json": {
+        github_username: "cara", created_at: "2026-05-01T00:00:00Z", updated_at: "2026-05-27T00:00:00Z",
+        competency: "web", disabled: true,
+        tasks: { "cc.a.1": { done: true }, "cc.a.2": { done: true } },
+      },
+    };
+
+    const fetchMock = (async (url: string) => {
+      if (url.endsWith("/contents/progress")) {
+        return new Response(JSON.stringify([
+          { name: "anna.json", type: "file", path: "progress/anna.json" },
+          { name: "ben.json", type: "file", path: "progress/ben.json" },
+          { name: "cara.json", type: "file", path: "progress/cara.json" },
+        ]), { headers: { "content-type": "application/json" } });
+      }
+      const name = url.split("/").pop()!;
+      return new Response(JSON.stringify({ sha: "s", content: btoa(JSON.stringify(files[name])), encoding: "base64" }),
+        { headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+
+    const now = new Date("2026-05-27T12:00:00Z");
+    const agg = await computeAggregate(cfg, registry, fetchMock, now, certRegistry);
+
+    const cc = agg.certifications.find((c) => c.id === "claude-code")!;
+    expect(cc.total_items).toBe(2);
+    expect(cc.engineers_started).toBe(2); // anna + ben (cara disabled, excluded)
+    expect(cc.engineers_ready).toBe(1);   // anna only
+
+    const anna = agg.engineers.find((e) => e.username === "anna")!;
+    expect(anna.certifications["claude-code"]).toEqual({ done: 2, total: 2, pct: 1, ready: true });
+    const ben = agg.engineers.find((e) => e.username === "ben")!;
+    expect(ben.certifications["claude-code"].ready).toBe(false);
+    expect(ben.certifications["claude-code"].pct).toBeCloseTo(0.5);
+  });
 });
 
 describe("handleApiAggregate (auth gate)", () => {

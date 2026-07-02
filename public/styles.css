@@ -14,9 +14,17 @@ body {
   align-items: center;
 }
 .topbar .brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 700;
   font-size: 16px;
   color: #0f172a;
+}
+.topbar .brand-logo {
+  height: 14px;
+  width: auto;
+  display: block;
 }
 .topbar .brand .tag {
   background: #2563eb;
@@ -224,6 +232,12 @@ body {
 .kind-tag.checkpoint { background: #fef3c7; color: #78350f; }
 .kind-tag.reading    { background: #ccfbf1; color: #115e59; }
 .kind-tag.video      { background: #fee2e2; color: #991b1b; }
+.task-est {
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 6px;
+}
 .external {
   color: #2563eb;
   font-size: 12.5px;

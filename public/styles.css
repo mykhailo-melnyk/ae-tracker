@@ -14,9 +14,17 @@ body {
   align-items: center;
 }
 .topbar .brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 700;
   font-size: 16px;
   color: #0f172a;
+}
+.topbar .brand-logo {
+  height: 22px;
+  width: auto;
+  display: block;
 }
 .topbar .brand .tag {
   background: #2563eb;

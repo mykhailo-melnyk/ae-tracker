@@ -11,130 +11,149 @@
           "kind": "reading",
           "title": "Tool Setup Guide",
           "desc": "Install Claude Code (and iTerm 2 on macOS). After this you can install everything else by pasting prompts into Claude Code. Plan ~10 minutes for the manual bootstrap, then come back here.",
-          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/tool-setup.md"
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/tool-setup.md",
+          "estimated_minutes": 10
         },
         {
           "id": "web-L1.T17",
           "kind": "practice",
           "title": "Break the AI on purpose",
-          "desc": "Before the wall of reading below, get your hands dirty: spend 15 minutes deliberately making the AI fail. Ask it about a library version that doesn't exist, feed it a false premise, push it past what it can know. Watch HOW it fails — confidently, usually. This anchors everything the mindset readings then explain."
+          "desc": "Before the wall of reading below, get your hands dirty: spend 15 minutes deliberately making the AI fail. Ask it about a library version that doesn't exist, feed it a false premise, push it past what it can know. Watch HOW it fails — confidently, usually. This anchors everything the mindset readings then explain.",
+          "estimated_minutes": 15
         },
         {
           "id": "web-L1.T6",
           "kind": "reading",
           "title": "How We Work With AI at Solvd",
           "desc": "Five-minute orientation: why AI fails the way it does, the four principles we use at Solvd, and when to use which tool. This is the entry point — everything else builds on it.",
-          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/start-here.md"
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/start-here.md",
+          "estimated_minutes": 10
         },
         {
           "id": "web-L1.T7",
           "kind": "reading",
           "title": "The AI Mindset — 4-property framework",
           "desc": "The diagnostic doc. Next Token Prediction, Knowledge, Working Memory, Steerability. Every success and every failure traces to one of these four — once you internalize them, every later guideline makes sense. Re-read whenever AI surprises you.",
-          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/mindset.md"
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/getting-started/mindset.md",
+          "estimated_minutes": 20
         },
         {
           "id": "web-L1.T8",
           "kind": "reading",
           "title": "Claude Code — Best Practices (Reference)",
           "desc": "Keep this open in a tab. Modes, slash commands, @-references, MCP, custom commands. You won't need every section at Level 1 — skim it now, return to specific sections as you hit them in later levels.",
-          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/tools/claude-code.md"
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/tools/claude-code.md",
+          "estimated_minutes": 30
         },
         {
           "id": "web-L1.T18",
           "kind": "reading",
           "title": "Golden example: a good CLAUDE.md",
           "desc": "An annotated exemplar CLAUDE.md with notes on why each part earns its place — what to include, what to leave out, and the smells to avoid. This is what 'good' looks like before you write your own.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/examples/claude-md.md"
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/examples/claude-md.md",
+          "estimated_minutes": 15
         },
         {
           "id": "web-L1.T19",
           "kind": "reading",
           "title": "Your tools are portable (not just Claude Code)",
           "desc": "A short note: the habits this path teaches — reading before writing, diff review, context engineering, planning, orchestration — transfer to any agentic tool (OpenCode, Codex). Only the specific commands and skills/MCP setup are Claude-specific. Keeps you from being stranded on a different stack.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/tool-agnostic.md"
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/tool-agnostic.md",
+          "estimated_minutes": 10
         },
         {
           "id": "web-L1.T1",
           "kind": "practice",
           "title": "Ask AI to explain code you already know",
-          "desc": "Open a project you know well. Use @-references. Ask AI to walk you through the logic. The point is to build a baseline for spotting hallucinations."
+          "desc": "Open a project you know well. Use @-references. Ask AI to walk you through the logic. The point is to build a baseline for spotting hallucinations.",
+          "estimated_minutes": 30
         },
         {
           "id": "web-L1.T2",
           "kind": "practice",
           "title": "Use /btw for side questions",
-          "desc": "Try the /btw command mid-task to get quick factual answers without interrupting your flow."
+          "desc": "Try the /btw command mid-task to get quick factual answers without interrupting your flow.",
+          "estimated_minutes": 15
         },
         {
           "id": "web-L1.T13",
           "kind": "video",
           "title": "Deep Dive into LLMs like ChatGPT — Andrej Karpathy",
           "desc": "Optional — recommended for depth. Andrej Karpathy's ~3.5-hour lecture on how LLMs are actually built — pretraining, post-training, hallucinations, why models are good at some things and bad at others. The synthesized notes in the next task (L1.T14) are the primary required read and cover the essentials; watch this when you want the full long-form treatment.",
-          "link": "https://youtu.be/7xTGNNLPyMI"
+          "link": "https://youtu.be/7xTGNNLPyMI",
+          "estimated_minutes": 210
         },
         {
           "id": "web-L1.T14",
           "kind": "reading",
           "title": "LLM Mechanics — Synthesized Notes",
           "desc": "The required, ~10-minute version of the Karpathy lecture: the two training stages, why models hallucinate, knowledge vs. working memory, and what models are good and bad at. This is the mechanical mental model every later course assumes — read it before the Anthropic Academy courses below.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/llm-mechanics-notes.md"
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/llm-mechanics-notes.md",
+          "estimated_minutes": 10
         },
         {
           "id": "web-L1.T15",
           "kind": "course",
           "title": "ChatGPT Prompt Engineering for Developers",
           "desc": "Short, hands-on prompting fundamentals (deeplearning.ai, with Andrew Ng & OpenAI). Uses the OpenAI API for examples, but the principles — clear instructions, giving the model time to reason, iterative prompt refinement — transfer directly to Claude. Complements, not replaces, Claude 101 and AI Fluency.",
-          "link": "https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers"
+          "link": "https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers",
+          "estimated_minutes": 90
         },
         {
           "id": "web-L1.T9",
           "kind": "course",
           "title": "Claude 101",
           "desc": "Anthropic Academy intro to Claude. Use Claude for routine professional tasks; survey of essential capabilities; signposts to deeper material. Free with certificate.",
-          "link": "https://anthropic.skilljar.com/claude-101"
+          "link": "https://anthropic.skilljar.com/claude-101",
+          "estimated_minutes": 60
         },
         {
           "id": "web-L1.T10",
           "kind": "course",
           "title": "Claude Code 101",
           "desc": "Anthropic Academy intro to Claude Code (the CLI/IDE coding agent). Installation, writing prompts, workflow management, day-to-day customization. Free with certificate.",
-          "link": "https://anthropic.skilljar.com/claude-code-101"
+          "link": "https://anthropic.skilljar.com/claude-code-101",
+          "estimated_minutes": 60
         },
         {
           "id": "web-L1.T11",
           "kind": "course",
           "title": "Introduction to Claude Cowork",
           "desc": "Working alongside Claude on real files and projects. Covers the task loop, plugins, skills setup, and responsibly steering multi-step work. Free with certificate.",
-          "link": "https://anthropic.skilljar.com/introduction-to-claude-cowork"
+          "link": "https://anthropic.skilljar.com/introduction-to-claude-cowork",
+          "estimated_minutes": 60
         },
         {
           "id": "web-L1.T12",
           "kind": "course",
           "title": "AI Capabilities and Limitations",
           "desc": "How modern generative AI systems work and behave. Identifies types of unexpected outputs (hallucinations, refusals) and applies targeted fixes based on the four machine properties — Next Token Prediction, Knowledge, Working Memory, Steerability. Video-first companion to the 'AI Mindset' reading.",
-          "link": "https://anthropic.skilljar.com/ai-capabilities-and-limitations"
+          "link": "https://anthropic.skilljar.com/ai-capabilities-and-limitations",
+          "estimated_minutes": 60
         },
         {
           "id": "web-L1.T3",
           "kind": "course",
           "title": "AI Fluency: Framework & Foundations",
           "desc": "Anthropic's foundational course on Anthropic Academy — free with certificate. Teaches practical skills for effective, efficient, ethical, and safe AI interaction. Covers the 4-property framework from the 'AI Mindset' reading in depth.",
-          "link": "https://anthropic.skilljar.com/ai-fluency-framework-foundations"
+          "link": "https://anthropic.skilljar.com/ai-fluency-framework-foundations",
+          "estimated_minutes": 120
         },
         {
           "id": "web-L1.T4",
           "kind": "checkpoint",
           "title": "Spot confident-correct vs confident-guessing AI",
           "desc": "You've caught AI hallucinating a few times and know what that looks like.",
-          "self_assessment": true
+          "self_assessment": true,
+          "estimated_minutes": 10
         },
         {
           "id": "web-L1.T16",
           "kind": "checkpoint",
           "title": "Capstone: spot & annotate AI behavior",
           "desc": "Capstone deliverable: annotate an agent transcript — mark good vs bad AI behavior and say why — plus the AI-claims practical exam: quiz AI on a domain you know (including false-premise questions), predict correct-vs-guessing before verifying, then score yourself. Rubric, deliverables, and optional GLAT/MAILS references in the linked doc.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L1.md"
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L1.md",
+          "estimated_minutes": 60
         }
       ]
     },
@@ -148,122 +167,140 @@
           "kind": "reading",
           "title": "Prompt Patterns",
           "desc": "Effective prompts are short, concrete, verifiable. Covers proven prompt patterns (Socratic, 3x3, Evaluator-Optimizer) and workflow patterns (chaining, parallelization). Read before the 'weak vs strong prompts' practice — it's the toolkit that practice draws on.",
-          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/workflows/prompt-patterns.md"
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/workflows/prompt-patterns.md",
+          "estimated_minutes": 20
         },
         {
           "id": "web-L2.T7",
           "kind": "reading",
           "title": "Context Engineering",
           "desc": "What AI sees, when, and how. Three context layers (project memory, rules, conversation), automating context injection with hooks, cross-session persistence. The Working Memory property from L1 made operational.",
-          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/workflows/context-engineering.md"
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/workflows/context-engineering.md",
+          "estimated_minutes": 20
         },
         {
           "id": "web-L2.T8",
           "kind": "reading",
           "title": "Code Review with AI",
           "desc": "First-pass review framework: Logic → Security → Performance → Maintainability → Style. AI catches patterns; humans validate architecture and business logic. Surgical-changes principle: every changed line traces to the request. Underpins the diff-review-habit practice below.",
-          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/workflows/code-review-with-ai.md"
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/workflows/code-review-with-ai.md",
+          "estimated_minutes": 20
         },
         {
           "id": "web-L2.T15",
           "kind": "reading",
           "title": "Golden example: a good AI-assisted PR",
           "desc": "An annotated exemplar PR: what makes AI-assisted work trustworthy is the visible review trail — the plausible-but-wrong parts caught, tests the author owns, scope held to the spec. The bar for your own PRs, and for the L2 capstone.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/examples/ai-assisted-pr.md"
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/examples/ai-assisted-pr.md",
+          "estimated_minutes": 15
         },
         {
           "id": "web-L2.T9",
           "kind": "reading",
           "title": "Debugging with AI",
           "desc": "Give AI the full error context (message, stack, code, what you tried). Use AI for hypothesis generation, never for unverified fixes — AI generates plausible hypotheses, not verified ones. Underpins the 3-try-rule practice below.",
-          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/workflows/debugging-with-ai.md"
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/workflows/debugging-with-ai.md",
+          "estimated_minutes": 20
         },
         {
           "id": "web-L2.T1",
           "kind": "practice",
           "title": "Practice weak vs strong prompts",
-          "desc": "Pick a task you'd normally prompt vaguely. Rewrite the prompt with explicit constraints. Compare results."
+          "desc": "Pick a task you'd normally prompt vaguely. Rewrite the prompt with explicit constraints. Compare results.",
+          "estimated_minutes": 30
         },
         {
           "id": "web-L2.T2",
           "kind": "practice",
           "title": "Internalize the diff-review habit",
-          "desc": "For one week, read every diff before accepting. Note one thing you caught that you would have missed."
+          "desc": "For one week, read every diff before accepting. Note one thing you caught that you would have missed.",
+          "estimated_minutes": 30
         },
         {
           "id": "web-L2.T3",
           "kind": "practice",
           "title": "Practice the 3-try rule",
-          "desc": "When AI doesn't get it right in 3 attempts, the problem is your prompt or context. Reframe instead of retrying."
+          "desc": "When AI doesn't get it right in 3 attempts, the problem is your prompt or context. Reframe instead of retrying.",
+          "estimated_minutes": 20
         },
         {
           "id": "web-L2.T18",
           "kind": "practice",
           "title": "Peer AI-PR review exchange",
-          "desc": "Swap an AI-assisted PR with a teammate and review each other's diffs. Each of you flags at least one plausible-but-wrong spot and one place to simplify, then compare notes: what did the author miss that the reviewer caught? Builds the team review habit — the social half of L2's 'quality is the point'."
+          "desc": "Swap an AI-assisted PR with a teammate and review each other's diffs. Each of you flags at least one plausible-but-wrong spot and one place to simplify, then compare notes: what did the author miss that the reviewer caught? Builds the team review habit — the social half of L2's 'quality is the point'.",
+          "estimated_minutes": 45
         },
         {
           "id": "web-L2.T4",
           "kind": "course",
           "title": "Claude Code in Action",
           "desc": "Modes, context control, and the habits that make daily AI usage productive. Free with certificate. At Level 2, focus on the modes, context, and review chapters — you'll revisit the same course for the Plan Mode chapters at Level 3 (L3.T3), so this is one course viewed twice, not two courses. Pairs directly with the Prompt Patterns and Code Review with AI readings.",
-          "link": "https://anthropic.skilljar.com/claude-code-in-action"
+          "link": "https://anthropic.skilljar.com/claude-code-in-action",
+          "estimated_minutes": 90
         },
         {
           "id": "web-L2.T5",
           "kind": "checkpoint",
           "title": "I instinctively review diffs and ask for simplification",
           "desc": "You no longer accept the first output without reading it.",
-          "self_assessment": true
+          "self_assessment": true,
+          "estimated_minutes": 10
         },
         {
           "id": "web-L2.T10",
           "kind": "reading",
           "title": "Team Practices for AI Code",
           "desc": "Your individual review habit scales to a team only with shared norms: PR-review norms for AI-generated code, CI gates, AI-PR disclosure, and reviewer-load balancing. Includes the 5-item AI-assisted-work checklist to run before opening any PR. The team-level companion to the Code Review with AI reading.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/team-practices.md"
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/team-practices.md",
+          "estimated_minutes": 20
         },
         {
           "id": "web-L2.T11",
           "kind": "reading",
           "title": "Security Basics: Secrets, Prompt Injection & Untrusted Content",
           "desc": "Three habits to adopt the moment AI starts editing real code: never paste secrets, understand prompt injection, and treat untrusted content as input not commands. Links the OWASP Top 10 for LLM & GenAI. The early-level companion to the deeper AI Security Policy at L4.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/security-basics.md"
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/security-basics.md",
+          "estimated_minutes": 20
         },
         {
           "id": "web-L2.T16",
           "kind": "reading",
           "title": "Cost & when not to use AI (intro)",
           "desc": "A short, early note on what AI usage costs (you pay per token; big context is the main driver) and when NOT to hand a task to AI (you can't verify it; it's trivial and deterministic; the stakes are high and the change is subtle). The fuller quantitative treatment comes at L4.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/cost-awareness.md"
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/cost-awareness.md",
+          "estimated_minutes": 10
         },
         {
           "id": "web-L2.T17",
           "kind": "checkpoint",
           "title": "I can tell when NOT to hand a task to AI",
           "desc": "You instinctively recognize when AI is the wrong tool — you can't verify the output, the task is trivial and deterministic, or the stakes are high and the change is subtle — and reach for it by default everywhere else.",
-          "self_assessment": true
+          "self_assessment": true,
+          "estimated_minutes": 10
         },
         {
           "id": "web-L2.T12",
           "kind": "reading",
           "title": "The AI-Test Trap",
           "desc": "When the same agent writes the code and the tests, a green suite only confirms the code's own bugs. How to break the loop with characterization tests and property-based testing — assert behaviour from intent, prefer invariants over example outputs the AI can reverse-fit.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/ai-test-trap.md"
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/ai-test-trap.md",
+          "estimated_minutes": 15
         },
         {
           "id": "web-L2.T13",
           "kind": "course",
           "title": "Automated Testing for LLMOps",
           "desc": "deeplearning.ai short course on building a CI workflow that evaluates LLM applications on every change — rule-based and model-graded evaluations wired into automated testing. The practical follow-on to The AI-Test Trap.",
-          "link": "https://www.deeplearning.ai/courses/automated-testing-llmops"
+          "link": "https://www.deeplearning.ai/courses/automated-testing-llmops",
+          "estimated_minutes": 90
         },
         {
           "id": "web-L2.T14",
           "kind": "checkpoint",
           "title": "Capstone: bring an AI change to merge quality",
           "desc": "Capstone deliverable: take an AI-generated multi-file change and bring it to merge quality yourself — review the diff, fix the plausible-but-wrong parts, write the tests the AI missed, and simplify. A short SPACE-framework reflection is the supporting evidence. Rubric and deliverables in the linked doc.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L2.md"
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L2.md",
+          "estimated_minutes": 90
         }
       ]
     },
@@ -277,81 +314,93 @@
           "kind": "reading",
           "title": "Spec-Driven Development",
           "desc": "Write a specification before writing code. Use AI to draft the spec, then generate architecture, then implement step-by-step with explicit STOP points. This is the workflow the 3-step practice below operationalizes — read this first so 'Context → Plan → Implement' has weight behind each word.",
-          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/workflows/spec-driven-dev.md"
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/workflows/spec-driven-dev.md",
+          "estimated_minutes": 20
         },
         {
           "id": "web-L3.T11",
           "kind": "reading",
           "title": "Golden example: a good spec",
           "desc": "An annotated exemplar spec: problem before solution, acceptance criteria you could turn into tests, and explicit non-goals to stop scope creep. The bar for the spec you write in the L3 capstone.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/examples/spec.md"
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/examples/spec.md",
+          "estimated_minutes": 15
         },
         {
           "id": "web-L3.T6",
           "kind": "reading",
           "title": "AI Model Selection Guide",
           "desc": "Opus for architecture and complex reasoning, Sonnet for daily coding, Haiku for quick queries. L3 is where this first matters — Plan mode and thinking mode let you spend more compute, and choosing the right model for the plan phase vs the code phase is a real productivity lever.",
-          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/tools/model-selection.md"
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/tools/model-selection.md",
+          "estimated_minutes": 15
         },
         {
           "id": "web-L3.T1",
           "kind": "practice",
           "title": "Use the 3-step workflow (Context → Plan → Implement) on a real change",
-          "desc": "Pick a real multi-file change you'd otherwise dive straight into. Do all three steps explicitly. Step 1 — Context: @-reference the relevant files and ask AI to analyze the current behavior; no changes yet. Step 2 — Plan: open Plan mode (/plan, or Shift+Tab twice) and describe the desired outcome; read the plan critically and push back before approving. Step 3 — Implement: only after the plan looks right, say 'execute'. The point isn't to do it once — it's to feel the difference between this and 'just ask AI to fix it'. Done when you've shipped one change end-to-end this way and can name one thing the plan caught that you would otherwise have missed."
+          "desc": "Pick a real multi-file change you'd otherwise dive straight into. Do all three steps explicitly. Step 1 — Context: @-reference the relevant files and ask AI to analyze the current behavior; no changes yet. Step 2 — Plan: open Plan mode (/plan, or Shift+Tab twice) and describe the desired outcome; read the plan critically and push back before approving. Step 3 — Implement: only after the plan looks right, say 'execute'. The point isn't to do it once — it's to feel the difference between this and 'just ask AI to fix it'. Done when you've shipped one change end-to-end this way and can name one thing the plan caught that you would otherwise have missed.",
+          "estimated_minutes": 45
         },
         {
           "id": "web-L3.T2",
           "kind": "practice",
           "title": "Use /branch to compare two approaches",
-          "desc": "Fork your session. Try approach A and B. Pick the better one."
+          "desc": "Fork your session. Try approach A and B. Pick the better one.",
+          "estimated_minutes": 30
         },
         {
           "id": "web-L3.T3",
           "kind": "course",
           "title": "Claude Code in Action — Plan Mode chapters",
           "desc": "Same Anthropic Academy course as the Level 2 Claude Code in Action — focus this time on the Plan Mode and three-step-workflow chapters. If you already completed the course at Level 2, just rewatch those sections.",
-          "link": "https://anthropic.skilljar.com/claude-code-in-action"
+          "link": "https://anthropic.skilljar.com/claude-code-in-action",
+          "estimated_minutes": 45
         },
         {
           "id": "web-L3.T4",
           "kind": "checkpoint",
           "title": "I never start >3-file work without a plan",
-          "self_assessment": true
+          "self_assessment": true,
+          "estimated_minutes": 10
         },
         {
           "id": "web-L3.T7",
           "kind": "reading",
           "title": "Evaluating AI Systems",
           "desc": "Once you ship features powered by AI, 'it looked good in three prompts' stops being enough. Eval datasets (input/output/criteria), acceptance testing (precision, recall, FP/FN, human-acceptance), regression testing, and how to evaluate a new model yourself instead of trusting the hype.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/evaluating-ai-systems.md"
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/evaluating-ai-systems.md",
+          "estimated_minutes": 25
         },
         {
           "id": "web-L3.T12",
           "kind": "reading",
           "title": "Golden example: a good eval",
           "desc": "An annotated exemplar eval: an adversarial-by-design dataset, the right check per criterion (rule-based vs model-graded), and gates that actually block a bad change. The bar for the evals you build at L4/L5.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/examples/eval.md"
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/examples/eval.md",
+          "estimated_minutes": 15
         },
         {
           "id": "web-L3.T8",
           "kind": "course",
           "title": "Evaluating AI Agents",
           "desc": "deeplearning.ai short course (with Arize AI) on tracing agents, building evaluations, choosing code-based vs LLM-as-judge evaluators, and the right metrics to improve agent performance. The hands-on companion to the Evaluating AI Systems reading.",
-          "link": "https://www.deeplearning.ai/courses/evaluating-ai-agents"
+          "link": "https://www.deeplearning.ai/courses/evaluating-ai-agents",
+          "estimated_minutes": 90
         },
         {
           "id": "web-L3.T9",
           "kind": "course",
           "title": "Spec-Driven Development with Coding Agents",
           "desc": "deeplearning.ai short course (with JetBrains) on the disciplined alternative to vibe coding: write a clear spec, then run iterative plan-implement-validate loops with a coding agent, and package the workflow into portable skills. Reinforces the Spec-Driven Development reading above.",
-          "link": "https://www.deeplearning.ai/courses/spec-driven-development-with-coding-agents"
+          "link": "https://www.deeplearning.ai/courses/spec-driven-development-with-coding-agents",
+          "estimated_minutes": 90
         },
         {
           "id": "web-L3.T10",
           "kind": "checkpoint",
           "title": "Capstone: ship a spec-first backlog item (>3 files)",
           "desc": "Capstone deliverable: take a real backlog item touching more than 3 files and ship it Context → Spec → Plan → Implement, pushing back on the plan before approving. Hand in the spec, the approved plan, and the merged PR. Rubric and required evidence in the linked doc.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L3.md"
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L3.md",
+          "estimated_minutes": 120
         }
       ]
     },
@@ -365,121 +414,139 @@
           "kind": "reading",
           "title": "Creating Claude Code Skills and Plugins",
           "desc": "A skill is a packaged set of instructions, references, and assets that teaches Claude Code domain-specific knowledge. Once installed, it activates automatically when relevant — so anyone on the team gets consistent output without re-explaining the rules. Covers the generic workflow: prompt structure, packaging, local marketplace install, team distribution. This is the foundation for the kind of automation that defines Level 4.",
-          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/workflows/creating-skills.md"
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/workflows/creating-skills.md",
+          "estimated_minutes": 30
         },
         {
           "id": "web-L4.T7",
           "kind": "reading",
           "title": "MCP — Model Context Protocol Configuration",
           "desc": "Configure MCP servers in `.mcp.json` to give Claude Code real-time access to documentation, issue trackers, and design tools — replacing stale training data with live context. The way you wire 'AI knows about our Jira / our Figma / our Confluence' without copy-pasting screenshots.",
-          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/tools/mcp.md"
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/tools/mcp.md",
+          "estimated_minutes": 25
         },
         {
           "id": "web-L4.T8",
           "kind": "reading",
           "title": "AI Security Policy",
           "desc": "Never put secrets, API keys, passwords, or PII in prompts, CLAUDE.md, or AI rules. Use placeholders for sensitive data. Set up permissions to deny destructive operations. Especially important at Level 4: you're now wiring hooks that auto-execute scripts — security mindset is the guardrail.",
-          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/security/ai-security-policy.md"
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/security/ai-security-policy.md",
+          "estimated_minutes": 15
         },
         {
           "id": "web-L4.T9",
           "kind": "reading",
           "title": "Repo Preparation — Making Your Codebase AI-Ready",
           "desc": "Step-by-step guide to preparing any existing codebase for effective AI agent collaboration. The bottleneck usually isn't the model — it's the codebase and environment it works in. Read the overview; follow links into the 10 specific guides (linters, type safety, CI/CD, hooks) as your codebase needs them.",
-          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/repo-preparation/README.md"
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/repo-preparation/README.md",
+          "estimated_minutes": 30
         },
         {
           "id": "web-L4.T1",
           "kind": "practice",
           "title": "Add a PostToolUse hook for type-checking",
-          "desc": "Catch type errors automatically after every edit."
+          "desc": "Catch type errors automatically after every edit.",
+          "estimated_minutes": 30
         },
         {
           "id": "web-L4.T2",
           "kind": "practice",
           "title": "Create a team /review custom command",
-          "desc": "Codify your team's review checklist."
+          "desc": "Codify your team's review checklist.",
+          "estimated_minutes": 30
         },
         {
           "id": "web-L4.T3",
           "kind": "practice",
-          "title": "Run a spec-driven implementation end-to-end"
+          "title": "Run a spec-driven implementation end-to-end",
+          "estimated_minutes": 60
         },
         {
           "id": "web-L4.T4",
           "kind": "course",
           "title": "Introduction to agent skills",
           "desc": "Anthropic Academy course on building, configuring, and sharing reusable Skills in Claude Code that automatically apply to relevant tasks. The video companion to the Creating Skills and Plugins reading. Free with certificate.",
-          "link": "https://anthropic.skilljar.com/introduction-to-agent-skills"
+          "link": "https://anthropic.skilljar.com/introduction-to-agent-skills",
+          "estimated_minutes": 60
         },
         {
           "id": "web-L4.T10",
           "kind": "course",
           "title": "Introduction to subagents",
           "desc": "Anthropic Academy course on Claude Code's sub-agents feature: delegate tasks to isolated assistants, manage context windows efficiently, build specialized workflows while keeping the main conversation focused. The orchestration multiplier — once you can fan work out across subagents, big migrations and audits become feasible. Free with certificate.",
-          "link": "https://anthropic.skilljar.com/introduction-to-subagents"
+          "link": "https://anthropic.skilljar.com/introduction-to-subagents",
+          "estimated_minutes": 60
         },
         {
           "id": "web-L4.T5",
           "kind": "checkpoint",
           "title": "I have an automated feedback loop catching bugs",
-          "self_assessment": true
+          "self_assessment": true,
+          "estimated_minutes": 10
         },
         {
           "id": "web-L4.T11",
           "kind": "reading",
           "title": "Tracing, Cost Tracking & Failure Analysis",
           "desc": "Orchestrating agents costs you the line-by-line visibility you had at L2. Get it back: traces (the stack trace of an agent run), per-run cost attribution, and clustering failures by root cause — then feed failures back into your eval dataset. The observability discipline that makes agent automation trustworthy.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/tracing-cost-failure.md"
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/tracing-cost-failure.md",
+          "estimated_minutes": 25
         },
         {
           "id": "web-L4.T12",
           "kind": "reading",
           "title": "Agentic Process Design",
           "desc": "Reliable agent workflows come from choosing the right pattern, not one giant prompt. Reflection, tool use, planning, and multi-agent patterns (orchestrator-worker, evaluator-optimizer) — and how to pick the simplest one that clears the bar, since every added agent adds cost and failure surface.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/agentic-process-design.md"
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/agentic-process-design.md",
+          "estimated_minutes": 25
         },
         {
           "id": "web-L4.T13",
           "kind": "reading",
           "title": "Deterministic vs Probabilistic Testing",
           "desc": "AI breaks the 'same input, same output' assumption. Test distributions not single runs; the compounding-failure math P(success)=(1-e)^n and why reducing the number of steps is the biggest reliability lever; and secondary-LLM-as-grader regression tests for outputs that vary every run.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/probabilistic-testing.md"
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/probabilistic-testing.md",
+          "estimated_minutes": 20
         },
         {
           "id": "web-L4.T14",
           "kind": "reading",
           "title": "Measuring the Transformation",
           "desc": "Org-level reference (not a per-engineer to-do): how the program measures whether the rollout works — baseline first, delivery metrics (cycle time, change-failure rate, rework), review burden, DX survey, a control cohort, and cost/benefit drivers. Read it so you know what's being tracked and why.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/measurement.md"
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/measurement.md",
+          "estimated_minutes": 15
         },
         {
           "id": "web-L4.T15",
           "kind": "course",
           "title": "Evaluating & Debugging Generative AI (Weights & Biases)",
           "desc": "deeplearning.ai short course (with W&B) on instrumenting, tracking, and debugging generative-AI workflows — experiment tracking, tracing, and versioning evals. Pairs with the Tracing, Cost & Failure reading.",
-          "link": "https://www.deeplearning.ai/short-courses/evaluating-debugging-generative-ai"
+          "link": "https://www.deeplearning.ai/short-courses/evaluating-debugging-generative-ai",
+          "estimated_minutes": 90
         },
         {
           "id": "web-L4.T16",
           "kind": "course",
           "title": "AI Agentic Design Patterns with AutoGen",
           "desc": "deeplearning.ai short course (with the AutoGen creators) implementing the four agentic patterns — reflection, tool use, planning, and multi-agent collaboration. The hands-on companion to the Agentic Process Design reading.",
-          "link": "https://www.deeplearning.ai/courses/ai-agentic-design-patterns-with-autogen"
+          "link": "https://www.deeplearning.ai/courses/ai-agentic-design-patterns-with-autogen",
+          "estimated_minutes": 90
         },
         {
           "id": "web-L4.T17",
           "kind": "course",
           "title": "Building & Evaluating Advanced RAG",
           "desc": "deeplearning.ai short course on advanced retrieval-augmented generation: sentence-window and auto-merging retrieval, reranking, and the RAG triad of evaluation metrics. Grounding agents in your own data without copy-pasting context.",
-          "link": "https://www.deeplearning.ai/short-courses/building-evaluating-advanced-rag"
+          "link": "https://www.deeplearning.ai/short-courses/building-evaluating-advanced-rag",
+          "estimated_minutes": 90
         },
         {
           "id": "web-L4.T18",
           "kind": "checkpoint",
           "title": "Capstone: team-adopted skill + eval suite + finbot CTF",
           "desc": "Capstone deliverable in two parts: ship a custom command or skill another engineer actually adopts, backed by a small eval suite that gates it; and complete the OWASP finbot CTF against an AI/agentic app. Rubric, deliverables, and links in the doc.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L4.md"
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L4.md",
+          "estimated_minutes": 180
         }
       ]
     },
@@ -493,65 +560,75 @@
           "kind": "reading",
           "title": "Recommended AI Tool Stack",
           "desc": "Claude Code is the primary AI coding tool at Solvd; Codex, Cursor, and Copilot are supported alternatives. Every project should be configured with CLAUDE.md (or AGENTS.md for Codex), rules, MCP servers, and permissions. At Level 5 you're making cross-team tool decisions — this is the stance you're operating from.",
-          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/tools/recommended-stack.md"
+          "link": "https://github.com/solvdinc/agentic-engineering/blob/main/general/tools/recommended-stack.md",
+          "estimated_minutes": 15
         },
         {
           "id": "web-L5.T1",
           "kind": "practice",
-          "title": "Run anti-sycophancy prompting on a real decision"
+          "title": "Run anti-sycophancy prompting on a real decision",
+          "estimated_minutes": 30
         },
         {
           "id": "web-L5.T2",
           "kind": "practice",
-          "title": "Use the evaluator-optimizer pattern"
+          "title": "Use the evaluator-optimizer pattern",
+          "estimated_minutes": 45
         },
         {
           "id": "web-L5.T3",
           "kind": "course",
           "title": "Building with the Claude API",
           "desc": "Comprehensive Anthropic Academy course on working with Anthropic models via the Claude API. Where you stop being a Claude Code user and start being an engineer who builds AI-powered systems. Free with certificate.",
-          "link": "https://anthropic.skilljar.com/claude-with-the-anthropic-api"
+          "link": "https://anthropic.skilljar.com/claude-with-the-anthropic-api",
+          "estimated_minutes": 150
         },
         {
           "id": "web-L5.T6",
           "kind": "course",
           "title": "Introduction to Model Context Protocol",
           "desc": "Build MCP servers and clients in Python. Master the three MCP primitives — tools, resources, and prompts — to connect Claude with external services. Companion course to the L4 MCP Configuration reading: that one is consumer-side, this one is server-side.",
-          "link": "https://anthropic.skilljar.com/introduction-to-model-context-protocol"
+          "link": "https://anthropic.skilljar.com/introduction-to-model-context-protocol",
+          "estimated_minutes": 90
         },
         {
           "id": "web-L5.T7",
           "kind": "course",
           "title": "Model Context Protocol: Advanced Topics",
           "desc": "Advanced MCP implementation patterns: sampling, notifications, file-system access, transport mechanisms. Take this after Introduction to MCP when you're ready to ship a production MCP server.",
-          "link": "https://anthropic.skilljar.com/model-context-protocol-advanced-topics"
+          "link": "https://anthropic.skilljar.com/model-context-protocol-advanced-topics",
+          "estimated_minutes": 90
         },
         {
           "id": "web-L5.T4",
           "kind": "checkpoint",
           "title": "I use AI to challenge my own assumptions",
-          "self_assessment": true
+          "self_assessment": true,
+          "estimated_minutes": 10
         },
         {
           "id": "web-L5.T8",
           "kind": "course",
           "title": "Anthropic Prompt Evaluations",
           "desc": "Anthropic's open course on writing prompt evaluations: building eval datasets, grading model-graded and code-graded outputs, and iterating prompts against measured results. Where the evaluation discipline from L3 becomes a first-class engineering skill. Free, in the anthropics/courses repo.",
-          "link": "https://github.com/anthropics/courses/tree/master/prompt_evaluations"
+          "link": "https://github.com/anthropics/courses/tree/master/prompt_evaluations",
+          "estimated_minutes": 90
         },
         {
           "id": "web-L5.T9",
           "kind": "checkpoint",
           "title": "Assessment: AI as architecture partner",
           "desc": "Graded exercise: take a real, consequential decision and use anti-sycophancy prompting plus the evaluator-optimizer pattern to make AI argue against your instinct and surface unexamined assumptions. Rubric and required evidence in the linked doc.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L5.md"
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L5.md",
+          "estimated_minutes": 90
         },
         {
           "id": "web-L5.T10",
           "kind": "checkpoint",
           "title": "Capstone: verification harness + team rules",
           "desc": "Capstone deliverable: build a verification harness for a real codebase area (eval suite, contract tests, or a small MCP server), show it catching a bad change before merge, and write the team rules that codify the lesson. The build counterpart to the architecture-partner reflection above. Rubric and deliverables in the linked doc.",
-          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L5-capstone.md"
+          "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L5-capstone.md",
+          "estimated_minutes": 180
         }
       ]
     }

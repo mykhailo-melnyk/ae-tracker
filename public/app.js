@@ -101,6 +101,13 @@ function renderTotals() {
   document.getElementById("total-count").textContent = totalTasks;
 }
 
+// Render an estimated-minutes value as a short human string: "10 min" or "1.5 hr".
+function formatEstimate(min) {
+  if (min < 60) return min + " min";
+  const hrs = min / 60;
+  return (Number.isInteger(hrs) ? hrs : hrs.toFixed(1)) + " hr";
+}
+
 function renderFocusCard() {
   const card = document.getElementById("focus-card");
   const lvl = CURRICULUM.levels.find((l) => l.id === FOCUS_LEVEL);
@@ -114,7 +121,7 @@ function renderFocusCard() {
       <div class="task ${isDone ? "done" : ""}" data-task="${task.id}">
         <div class="check"></div>
         <div class="body">
-          <div class="title">${task.title} <span class="kind-tag ${task.kind}">${task.kind}</span></div>
+          <div class="title">${task.title} <span class="kind-tag ${task.kind}">${task.kind}</span>${task.estimated_minutes ? `<span class="task-est">· ${formatEstimate(task.estimated_minutes)}</span>` : ""}</div>
           ${task.desc ? `<div class="desc">${task.desc}</div>` : ""}
           ${task.link ? `<a class="external" href="${task.link}" target="_blank" rel="noopener">${task.link} ↗</a>` : ""}
           ${READONLY ? "" : `<div><button type="button" class="task-report">⚑ Report / suggest</button></div>`}

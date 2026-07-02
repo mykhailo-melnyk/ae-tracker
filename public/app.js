@@ -300,7 +300,7 @@ async function renderPath() {
   CURRICULUM = await loadPath(PROGRESS.competency);
   FOCUS_LEVEL = computeCurrentLevel();
   const lvl = CURRICULUM.levels.find((l) => l.id === FOCUS_LEVEL);
-  document.getElementById("greeting-sub").textContent = lvl ? "Currently at " + lvl.title : "";
+  document.getElementById("greeting-sub").textContent = lvl ? `Currently at: LEVEL ${lvl.id.slice(1)} — ${lvl.title}` : "";
   document.getElementById("totals").classList.remove("hidden");
   document.getElementById("pill-bar-wrap").classList.remove("hidden");
   renderTotals();

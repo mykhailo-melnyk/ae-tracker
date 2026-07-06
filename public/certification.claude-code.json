@@ -3,7 +3,7 @@
   "draft": false,
   "exam": {
     "name": "Claude Certified Architect – Foundations",
-    "link": "https://academy.anthropic.com/",
+    "link": "https://anthropic-partners.skilljar.com/claude-certified-architect-foundations-certification/486716",
     "notes": "Reconciled against the official Exam Guide (v0.2) and a real exam pass. Domains, weights, task statements, and scenarios match the confirmed blueprint."
   },
   "sections": [
@@ -13,7 +13,7 @@
       "items": [
         { "id": "cc.start.1", "kind": "reading", "title": "Exam overview & how to study", "desc": "Format, registration, and the recommended study order by domain weight (D1 → D3 → D4 → D2 → D5).", "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/certifications/claude-code/exam-overview.md", "estimated_minutes": 10 },
         { "id": "cc.start.2", "kind": "reading", "title": "What is and isn't tested", "desc": "The exam's In-Scope and Out-of-Scope topic lists — read before diving in so you don't study the wrong things.", "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/certifications/claude-code/scope-map.md", "estimated_minutes": 10 },
-        { "id": "cc.start.3", "kind": "course", "optional": true, "title": "Claude with the Anthropic API (official course)", "desc": "Anthropic's free, in-depth course covering the Messages API, tool use, and prompting fundamentals used throughout the exam. Long, but a high-leverage foundation before domain prep.", "link": "https://anthropic-partners.skilljar.com/claude-with-the-anthropic-api", "estimated_minutes": 240 }
+        { "id": "cc.start.3", "kind": "course", "optional": true, "title": "Claude with the Anthropic API (official course)", "desc": "Anthropic's free, in-depth course covering the Messages API, tool use, and prompting fundamentals used throughout the exam. Long, but a high-leverage foundation before domain prep.", "link": "https://anthropic-partners.skilljar.com/claude-with-the-anthropic-api", "estimated_minutes": 480 }
       ]
     },
     {
@@ -55,10 +55,10 @@
       "id": "exercises",
       "title": "Hands-on exercises",
       "items": [
-        { "id": "cc.ex.1", "kind": "practice", "title": "Exercise 1: Multi-tool agent with escalation logic", "desc": "Build an agentic loop with 3–4 differentiated MCP tools, structured errors, a compliance hook, and multi-concern decomposition.", "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/certifications/claude-code/exercises.md#exercise-1--build-a-multi-tool-agent-with-escalation-logic", "exam_note": "Reinforces D1/D2/D5: agentic loop, tool descriptions, structured errors, hooks, escalation.", "estimated_minutes": 120 },
-        { "id": "cc.ex.2", "kind": "practice", "title": "Exercise 2: Configure Claude Code for a team workflow", "desc": "Set up a CLAUDE.md hierarchy, glob-scoped .claude/rules/, a context:fork skill, MCP servers, and plan-vs-direct decisions.", "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/certifications/claude-code/exercises.md#exercise-2--configure-claude-code-for-a-team-development-workflow", "exam_note": "Reinforces D3/D2: configuration hierarchy, rules, skills, MCP integration.", "estimated_minutes": 120 },
-        { "id": "cc.ex.3", "kind": "practice", "title": "Exercise 3: Structured data extraction pipeline", "desc": "Design a JSON schema with nullable/enum fields, a validation-retry loop, few-shot for varied formats, batch processing, and confidence-based human review.", "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/certifications/claude-code/exercises.md#exercise-3--build-a-structured-data-extraction-pipeline", "exam_note": "Reinforces D4/D5: tool_use schemas, retry loops, batch API, human review.", "estimated_minutes": 120 },
-        { "id": "cc.ex.4", "kind": "practice", "title": "Exercise 4: Multi-agent research pipeline", "desc": "Orchestrate coordinator + subagents with explicit context passing, parallel Task calls, provenance-preserving structured output, error propagation, and conflict annotation.", "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/certifications/claude-code/exercises.md#exercise-4--design-and-debug-a-multi-agent-research-pipeline", "exam_note": "Reinforces D1/D2/D5: orchestration, context passing, error propagation, provenance.", "estimated_minutes": 120 }
+        { "id": "cc.ex.1", "kind": "practice", "title": "Exercise 1: Multi-tool agent with escalation logic", "desc": "Build an agentic loop with 3–4 differentiated MCP tools, structured errors, a compliance hook, and multi-concern decomposition.", "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/certifications/claude-code/exercises.md#exercise-1--build-a-multi-tool-agent-with-escalation-logic", "exam_note": "Reinforces D1/D2/D5: agentic loop, tool descriptions, structured errors, hooks, escalation.", "estimated_minutes": 240 },
+        { "id": "cc.ex.2", "kind": "practice", "title": "Exercise 2: Configure Claude Code for a team workflow", "desc": "Set up a CLAUDE.md hierarchy, glob-scoped .claude/rules/, a context:fork skill, MCP servers, and plan-vs-direct decisions.", "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/certifications/claude-code/exercises.md#exercise-2--configure-claude-code-for-a-team-development-workflow", "exam_note": "Reinforces D3/D2: configuration hierarchy, rules, skills, MCP integration.", "estimated_minutes": 240 },
+        { "id": "cc.ex.3", "kind": "practice", "title": "Exercise 3: Structured data extraction pipeline", "desc": "Design a JSON schema with nullable/enum fields, a validation-retry loop, few-shot for varied formats, batch processing, and confidence-based human review.", "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/certifications/claude-code/exercises.md#exercise-3--build-a-structured-data-extraction-pipeline", "exam_note": "Reinforces D4/D5: tool_use schemas, retry loops, batch API, human review.", "estimated_minutes": 240 },
+        { "id": "cc.ex.4", "kind": "practice", "title": "Exercise 4: Multi-agent research pipeline", "desc": "Orchestrate coordinator + subagents with explicit context passing, parallel Task calls, provenance-preserving structured output, error propagation, and conflict annotation.", "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/certifications/claude-code/exercises.md#exercise-4--design-and-debug-a-multi-agent-research-pipeline", "exam_note": "Reinforces D1/D2/D5: orchestration, context passing, error propagation, provenance.", "estimated_minutes": 240 }
       ]
     },
     {
@@ -86,8 +86,10 @@
       "id": "exam-day",
       "title": "Exam day",
       "items": [
-        { "id": "cc.exam.1", "kind": "practice", "title": "Complete the official Anthropic Practice Exam", "desc": "The real calibration tool (unlimited attempts). Review every miss against the domain study guides above before booking the exam.", "link": "https://academy.anthropic.com/", "estimated_minutes": 120 },
-        { "id": "cc.exam.2", "kind": "practice", "title": "Take the certification exam", "desc": "The finish line: register and sit the exam.", "link": "https://academy.anthropic.com/", "estimated_minutes": 120 }
+        { "id": "cc.exam.1", "kind": "practice", "title": "Complete the official Anthropic Practice Exam", "desc": "The real calibration tool (unlimited attempts). Review every miss against the domain study guides above before booking the exam.", "link": "https://anthropic-partners.skilljar.com/claude-certified-architect-foundations-certification/486716", "estimated_minutes": 120 },
+        { "id": "cc.exam.2", "kind": "practice", "optional": true, "title": "Extra practice questions (CertSafari, unofficial)", "desc": "A free, unofficial bank of AI-generated practice questions with explanations. Not an Anthropic resource and not sourced from the real exam — use it for extra repetition after the official practice exam, not as a substitute for it.", "link": "https://www.certsafari.com/anthropic/claude-certified-architect", "estimated_minutes": 60 },
+        { "id": "cc.exam.3", "kind": "practice", "optional": true, "title": "Extra practice platform (Anthropic Certifications, unofficial)", "desc": "A free, independent community study platform for this exam — a concept library, adaptive practice questions, and full mock exams, with paid tiers for extra features (AI tutor, full simulator). Despite the name, it explicitly states it is not affiliated with or endorsed by Anthropic; use it as supplementary drilling, not a substitute for the official practice exam.", "link": "https://www.anthropiccertifications.com/", "estimated_minutes": 120 },
+        { "id": "cc.exam.4", "kind": "practice", "title": "Take the certification exam", "desc": "The finish line: register and sit the exam.", "link": "https://anthropic-partners.skilljar.com/claude-certified-architect-foundations-certification/486716", "estimated_minutes": 120 }
       ]
     }
   ]

@@ -26,7 +26,7 @@ Each of the 4 scenarios you draw frames a realistic production context (a suppor
 
 ## Registration
 
-Register and schedule through Anthropic Academy. Confirm your identification requirements ahead of time if you choose the online-proctored option (a private room, a working webcam, and a government ID are the usual baseline for this kind of proctoring) — check the current requirements on the registration page before your session, since proctoring vendors change these details from time to time.
+Register and schedule through the official [Claude Certified Architect – Foundations certification page](https://anthropic-partners.skilljar.com/claude-certified-architect-foundations-certification/486716). Confirm your identification requirements ahead of time if you choose the online-proctored option (a private room, a working webcam, and a government ID are the usual baseline for this kind of proctoring) — check the current requirements on the registration page before your session, since proctoring vendors change these details from time to time.
 
 ## Recommended study order
 
@@ -43,3 +43,10 @@ After the domains, work through the six scenario docs (`scenario-1-customer-supp
 ## Sample questions
 
 The official exam guide includes a set of sample questions with explanations. Work through them once you've completed the domain guides — they're a useful difficulty and phrasing calibration, showing you how a scenario framing turns into a concrete multiple-choice question. Treat them as a reference for *what the questions feel like*, not as a question bank to memorize; they are not reproduced here.
+
+For extra repetition after the official practice exam, two independent community platforms offer supplementary practice for this credential — neither is an Anthropic resource, and neither draws its questions from the real exam:
+
+- [CertSafari](https://www.certsafari.com/anthropic/claude-certified-architect) — a free, unofficial bank of AI-generated practice questions with explanations.
+- [Anthropic Certifications](https://www.anthropiccertifications.com/) — despite the name, an independent community platform (it explicitly discloses it is "not affiliated with or endorsed by Anthropic"); free concept library and adaptive practice, with paid tiers for extra features like an AI tutor and full mock-exam simulator.
+
+Treat both as supplementary drilling, not a replacement for the official Anthropic Practice Exam.

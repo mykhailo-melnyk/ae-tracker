@@ -9,12 +9,16 @@ describe("certifications registry", () => {
     expect(cc!.label).toBe("Claude Code");
     // ids exist under the new structure
     expect(cc!.itemIds).toContain("cc.d1.1");
-    expect(cc!.itemIds).toContain("cc.exam.2");
+    expect(cc!.itemIds).toContain("cc.exam.4");
     expect(cc!.itemIds).toContain("cc.start.3"); // the optional course
-    // the optional course is in itemIds but excluded from requiredItemIds
+    expect(cc!.itemIds).toContain("cc.exam.2"); // the optional third-party practice bank (CertSafari)
+    expect(cc!.itemIds).toContain("cc.exam.3"); // the optional third-party practice platform (Anthropic Certifications)
+    // the optional items are in itemIds but excluded from requiredItemIds
     expect(cc!.requiredItemIds).toContain("cc.d1.1");
     expect(cc!.requiredItemIds).not.toContain("cc.start.3");
-    expect(cc!.requiredItemIds.length).toBe(cc!.itemIds.length - 1);
+    expect(cc!.requiredItemIds).not.toContain("cc.exam.2");
+    expect(cc!.requiredItemIds).not.toContain("cc.exam.3");
+    expect(cc!.requiredItemIds.length).toBe(cc!.itemIds.length - 3);
     // ids are unique
     expect(new Set(cc!.itemIds).size).toBe(cc!.itemIds.length);
   });

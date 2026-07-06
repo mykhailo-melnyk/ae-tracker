@@ -11,11 +11,12 @@ export interface CertInfo {
   id: string;
   label: string;
   itemIds: string[];
+  requiredItemIds: string[];
 }
 
 interface PathFile {
   certification: string;
-  sections: Array<{ id: string; items: Array<{ id: string }> }>;
+  sections: Array<{ id: string; items: Array<{ id: string; optional?: boolean }> }>;
 }
 
 const PATHS: Record<string, PathFile> = {};
@@ -25,8 +26,10 @@ for (const p of [claudeCodePath] as PathFile[]) {
 
 const LIST: CertInfo[] = registry.certifications.map((c) => {
   const path = PATHS[c.id];
-  const itemIds = path ? path.sections.flatMap((s) => s.items.map((it) => it.id)) : [];
-  return { id: c.id, label: c.label, itemIds };
+  const items = path ? path.sections.flatMap((s) => s.items) : [];
+  const itemIds = items.map((it) => it.id);
+  const requiredItemIds = items.filter((it) => it.optional !== true).map((it) => it.id);
+  return { id: c.id, label: c.label, itemIds, requiredItemIds };
 });
 
 /** Every certification with its flattened prep-item ids. */

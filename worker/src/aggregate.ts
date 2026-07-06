@@ -12,7 +12,7 @@ interface CurriculumRegistry {
 // A cert registry is any object exposing certList() (the ./certifications module
 // satisfies this structurally; tests pass a fake). Empty default = no cert pass.
 interface CertRegistry {
-  certList(): Array<{ id: string; label: string; itemIds: string[] }>;
+  certList(): Array<{ id: string; label: string; itemIds: string[]; requiredItemIds: string[] }>;
 }
 const EMPTY_CERT_REGISTRY: CertRegistry = { certList: () => [] };
 
@@ -30,7 +30,7 @@ export interface Aggregate {
     label: string;
     total_items: number;
     engineers_started: number;   // ≥1 item done
-    engineers_ready: number;     // ALL items done
+    engineers_ready: number;     // ALL required items done
   }>;
   engineers: Array<{
     username: string;
@@ -87,7 +87,7 @@ export async function computeAggregate(
 
   const certDefs = certRegistry.certList();
   const certAgg = certDefs.map((c) => ({
-    id: c.id, label: c.label, total_items: c.itemIds.length,
+    id: c.id, label: c.label, total_items: c.requiredItemIds.length,
     engineers_started: 0, engineers_ready: 0,
   }));
 
@@ -113,8 +113,8 @@ export async function computeAggregate(
     const certProgress: Record<string, { done: number; total: number; pct: number; ready: boolean }> = {};
     for (let i = 0; i < certDefs.length; i++) {
       const def = certDefs[i];
-      const total = def.itemIds.length;
-      const doneCount = def.itemIds.filter((id) => p.tasks[id]?.done).length;
+      const total = def.requiredItemIds.length;
+      const doneCount = def.requiredItemIds.filter((id) => p.tasks[id]?.done).length;
       const ready = total > 0 && doneCount === total;
       certProgress[def.id] = { done: doneCount, total, pct: total ? doneCount / total : 0, ready };
       // Disabled engineers are excluded from headline cert counts, as elsewhere.
@@ -156,8 +156,8 @@ import { isSuperAdmin } from "./api";
 // and excludes disabled engineers from the headline counts; v4 makes completion /
 // current-level per the engineer's own competency path and keys by_task by the
 // globally-unique prefixed task ids; v5 adds per-cert readiness + per-engineer
-// cert progress).
-export const CACHE_KEY = "aggregate-v5";
+// cert progress; v6 counts cert readiness against required (non-optional) items only).
+export const CACHE_KEY = "aggregate-v6";
 const CACHE_TTL_SECONDS = 300;
 
 // `is_superadmin` is viewer-specific, so it can't live in the shared cached body.

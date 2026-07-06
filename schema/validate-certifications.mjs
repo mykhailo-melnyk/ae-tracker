@@ -10,7 +10,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const pub = join(root, "public");
 const readJson = (p) => JSON.parse(readFileSync(p, "utf8"));
 
-const KINDS = new Set(["reading", "practice", "video"]);
+const KINDS = new Set(["reading", "practice", "video", "course"]);
 const errors = [];
 const fail = (m) => errors.push(m);
 
@@ -47,6 +47,8 @@ for (const cert of registry.certifications ?? []) {
       if (!idRe.test(it.id)) fail(`item id "${it.id}" must match ${idRe} (cert code "${cert.code}")`);
       if (!KINDS.has(it.kind)) fail(`item "${it.id}": kind "${it.kind}" not in ${[...KINDS].join("|")}`);
       if (typeof it.title !== "string" || !it.title) fail(`item "${it.id}": missing title`);
+      if ("optional" in it && typeof it.optional !== "boolean") fail(`item "${it.id}": optional must be boolean if present`);
+      if ("exam_note" in it && typeof it.exam_note !== "string") fail(`item "${it.id}": exam_note must be a string if present`);
       if (seenIds.has(it.id)) fail(`item id "${it.id}" duplicated (in ${cert.id} and ${seenIds.get(it.id)})`);
       else seenIds.set(it.id, cert.id);
     }

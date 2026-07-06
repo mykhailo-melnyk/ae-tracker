@@ -45,6 +45,8 @@ function renderBanner() {
   if (CURRENT && CURRENT.draft) {
     const note = CURRENT.exam && CURRENT.exam.notes ? CURRENT.exam.notes : "This path is a draft under review.";
     box.innerHTML = `<div class="move-on"><strong>Draft:</strong> ${note}</div>`;
+  } else if (CURRENT && CURRENT.exam && CURRENT.exam.notes) {
+    box.innerHTML = `<div class="move-on">${CURRENT.exam.notes}</div>`;
   } else {
     box.innerHTML = "";
   }
@@ -70,8 +72,9 @@ function renderBody() {
         <div class="task ${isDone ? "done" : ""}" data-item="${it.id}">
           <div class="check"></div>
           <div class="body">
-            <div class="title">${it.title} <span class="kind-tag ${it.kind}">${it.kind}</span>${it.estimated_minutes ? `<span class="task-est">· ${formatEstimate(it.estimated_minutes)}</span>` : ""}</div>
+            <div class="title">${it.title} <span class="kind-tag ${it.kind}">${it.kind}</span>${it.optional ? `<span class="kind-tag optional">optional</span>` : ""}${it.estimated_minutes ? `<span class="task-est">· ${formatEstimate(it.estimated_minutes)}</span>` : ""}</div>
             ${it.desc ? `<div class="desc">${it.desc}</div>` : ""}
+            ${it.exam_note ? `<div class="exam-note">${it.exam_note}</div>` : ""}
             ${it.link ? `<a class="external" href="${it.link}" target="_blank" rel="noopener">${it.link} ↗</a>` : ""}
           </div>
         </div>`;

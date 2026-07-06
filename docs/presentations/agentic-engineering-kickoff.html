@@ -1,0 +1,409 @@
+<title>Agentic Engineering at Solvd — Kickoff</title>
+<style>
+  :root {
+    --ground: #12151C;
+    --raised: #1A1E27;
+    --line: #2A2F3A;
+    --text: #ECEAE2;
+    --muted: #939AA6;
+    --accent: #E6A852;
+    --accent-dim: #8a6a34;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--ground);
+    color: var(--text);
+    font-family: var(--sans);
+    overflow: hidden;
+  }
+
+  /* ---- stage ---- */
+  #deck {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(2.5rem, 7vw, 7rem);
+    max-width: 1100px;
+    margin: 0 auto;
+    left: 0; right: 0;
+  }
+  .slide.active { display: flex; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .slide.active > * {
+      opacity: 0;
+      transform: translateY(14px);
+      animation: rise .5s cubic-bezier(.2,.7,.2,1) forwards;
+    }
+    .slide.active > *:nth-child(2) { animation-delay: .06s; }
+    .slide.active > *:nth-child(3) { animation-delay: .12s; }
+    .slide.active > *:nth-child(4) { animation-delay: .18s; }
+    .slide.active > *:nth-child(5) { animation-delay: .24s; }
+    @keyframes rise { to { opacity: 1; transform: none; } }
+  }
+
+  /* ---- type ---- */
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: clamp(.72rem, 1.2vw, .85rem);
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 1.4rem;
+  }
+  .eyebrow .num { color: var(--muted); }
+
+  h1 {
+    font-size: clamp(2.6rem, 6.5vw, 5.2rem);
+    line-height: 1.02;
+    letter-spacing: -.02em;
+    font-weight: 800;
+    margin: 0;
+    text-wrap: balance;
+  }
+  h2 {
+    font-size: clamp(1.9rem, 4.4vw, 3.4rem);
+    line-height: 1.06;
+    letter-spacing: -.02em;
+    font-weight: 780;
+    margin: 0 0 1.6rem;
+    text-wrap: balance;
+  }
+  .lead {
+    font-size: clamp(1.15rem, 2.1vw, 1.6rem);
+    line-height: 1.5;
+    color: var(--text);
+    max-width: 34ch;
+    margin: 0;
+  }
+  .sub {
+    font-size: clamp(1rem, 1.7vw, 1.3rem);
+    color: var(--muted);
+    line-height: 1.5;
+    margin: 1.4rem 0 0;
+    max-width: 46ch;
+  }
+  .accent { color: var(--accent); }
+  strong { font-weight: 720; color: #fff; }
+
+  /* ---- title slide ---- */
+  #s-title { align-items: flex-start; }
+  #s-title::before {
+    content: "";
+    position: absolute;
+    top: -18%;
+    right: -12%;
+    width: 60vw;
+    height: 60vw;
+    max-width: 760px;
+    max-height: 760px;
+    background: radial-gradient(circle, rgba(230,168,82,.16), transparent 62%);
+    pointer-events: none;
+  }
+  .byline {
+    font-family: var(--mono);
+    font-size: clamp(.85rem, 1.5vw, 1.05rem);
+    color: var(--muted);
+    letter-spacing: .04em;
+    margin: 1.8rem 0 0;
+  }
+  .byline b { color: var(--text); font-weight: 600; }
+  .byline + .byline { margin-top: .4rem; }
+  .byline.hint { margin-top: 2.2rem; }
+
+  /* ---- three-role grid ---- */
+  .cols {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.4rem;
+    margin: 0;
+  }
+  @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--raised);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.5rem 1.4rem;
+  }
+  .card .k {
+    font-family: var(--mono);
+    font-size: .78rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 .7rem;
+  }
+  .card .t { font-size: 1.25rem; font-weight: 700; margin: 0 0 .5rem; }
+  .card p { margin: 0; color: var(--muted); font-size: 1rem; line-height: 1.45; }
+
+  /* ---- levels ladder ---- */
+  .ladder { display: flex; flex-direction: column; gap: .55rem; margin: 0; }
+  .rung {
+    display: grid;
+    grid-template-columns: 3.4rem 1fr;
+    gap: 1.2rem;
+    align-items: baseline;
+    padding: .85rem 1.1rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--raised);
+  }
+  .rung .code {
+    font-family: var(--mono);
+    font-weight: 700;
+    color: var(--muted);
+    font-size: 1.05rem;
+  }
+  .rung .name { font-weight: 700; font-size: clamp(1.05rem, 1.9vw, 1.35rem); }
+  .rung .desc { color: var(--muted); font-weight: 400; font-size: .98rem; }
+  .rung.target {
+    border-color: var(--accent);
+    background: linear-gradient(90deg, rgba(230,168,82,.12), rgba(230,168,82,.02));
+  }
+  .rung.target .code, .rung.target .name { color: var(--accent); }
+  .rung.target .tag {
+    font-family: var(--mono);
+    font-size: .68rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ground);
+    background: var(--accent);
+    padding: .15rem .5rem;
+    border-radius: 6px;
+    margin-left: .6rem;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  /* ---- steps / examples ---- */
+  ul.plain { list-style: none; padding: 0; margin: 1.6rem 0 0; display: flex; flex-direction: column; gap: .9rem; max-width: 40ch; }
+  ul.plain li { position: relative; padding-left: 1.7rem; font-size: clamp(1.05rem, 1.8vw, 1.35rem); line-height: 1.4; }
+  ul.plain li::before {
+    content: "→";
+    position: absolute; left: 0;
+    color: var(--accent);
+    font-family: var(--mono);
+  }
+
+  /* ---- the ask (numbered) ---- */
+  .steps { display: flex; flex-direction: column; gap: 1rem; margin: 0; }
+  .step { display: flex; align-items: baseline; gap: 1.1rem; }
+  .step .n {
+    font-family: var(--mono);
+    font-size: clamp(1.4rem, 3vw, 2.2rem);
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 2ch;
+  }
+  .step .txt { font-size: clamp(1.3rem, 2.6vw, 2rem); font-weight: 650; }
+  .url {
+    display: inline-block;
+    margin-top: 2.2rem;
+    font-family: var(--mono);
+    font-size: clamp(1rem, 2vw, 1.4rem);
+    color: var(--accent);
+    border: 1px solid var(--accent-dim);
+    border-radius: 10px;
+    padding: .7rem 1.1rem;
+    letter-spacing: .01em;
+  }
+
+  /* ---- chrome: progress, footer, hints ---- */
+  #bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--accent); width: 0; transition: width .3s ease; z-index: 20; }
+  footer {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem clamp(1.4rem, 4vw, 3rem);
+    font-family: var(--mono); font-size: .78rem; letter-spacing: .08em;
+    color: var(--muted); z-index: 15; pointer-events: none;
+  }
+  #count { font-variant-numeric: tabular-nums; }
+  .hint { color: #5a616d; }
+
+  /* ---- speaker notes overlay ---- */
+  #notes {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    background: rgba(8,10,14,.96);
+    border-top: 1px solid var(--line);
+    padding: 1.4rem clamp(1.4rem, 4vw, 3rem) 3rem;
+    font-size: 1.05rem; line-height: 1.55;
+    color: var(--text); z-index: 18;
+    display: none;
+    max-height: 42vh; overflow-y: auto;
+  }
+  #notes.show { display: block; }
+  #notes .lbl { font-family: var(--mono); font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: .6rem; }
+  #notes em { color: var(--muted); font-style: italic; }
+
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+</style>
+
+<div id="bar"></div>
+
+<div id="deck">
+
+  <!-- 1 · Title -->
+  <section class="slide" id="s-title">
+    <p class="eyebrow">Agentic Engineering · Solvd</p>
+    <h1>A skill you build<br>a little <span class="accent">every day</span>.</h1>
+    <p class="byline"><b>Mykhailo Melnyk</b> · Head of Web Competency</p>
+    <p class="byline"><b>Jakie Himel</b> · AI Strategy &amp; Transformation Consultant</p>
+    <p class="byline hint">→ advance &nbsp;·&nbsp; F fullscreen &nbsp;·&nbsp; N speaker notes</p>
+  </section>
+
+  <!-- 2 · Why now -->
+  <section class="slide" id="s-why">
+    <p class="eyebrow"><span class="num">01</span> &nbsp;Why now</p>
+    <h2>AI is now part of<br>how we build.</h2>
+    <p class="lead">Everyone has AI today. The difference is who <strong>practices</strong> — and who only tries it sometimes.</p>
+    <p class="sub">This program helps all of us practice.</p>
+  </section>
+
+  <!-- 3 · Our role -->
+  <section class="slide" id="s-role">
+    <p class="eyebrow"><span class="num">02</span> &nbsp;Our role</p>
+    <h2>What we made for you.</h2>
+    <div class="cols">
+      <div class="card">
+        <p class="k">The path</p>
+        <p class="t">A clear route</p>
+        <p>From "I use AI sometimes" to "AI makes me much faster."</p>
+      </div>
+      <div class="card">
+        <p class="k">The tracker</p>
+        <p class="t">Where you follow it</p>
+        <p>Follow the path and mark what you finish.</p>
+      </div>
+      <div class="card">
+        <p class="k">With you</p>
+        <p class="t">Not testing you</p>
+        <p>We're doing this too. We're all learning together.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · Five levels -->
+  <section class="slide" id="s-levels">
+    <p class="eyebrow"><span class="num">03</span> &nbsp;The path · five levels</p>
+    <div class="ladder">
+      <div class="rung"><span class="code">L1</span><span><span class="name">Understand</span> &nbsp;<span class="desc">— use AI to read, not write</span></span></div>
+      <div class="rung target"><span class="code">L2</span><span><span class="name">Edit with Review</span><span class="tag">the goal for most of us</span><br><span class="desc">quality is the point — read every change</span></span></div>
+      <div class="rung"><span class="code">L3</span><span><span class="name">Plan &amp; Implement</span> &nbsp;<span class="desc">— always plan before big changes</span></span></div>
+      <div class="rung"><span class="code">L4</span><span><span class="name">Orchestrate</span> &nbsp;<span class="desc">— set up tools that help the whole team</span></span></div>
+      <div class="rung"><span class="code">L5</span><span><span class="name">Architecture Partner</span> &nbsp;<span class="desc">— use AI to question your own ideas</span></span></div>
+    </div>
+  </section>
+
+  <!-- 5 · The habit -->
+  <section class="slide" id="s-habit">
+    <p class="eyebrow"><span class="num">04</span> &nbsp;The habit</p>
+    <h2>Small steps,<br>every day.</h2>
+    <p class="lead">Use AI on your real work, a little, every day. <strong>15 minutes a day</strong> beats one long day a month.</p>
+    <ul class="plain">
+      <li>Ask AI to explain a file you know</li>
+      <li>Take one unclear prompt and make it clear</li>
+      <li>Read one change before you accept it</li>
+    </ul>
+  </section>
+
+  <!-- 6 · How the tracker works -->
+  <section class="slide" id="s-tracker">
+    <p class="eyebrow"><span class="num">05</span> &nbsp;How the tracker works</p>
+    <h2>Simple.</h2>
+    <ul class="plain">
+      <li><strong>Sign in</strong> with GitHub — one click</li>
+      <li><strong>Pick your path</strong> — Web, Mobile, or Backend</li>
+      <li><strong>Check the box</strong> when you finish — it saves right away</li>
+      <li><strong>⚑ Report / suggest</strong> — your feedback comes straight to me</li>
+    </ul>
+  </section>
+
+  <!-- 7 · The ask -->
+  <section class="slide" id="s-ask">
+    <p class="eyebrow"><span class="num">06</span> &nbsp;This week</p>
+    <div class="steps">
+      <div class="step"><span class="n">1</span><span class="txt">Sign in</span></div>
+      <div class="step"><span class="n">2</span><span class="txt">Pick your path</span></div>
+      <div class="step"><span class="n">3</span><span class="txt">Start Level 1 — <span class="accent">the first task today</span></span></div>
+    </div>
+    <span class="url">mykhailo-melnyk.github.io/ae-tracker/</span>
+  </section>
+
+</div>
+
+<footer>
+  <span>Agentic Engineering · Solvd</span>
+  <span id="count">01 / 07</span>
+</footer>
+
+<div id="notes" aria-live="polite"><span class="lbl">Speaker notes</span><div id="notes-body"></div></div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const bar = document.getElementById('bar');
+  const count = document.getElementById('count');
+  const notes = document.getElementById('notes');
+  const notesBody = document.getElementById('notes-body');
+  let i = 0;
+
+  const pad = n => String(n).padStart(2, '0');
+
+  const NOTES = [
+    "Hi everyone. I need five minutes of your time. I want to share something important for this year — and then give you one small thing to do this week.",
+    "AI is not a side tool anymore. Everyone has it. The real difference is who <b>practices</b> every day and who only tries it sometimes. This program helps all of us practice.",
+    "Our job here is three things. <b>The path</b> — a clear way to get much faster with AI. <b>The tracker</b> — where you follow it. And we are doing this <b>with</b> you — not testing you. We are all learning together.",
+    "Five levels. L1 Understand. <b>L2 Edit with Review — this is the goal for most of us;</b> if it feels natural, you're exactly where we want you. L3 plan before big changes. L4 tools for the whole team. L5 use AI to question your own ideas. No need to rush to the top.",
+    "How do you move through the levels? Not one long weekend. Use AI on real work, a little, every day. Explain a file you know. Fix one prompt. Read one change. 15 minutes a day beats one long day a month. The tracker helps you keep the habit.",
+    "Let me show you — it's simple. Sign in with GitHub, one click. Pick your path so tasks match your work. Check the box when you finish; it saves right away and it's yours. See the flag? Report or suggest — it comes straight to me. Please send it.",
+    "So here is the one thing I ask, and it's small. This week: sign in, pick your path, start Level 1. Do the first task today. I'm doing this with you. Let's build the habit. Thank you."
+  ];
+
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, k) => s.classList.toggle('active', k === i));
+    // retrigger stagger animation
+    const active = slides[i];
+    active.querySelectorAll('*').forEach(el => { el.style.animation = 'none'; el.offsetHeight; el.style.animation = ''; });
+    count.textContent = pad(i + 1) + ' / ' + pad(slides.length);
+    bar.style.width = ((i) / (slides.length - 1) * 100) + '%';
+    notesBody.innerHTML = NOTES[i] || '';
+  }
+
+  function next() { show(i + 1); }
+  function prev() { show(i - 1); }
+
+  document.addEventListener('keydown', e => {
+    if (['ArrowRight', 'ArrowDown', ' ', 'PageDown'].includes(e.key)) { e.preventDefault(); next(); }
+    else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); prev(); }
+    else if (e.key === 'Home') { show(0); }
+    else if (e.key === 'End') { show(slides.length - 1); }
+    else if (e.key.toLowerCase() === 'f') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+      else document.exitFullscreen?.();
+    }
+    else if (e.key.toLowerCase() === 'n') { notes.classList.toggle('show'); }
+  });
+
+  document.getElementById('deck').addEventListener('click', e => {
+    // click right half = next, left half = prev
+    if (e.clientX > window.innerWidth * 0.35) next(); else prev();
+  });
+
+  show(0);
+</script>

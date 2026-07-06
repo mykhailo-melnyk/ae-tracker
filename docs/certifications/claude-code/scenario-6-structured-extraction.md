@@ -38,9 +38,9 @@ A few standing heuristics resolve most of the judgment calls in this scenario. F
 
 | Task Statement | How it surfaces here |
 |---|---|
-| 4.2 — schema syntax vs. semantics | Schema validates, but `calculated_total` doesn't match `stated_total` |
+| 4.3 — schema syntax vs. semantics | Schema validates, but `calculated_total` doesn't match `stated_total` |
 | 4.3 — nullable fields vs. fabrication | Missing data → `null`, not an invented value |
-| 4.2 — `tool_choice` modes | A named tool → forced; unnamed but required → `any`; optional → `auto` |
+| 4.3 — `tool_choice` modes | A named tool → forced; unnamed but required → `any`; optional → `auto` |
 | 4.4 — retry semantics | Retry fixes format/structure, not genuinely missing data |
 | 4.3 — extensible categorization | `enum` + `"other"` + a free-text detail field |
 | 5.5 — aggregate accuracy vs. segments | Stratified sampling exposes per-type, per-field weak spots |

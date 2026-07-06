@@ -34,9 +34,9 @@ A few standing heuristics resolve most of the judgment calls in this scenario. U
 
 | Task Statement | How it surfaces here |
 |---|---|
-| 3.7 — CLI / non-interactive mode | `-p`/`--print` for pipeline execution |
-| 3.7 — structured CLI output | `--output-format json` instead of regex parsing on prose |
-| 3.7 / 4.6 — independent vs. self-review | A fresh instance reviews the PR instead of the generating session |
+| 3.6 — CLI / non-interactive mode | `-p`/`--print` for pipeline execution |
+| 3.6 — structured CLI output | `--output-format json` instead of regex parsing on prose |
+| 3.6 / 4.6 — independent vs. self-review | A fresh instance reviews the PR instead of the generating session |
 | 4.6 — multi-pass / attention dilution | Per-file pass plus a separate integration pass |
 | 4.1 — explicit criteria | Categorical criteria to cut false positives |
 | 4.5 — Batch API fit | Nightly report on Batch; blocking pre-merge review stays synchronous |

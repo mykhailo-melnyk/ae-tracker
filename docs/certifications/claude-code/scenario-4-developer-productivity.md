@@ -34,7 +34,7 @@ A few standing heuristics resolve most of the judgment calls in this scenario. A
 
 | Task Statement | How it surfaces here |
 |---|---|
-| 2.4 — built-in tool selection | Grep (content) vs. Glob (names); `Edit` → `Read`+`Write` fallback on a non-unique match |
+| 2.5 — built-in tool selection | Grep (content) vs. Glob (names); `Edit` → `Read`+`Write` fallback on a non-unique match |
 | 2.1 — tool descriptions & selection | Detailed MCP descriptions needed to be chosen over built-ins |
 | 2.4 / 3.1 — MCP scope | `.mcp.json` for team tools vs. `~/.claude.json` for personal ones |
-| 1.6 — incremental investigation | Grep entry points, then Read along the import chain |
+| 2.5 — incremental investigation | Grep entry points, then Read along the import chain |

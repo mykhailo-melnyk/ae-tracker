@@ -31,6 +31,6 @@ A few standing heuristics resolve most of the judgment calls in this scenario. T
 |---|---|
 | 3.1 — `CLAUDE.md` hierarchy | Project-level vs. user-level; "everyone needs this after clone" |
 | 3.2 / 3.3 — rules & path scoping | `.claude/rules/` with glob `paths:` for scattered test-file conventions |
-| 3.4 — skills vs. slash commands | Command scope (`.claude/commands/` vs. personal directory) |
-| 3.6 — plan mode vs. direct execution | Monolith → microservices calls for plan mode; a small fix calls for direct execution; hybrid for both |
+| 3.2 — skills vs. slash commands | Command scope (`.claude/commands/` vs. personal directory) |
+| 3.4 — plan mode vs. direct execution | Monolith → microservices calls for plan mode; a small fix calls for direct execution; hybrid for both |
 | 5.1 — lost-in-the-middle | Argument against one bloated root `CLAUDE.md` |

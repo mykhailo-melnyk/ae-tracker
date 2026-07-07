@@ -1,0 +1,27 @@
+name: Validate certifications
+
+on:
+  push:
+    paths:
+      - "public/certifications.json"
+      - "public/certification.*.json"
+      - "schema/validate-certifications.mjs"
+      - ".github/workflows/validate-certifications.yml"
+  pull_request:
+    paths:
+      - "public/certifications.json"
+      - "public/certification.*.json"
+      - "schema/validate-certifications.mjs"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      # Plain-Node validator (no ajv): registry + every path file it points to,
+      # plus cross-checks (file present, certification field matches, item ids
+      # unique, ≤32 chars, and prefixed with the cert code).
+      - run: node schema/validate-certifications.mjs

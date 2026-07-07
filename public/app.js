@@ -370,6 +370,7 @@ async function init() {
     : "";
   userBox.innerHTML = `
     <span class="user-name">${PROGRESS.display_name || PROGRESS.github_username}</span>
+    <a class="dashboard-link" href="cert.html">🎓 Certifications</a>
     ${dashboardLink}
     <a class="signout-link" href="${WORKER}/auth/logout" onclick="clearAuthToken()">Sign out</a>
   `;

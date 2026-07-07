@@ -119,8 +119,76 @@ async function renderLevelCompletion() {
   box.innerHTML = html;
 }
 
+// The currently-selected certification (drives the readiness card + table). Certs are
+// filtered one-at-a-time via #cert-pills so the table stays a fixed width as certs grow.
+let CERT_SEL = null;
+
+function selectedCert() {
+  const certs = AGG.certifications || [];
+  return certs.find((c) => c.id === CERT_SEL) || certs[0] || null;
+}
+
+function buildCertPills() {
+  const box = document.getElementById("cert-pills");
+  const certs = AGG.certifications || [];
+  if (!certs.length) { box.innerHTML = ""; return; }
+  if (!CERT_SEL || !certs.some((c) => c.id === CERT_SEL)) CERT_SEL = certs[0].id;
+  box.innerHTML = certs.map((c) =>
+    `<div class="comp-pill ${c.id === CERT_SEL ? "active" : ""}" data-cert="${c.id}">${c.label}</div>`).join("");
+}
+
+function renderCertReadiness() {
+  const box = document.getElementById("cert-readiness");
+  const c = selectedCert();
+  if (!c) { box.innerHTML = `<div class="empty-detail">No certifications configured.</div>`; return; }
+  box.innerHTML = `
+    <div class="cert-stats">
+      <div class="kpi"><div class="lbl">Started preparation</div><div class="val">${c.engineers_started || 0}</div></div>
+      <div class="kpi"><div class="lbl">Ready to pass exam</div><div class="val">${c.engineers_ready || 0}</div></div>
+    </div>`;
+}
+
+function competencyLabel(id) {
+  if (!id) return "—";
+  const c = (CUR.competencies || []).find((x) => x.id === id);
+  return c ? c.label : id;
+}
+
+// Certifications-only engineers table (its own dashboard tab), scoped to the ONE
+// selected certification (#cert-pills). Fixed width regardless of how many certs
+// exist. Cross-cutting: NOT scoped by the competency pills. Disabled engineers excluded.
+function renderCertTable() {
+  const box = document.getElementById("cert-table");
+  const sel = selectedCert();
+  if (!sel) { box.innerHTML = `<div class="empty-detail">No certifications configured.</div>`; return; }
+  const q = CERT_SEARCH.toLowerCase();
+  const rows = AGG.engineers
+    .filter((e) => !e.disabled)
+    .filter((e) => !q || e.username.toLowerCase().includes(q) || (e.display_name || "").toLowerCase().includes(q))
+    .map((e) => ({ e, cp: (e.certifications || {})[sel.id] || { pct: 0, ready: false } }))
+    .sort((a, b) => b.cp.pct - a.cp.pct);
+
+  const body = rows.map(({ e, cp }) => {
+    const pct = Math.round((cp.pct || 0) * 100);
+    return `<tr>
+      <td><div class="who"><div class="avatar">${(e.display_name || e.username).slice(0, 2).toUpperCase()}</div>
+          <div><div class="name">${e.display_name || e.username}</div>
+               <div class="handle">@${e.username}</div></div></div></td>
+      <td>${competencyLabel(e.competency)}</td>
+      <td><span class="cert-chip${cp.ready ? " ready" : ""}">${pct}%</span></td>
+      <td>${cp.ready ? `<span class="cert-chip ready">Ready</span>` : `<span class="handle">Not yet</span>`}</td>
+      <td><span class="last-active">${new Date(e.last_active).toLocaleDateString()}</span></td>
+    </tr>`;
+  }).join("") || `<tr><td colspan="5"><div class="empty-detail">No engineers match.</div></td></tr>`;
+
+  box.innerHTML = `<table class="engineers"><thead><tr>
+    <th>Engineer</th><th>Competency</th><th>${sel.label} progress</th><th>Exam ready</th><th>Last active</th>
+  </tr></thead><tbody>${body}</tbody></table>`;
+}
+
 let FILTER = "all";
 let SEARCH = "";
+let CERT_SEARCH = "";
 let SCOPE = "all";       // page-level competency scope: "all" or a competency id
 
 function buildCompetencyPills() {
@@ -255,6 +323,33 @@ function wireFilters() {
     SEARCH = e.target.value;
     renderTable();
   });
+  document.getElementById("cert-search").addEventListener("input", (e) => {
+    CERT_SEARCH = e.target.value;
+    renderCertTable();
+  });
+  document.querySelectorAll("#cert-pills .comp-pill").forEach((el) => {
+    el.addEventListener("click", () => {
+      document.querySelectorAll("#cert-pills .comp-pill").forEach((p) => p.classList.remove("active"));
+      el.classList.add("active");
+      CERT_SEL = el.dataset.cert;
+      renderCertReadiness();
+      renderCertTable();
+    });
+  });
+}
+
+// Top-level view switch: "Level progress" (competency/level) vs "Certifications".
+// Cert and level data are kept on separate tabs so they never mix in one view.
+function wireTabs() {
+  document.querySelectorAll(".dash-tab").forEach((el) => {
+    el.addEventListener("click", () => {
+      document.querySelectorAll(".dash-tab").forEach((t) => t.classList.remove("active"));
+      el.classList.add("active");
+      const view = el.dataset.view;
+      document.getElementById("view-levels").classList.toggle("hidden", view !== "levels");
+      document.getElementById("view-certs").classList.toggle("hidden", view !== "certs");
+    });
+  });
 }
 
 async function init() {
@@ -268,8 +363,10 @@ async function init() {
   document.getElementById("who").innerHTML =
     `<a class="signout-link" href="${WORKER}/auth/logout" onclick="clearAuthToken()">Sign out</a>`;
   buildCompetencyPills();
+  buildCertPills();
   await renderAll();
   wireFilters();
+  wireTabs();
   document.getElementById("export-btn").addEventListener("click", () => openExportDialog(AGG, CUR));
 }
 
@@ -278,6 +375,8 @@ async function renderAll() {
   renderKpis();
   renderBars();
   await renderLevelCompletion();
+  renderCertReadiness();
+  renderCertTable();
   renderTable();
 }
 

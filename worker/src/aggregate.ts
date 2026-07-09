@@ -39,6 +39,7 @@ export interface Aggregate {
     completion_pct: number;
     last_active: string;
     competency?: string;
+    unit_leader?: string;
     disabled?: boolean;
     certifications: Record<string, { done: number; total: number; pct: number; ready: boolean }>;
   }>;
@@ -130,6 +131,7 @@ export async function computeAggregate(
       completion_pct: totalTasks ? done / totalTasks : 0,
       last_active: la,
       competency: p.competency,
+      unit_leader: p.unit_leader,
       disabled: p.disabled,
       certifications: certProgress,
     });
@@ -156,8 +158,9 @@ import { isSuperAdmin } from "./api";
 // and excludes disabled engineers from the headline counts; v4 makes completion /
 // current-level per the engineer's own competency path and keys by_task by the
 // globally-unique prefixed task ids; v5 adds per-cert readiness + per-engineer
-// cert progress; v6 counts cert readiness against required (non-optional) items only).
-export const CACHE_KEY = "aggregate-v6";
+// cert progress; v6 counts cert readiness against required (non-optional) items only;
+// v7 adds per-engineer `unit_leader`).
+export const CACHE_KEY = "aggregate-v7";
 const CACHE_TTL_SECONDS = 300;
 
 // `is_superadmin` is viewer-specific, so it can't live in the shared cached body.

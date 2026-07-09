@@ -54,10 +54,15 @@
           <div class="filter-pill" data-filter="L4">L4+</div>
           <div class="filter-pill" data-filter="stalled">Stalled</div>
           <div class="filter-pill" data-filter="disabled">Disabled</div>
+          <select class="leader-filter" id="leader-filter" aria-label="Filter by unit leader">
+            <option value="all">All unit leaders</option>
+          </select>
         </div>
+        <div class="table-scroll">
         <table class="engineers"><thead><tr>
-          <th>Engineer</th><th>Current</th><th>Completion</th><th>Competency</th><th>Last active</th><th></th>
+          <th>Engineer</th><th>Current</th><th>Completion</th><th>Competency</th><th>Unit leader</th><th>Last active</th><th></th>
         </tr></thead><tbody id="engineers-body"></tbody></table>
+        </div>
       </div>
     </div>
 

@@ -33,11 +33,24 @@ async function loadPath(competencyId) {
   return composed;
 }
 
-// Active (non-disabled) engineers within the current competency scope. Every headline
-// number and the bars are derived from this set, so the whole dashboard rescopes when
-// SCOPE changes. Disabled engineers are excluded from all stats (as before).
+let LEADER = "all";               // "all" | "__unassigned__" | a leader username
+const LEADER_UNASSIGNED = "__unassigned__";
+
+function inLeaderScope(e) {
+  if (LEADER === "all") return true;
+  if (LEADER === LEADER_UNASSIGNED) return !e.unit_leader;
+  return e.unit_leader === LEADER;
+}
+
+// Active (non-disabled) engineers within the current competency + unit-leader scope.
+// Every headline number and the bars are derived from this set, so the whole dashboard
+// rescopes when SCOPE or LEADER changes. Disabled engineers are excluded from all stats
+// (as before).
 function scopedActive() {
-  return AGG.engineers.filter((e) => !e.disabled && (SCOPE === "all" || e.competency === SCOPE));
+  return AGG.engineers.filter((e) =>
+    !e.disabled
+    && (SCOPE === "all" || e.competency === SCOPE)
+    && inLeaderScope(e));
 }
 
 const STALL_MS = 14 * 86400_000;
@@ -116,7 +129,10 @@ async function renderLevelCompletion() {
       <div class="lvl-tasks">${taskRows}</div>
     </details>`;
   }).join("");
-  box.innerHTML = html;
+  const leaderNote = LEADER !== "all"
+    ? `<div class="empty-detail" style="margin-bottom:8px">Task detail reflects the whole competency, not the unit-leader filter.</div>`
+    : "";
+  box.innerHTML = leaderNote + html;
 }
 
 // The currently-selected certification (drives the readiness card + table). Certs are
@@ -152,6 +168,14 @@ function competencyLabel(id) {
   if (!id) return "—";
   const c = (CUR.competencies || []).find((x) => x.id === id);
   return c ? c.label : id;
+}
+
+// Display name for a leader username, resolved from the engineers list (leaders are
+// themselves engineers). Falls back to the raw username, or "—" when unset.
+function leaderName(username) {
+  if (!username) return "—";
+  const e = AGG.engineers.find((x) => x.username === username);
+  return e ? (e.display_name || e.username) : username;
 }
 
 // Certifications-only engineers table (its own dashboard tab), scoped to the ONE
@@ -198,6 +222,18 @@ function buildCompetencyPills() {
     + comps.map((c) => `<div class="comp-pill" data-comp="${c.id}">${c.label}</div>`).join("");
 }
 
+function populateLeaderFilter() {
+  const sel = document.getElementById("leader-filter");
+  const leaders = [...new Set(AGG.engineers.map((e) => e.unit_leader).filter(Boolean))]
+    .sort((a, b) => leaderName(a).localeCompare(leaderName(b)));
+  sel.innerHTML = `<option value="all">All unit leaders</option>`
+    + leaders.map((u) => `<option value="${u}">${leaderName(u)}</option>`).join("")
+    + `<option value="${LEADER_UNASSIGNED}">Unassigned</option>`;
+  // Keep the current selection if it's still a valid option; else fall back to "all".
+  if (LEADER === "all" || LEADER === LEADER_UNASSIGNED || leaders.includes(LEADER)) sel.value = LEADER;
+  else { LEADER = "all"; sel.value = "all"; }
+}
+
 function renderTable() {
   const filtered = AGG.engineers.filter((e) => {
     // The "Disabled" pill shows ONLY disabled engineers; every other view hides them.
@@ -215,6 +251,7 @@ function renderTable() {
       }
     }
     if (SCOPE !== "all" && e.competency !== SCOPE) return false;
+    if (!inLeaderScope(e)) return false;
     if (SEARCH) {
       const q = SEARCH.toLowerCase();
       return e.username.toLowerCase().includes(q)
@@ -226,6 +263,11 @@ function renderTable() {
   document.getElementById("engineers-body").innerHTML = filtered.map((e) => {
     const options = [`<option value=""${!e.competency ? " selected" : ""}>—</option>`]
       .concat(allComps.map((c) => `<option value="${c.id}"${e.competency === c.id ? " selected" : ""}>${c.label}</option>`))
+      .join("");
+    const leaderOptions = [`<option value=""${!e.unit_leader ? " selected" : ""}>—</option>`]
+      .concat(AGG.engineers
+        .filter((o) => o.username !== e.username) // no self-lead
+        .map((o) => `<option value="${o.username}"${e.unit_leader === o.username ? " selected" : ""}>${o.display_name || o.username}</option>`))
       .join("");
     const disabledBadge = e.disabled ? `<span class="disabled-badge">disabled</span>` : "";
     // Disable/Enable is a super-admin-only power (AGG.is_superadmin is stamped per-viewer).
@@ -241,12 +283,16 @@ function renderTable() {
       <td><div class="pct-cell"><div class="pct-bar"><div style="width:${Math.round(e.completion_pct * 100)}%"></div></div>
           <span class="pct-num">${Math.round(e.completion_pct * 100)}%</span></div></td>
       <td><select class="comp-select" data-user="${e.username}" data-prev="${e.competency || ""}">${options}</select></td>
+      <td><select class="leader-select" data-user="${e.username}" data-prev="${e.unit_leader || ""}">${leaderOptions}</select></td>
       <td><span class="last-active">${new Date(e.last_active).toLocaleDateString()}</span></td>
       <td style="text-align:right">${toggleBtn}<a href="tracker.html?as=${e.username}" style="color:#2563eb;font-weight:600">View →</a></td>
     </tr>`;
   }).join("");
   document.querySelectorAll(".comp-select").forEach((sel) => {
     sel.addEventListener("change", () => saveCompetency(sel));
+  });
+  document.querySelectorAll(".leader-select").forEach((sel) => {
+    sel.addEventListener("change", () => saveLeader(sel));
   });
   document.querySelectorAll(".disable-btn").forEach((btn) => {
     btn.addEventListener("click", () => toggleDisabled(btn));
@@ -302,6 +348,30 @@ async function saveCompetency(sel) {
   }
 }
 
+async function saveLeader(sel) {
+  const username = sel.dataset.user;
+  const leader = sel.value;
+  sel.disabled = true;
+  try {
+    const res = await apiFetch(WORKER + "/api/user/" + encodeURIComponent(username) + "/leader", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ leader: leader || null }),
+    });
+    if (!res.ok) throw new Error("save failed: " + res.status);
+    const updated = await res.json();
+    const eng = AGG.engineers.find((e) => e.username === username);
+    if (eng) eng.unit_leader = updated.unit_leader;
+    sel.dataset.prev = updated.unit_leader || "";
+    populateLeaderFilter(); // a leader may have just appeared or disappeared from the pool
+    sel.disabled = false;
+  } catch (e) {
+    sel.value = sel.dataset.prev; // roll back the selection
+    sel.disabled = false;
+    alert("Could not save unit leader for " + username + ". Try again in a moment.");
+  }
+}
+
 function wireFilters() {
   document.querySelectorAll(".filter-pill").forEach((el) => {
     el.addEventListener("click", () => {
@@ -322,6 +392,10 @@ function wireFilters() {
   document.getElementById("search").addEventListener("input", (e) => {
     SEARCH = e.target.value;
     renderTable();
+  });
+  document.getElementById("leader-filter").addEventListener("change", (e) => {
+    LEADER = e.target.value;
+    renderAll(); // leader scope drives KPIs + bars + table, like the competency scope
   });
   document.getElementById("cert-search").addEventListener("input", (e) => {
     CERT_SEARCH = e.target.value;
@@ -363,6 +437,7 @@ async function init() {
   document.getElementById("who").innerHTML =
     `<a class="signout-link" href="${WORKER}/auth/logout" onclick="clearAuthToken()">Sign out</a>`;
   buildCompetencyPills();
+  populateLeaderFilter();
   buildCertPills();
   await renderAll();
   wireFilters();

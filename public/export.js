@@ -7,6 +7,7 @@
 const SHEETJS_URL = "https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js";
 
 const UNASSIGNED = "__unassigned__";
+const NO_LEADER = "__no_leader__";
 
 function compLabel(CUR, id) {
   if (!id) return "Unassigned";
@@ -14,19 +15,35 @@ function compLabel(CUR, id) {
   return c ? c.label : id;
 }
 
-// Engineers whose competency is in chosenIds, plus the competency-less ones when
-// includeUnassigned. Mirrors the filter idiom in dashboard.js renderTable().
-function selectedEngineers(AGG, chosenIds, includeUnassigned) {
-  return AGG.engineers.filter((e) =>
-    (e.competency && chosenIds.has(e.competency)) || (!e.competency && includeUnassigned),
-  );
+function leaderLabelFor(AGG, username) {
+  if (!username) return "Unassigned";
+  const e = AGG.engineers.find((x) => x.username === username);
+  return e ? (e.display_name || e.username) : username;
 }
 
-function buildRows(engineers, CUR) {
+// Distinct leader usernames present in the aggregate, sorted by display name.
+function leaderList(AGG) {
+  return [...new Set(AGG.engineers.map((e) => e.unit_leader).filter(Boolean))]
+    .sort((a, b) => leaderLabelFor(AGG, a).localeCompare(leaderLabelFor(AGG, b)));
+}
+
+// Engineers passing BOTH the competency selection and the unit-leader selection
+// (intersection). chosenLeaders is a Set of leader usernames; includeNoLeader covers
+// engineers with no leader assigned.
+function selectedEngineers(AGG, chosenIds, includeUnassigned, chosenLeaders, includeNoLeader) {
+  return AGG.engineers.filter((e) => {
+    const compOk = (e.competency && chosenIds.has(e.competency)) || (!e.competency && includeUnassigned);
+    const leaderOk = (e.unit_leader && chosenLeaders.has(e.unit_leader)) || (!e.unit_leader && includeNoLeader);
+    return compOk && leaderOk;
+  });
+}
+
+function buildRows(AGG, engineers, CUR) {
   return engineers.map((e) => ({
     Name: e.display_name || e.username,
     GitHub: "@" + e.username,
     Competency: compLabel(CUR, e.competency),
+    "Unit leader": leaderLabelFor(AGG, e.unit_leader),
     "Current level": e.current_level,
     "Completion %": Math.round(e.completion_pct * 100),
     "Last active": new Date(e.last_active).toLocaleDateString(),
@@ -46,7 +63,7 @@ function csvCell(v) {
 
 function downloadCsv(rows) {
   const headers = Object.keys(rows[0] || {
-    Name: "", GitHub: "", Competency: "", "Current level": "", "Completion %": "", "Last active": "",
+    Name: "", GitHub: "", Competency: "", "Unit leader": "", "Current level": "", "Completion %": "", "Last active": "",
   });
   const lines = [headers.map(csvCell).join(",")]
     .concat(rows.map((r) => headers.map((h) => csvCell(r[h])).join(",")));
@@ -82,7 +99,7 @@ function loadSheetJs() {
   return sheetJsPromise;
 }
 
-function summaryAoa(engineers, CUR, chosenIds, includeUnassigned) {
+function summaryAoa(AGG, engineers, CUR, chosenIds, includeUnassigned, chosenLeaders, includeNoLeader) {
   const aoa = [];
   aoa.push(["AE Tracker — engineer export"]);
   aoa.push(["Generated", new Date().toLocaleString()]);
@@ -108,6 +125,15 @@ function summaryAoa(engineers, CUR, chosenIds, includeUnassigned) {
   }
   aoa.push([]);
 
+  aoa.push(["By unit leader", "Count"]);
+  for (const u of [...chosenLeaders].sort((a, b) => leaderLabelFor(AGG, a).localeCompare(leaderLabelFor(AGG, b)))) {
+    aoa.push([leaderLabelFor(AGG, u), engineers.filter((e) => e.unit_leader === u).length]);
+  }
+  if (includeNoLeader) {
+    aoa.push(["Unassigned", engineers.filter((e) => !e.unit_leader).length]);
+  }
+  aoa.push([]);
+
   aoa.push(["By current level", "Count"]);
   for (const lvl of ["L1", "L2", "L3", "L4", "L5"]) {
     aoa.push([lvl, engineers.filter((e) => e.current_level === lvl).length]);
@@ -115,16 +141,16 @@ function summaryAoa(engineers, CUR, chosenIds, includeUnassigned) {
   return aoa;
 }
 
-async function downloadXlsx(engineers, rows, CUR, chosenIds, includeUnassigned) {
+async function downloadXlsx(AGG, engineers, rows, CUR, chosenIds, includeUnassigned, chosenLeaders, includeNoLeader) {
   const XLSX = await loadSheetJs();
   const wb = XLSX.utils.book_new();
 
-  const summary = XLSX.utils.aoa_to_sheet(summaryAoa(engineers, CUR, chosenIds, includeUnassigned));
+  const summary = XLSX.utils.aoa_to_sheet(summaryAoa(AGG, engineers, CUR, chosenIds, includeUnassigned, chosenLeaders, includeNoLeader));
   summary["!cols"] = [{ wch: 24 }, { wch: 40 }];
   XLSX.utils.book_append_sheet(wb, summary, "Summary");
 
   const people = XLSX.utils.json_to_sheet(rows);
-  people["!cols"] = [{ wch: 24 }, { wch: 20 }, { wch: 16 }, { wch: 13 }, { wch: 12 }, { wch: 13 }];
+  people["!cols"] = [{ wch: 24 }, { wch: 20 }, { wch: 16 }, { wch: 20 }, { wch: 13 }, { wch: 12 }, { wch: 13 }];
   XLSX.utils.book_append_sheet(wb, people, "Engineers");
 
   XLSX.writeFile(wb, "ae-progress-" + fileDate() + ".xlsx");
@@ -134,6 +160,7 @@ async function downloadXlsx(engineers, rows, CUR, chosenIds, includeUnassigned) 
 
 function openExportDialog(AGG, CUR) {
   const comps = CUR.competencies || [];
+  const leaders = leaderList(AGG);
 
   const backdrop = document.createElement("div");
   backdrop.className = "export-backdrop";
@@ -150,6 +177,12 @@ function openExportDialog(AGG, CUR) {
           ${comps.map((c) => `<label class="export-check"><input type="checkbox" value="${c.id}" checked> <span>${c.label}</span></label>`).join("")}
           <label class="export-check"><input type="checkbox" value="${UNASSIGNED}" checked> <span>Unassigned</span></label>
         </div>
+        <div class="export-section-label">Unit leaders to include</div>
+        <div class="export-checks" id="export-leader-checks">
+          <label class="export-check"><input type="checkbox" data-all-leaders> <span>Select all</span></label>
+          ${leaders.map((u) => `<label class="export-check"><input type="checkbox" data-leader value="${u}" checked> <span>${leaderLabelFor(AGG, u)}</span></label>`).join("")}
+          <label class="export-check"><input type="checkbox" data-leader value="${NO_LEADER}" checked> <span>Unassigned</span></label>
+        </div>
         <div class="export-count" id="export-count"></div>
       </div>
       <div class="export-actions">
@@ -165,22 +198,27 @@ function openExportDialog(AGG, CUR) {
     if (e.key === "Escape") { close(); document.removeEventListener("keydown", esc); }
   });
 
-  const itemBoxes = () => Array.from(backdrop.querySelectorAll('.export-checks input[value]'));
+  const itemBoxes = () => Array.from(backdrop.querySelectorAll('.export-checks input[value]:not([data-leader])'));
+  const leaderBoxes = () => Array.from(backdrop.querySelectorAll('.export-checks input[data-leader]'));
   const allBox = backdrop.querySelector("input[data-all]");
+  const allLeadersBox = backdrop.querySelector("input[data-all-leaders]");
   const countEl = backdrop.querySelector("#export-count");
 
   function currentSelection() {
     const checked = itemBoxes().filter((b) => b.checked).map((b) => b.value);
     const includeUnassigned = checked.includes(UNASSIGNED);
     const chosenIds = new Set(checked.filter((v) => v !== UNASSIGNED));
-    return { chosenIds, includeUnassigned };
+    const checkedL = leaderBoxes().filter((b) => b.checked).map((b) => b.value);
+    const includeNoLeader = checkedL.includes(NO_LEADER);
+    const chosenLeaders = new Set(checkedL.filter((v) => v !== NO_LEADER));
+    return { chosenIds, includeUnassigned, chosenLeaders, includeNoLeader };
   }
 
   function refreshCount() {
-    const boxes = itemBoxes();
-    allBox.checked = boxes.every((b) => b.checked);
-    const { chosenIds, includeUnassigned } = currentSelection();
-    const n = selectedEngineers(AGG, chosenIds, includeUnassigned).length;
+    allBox.checked = itemBoxes().every((b) => b.checked);
+    allLeadersBox.checked = leaderBoxes().every((b) => b.checked);
+    const { chosenIds, includeUnassigned, chosenLeaders, includeNoLeader } = currentSelection();
+    const n = selectedEngineers(AGG, chosenIds, includeUnassigned, chosenLeaders, includeNoLeader).length;
     countEl.textContent = n + (n === 1 ? " engineer selected" : " engineers selected");
   }
 
@@ -190,12 +228,18 @@ function openExportDialog(AGG, CUR) {
   });
   itemBoxes().forEach((b) => b.addEventListener("change", refreshCount));
 
+  allLeadersBox.addEventListener("change", () => {
+    leaderBoxes().forEach((b) => { b.checked = allLeadersBox.checked; });
+    refreshCount();
+  });
+  leaderBoxes().forEach((b) => b.addEventListener("change", refreshCount));
+
   backdrop.querySelectorAll(".export-dl").forEach((btn) => {
     btn.addEventListener("click", async () => {
-      const { chosenIds, includeUnassigned } = currentSelection();
-      const engineers = selectedEngineers(AGG, chosenIds, includeUnassigned);
-      if (!engineers.length) { countEl.textContent = "No engineers match — pick at least one competency."; return; }
-      const rows = buildRows(engineers, CUR);
+      const { chosenIds, includeUnassigned, chosenLeaders, includeNoLeader } = currentSelection();
+      const engineers = selectedEngineers(AGG, chosenIds, includeUnassigned, chosenLeaders, includeNoLeader);
+      if (!engineers.length) { countEl.textContent = "No engineers match — widen your selection."; return; }
+      const rows = buildRows(AGG, engineers, CUR);
       if (btn.dataset.fmt === "csv") {
         downloadCsv(rows);
       } else {
@@ -203,7 +247,7 @@ function openExportDialog(AGG, CUR) {
         btn.disabled = true;
         btn.textContent = "Preparing…";
         try {
-          await downloadXlsx(engineers, rows, CUR, chosenIds, includeUnassigned);
+          await downloadXlsx(AGG, engineers, rows, CUR, chosenIds, includeUnassigned, chosenLeaders, includeNoLeader);
         } catch (e) {
           alert(e.message || "Excel export failed.");
         } finally {

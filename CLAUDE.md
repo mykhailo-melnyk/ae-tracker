@@ -42,7 +42,7 @@ Two deployable pieces with **no shared registrable domain**, which drives severa
 
 ### Data flow
 
-There is no database. Per-engineer progress lives as one JSON file per engineer (`progress/<username>.json`) in a **separate private GitHub repo** (`mykhailo-melnyk/ae-tracker-data`), accessed via the GitHub Contents API using a bot PAT (`BOT_PAT`). `src/github.ts` is the entire storage layer (read / write / list). `src/types.ts:ProgressFile` is the on-disk shape.
+There is no database. Per-engineer progress lives as one JSON file per engineer (`progress/<username>.json`) in a **separate private GitHub repo** (`mykhailo-melnyk/ae-tracker-data`), accessed via the GitHub Contents API using a bot PAT (`BOT_PAT`). `src/github.ts` is the entire storage layer (read / write / list). `src/types.ts:ProgressFile` is the on-disk shape. Engineers also carry an optional **`unit_leader`** (plus `unit_leader_set_by` / `unit_leader_updated_at` audit fields) — the GitHub username of the manager who tracks them. It is a **data attribute, not a role**: it grants no access and no scoped view; it only powers the dashboard's unit-leader filter and the export's unit-leader grouping. Anyone who needs dashboard access is added to `ADMIN_USERNAMES`.
 
 The aggregate dashboard (`src/aggregate.ts`) lists the `progress/` directory, reads every file, and computes adoption stats. Results are cached in Cloudflare KV (`AGGREGATE_CACHE` binding) for 5 minutes. **The Worker degrades gracefully when `AGGREGATE_CACHE` is undefined** (recomputes every request) — this is why local dev needs no KV namespace.
 
@@ -98,6 +98,7 @@ additionally needs a new static import in `worker/src/certifications.ts`.
 | Action | How |
 |---|---|
 | Add an admin | Edit `ADMIN_USERNAMES` (comma-separated GitHub usernames) in `worker/wrangler.toml`, then `wrangler deploy`. |
+| Assign a unit leader | As an admin, use the per-row **Unit leader** dropdown on the dashboard (or `POST /api/user/<username>/leader` with `{leader:"<username>"|null}`). Stored on `progress/<username>.json`; busts the aggregate cache. |
 | Add a super admin | Edit `SUPERADMIN_USERNAMES` in `worker/wrangler.toml`, then `wrangler deploy`. Super admins are a *superset* of admins (see the disable/enable controls on the dashboard) — they need not also be in `ADMIN_USERNAMES`. |
 | Disable / re-enable an engineer | As a super admin, use the per-row **Disable / Enable** button on the dashboard (or `POST /api/user/<username>/disabled` with `{disabled:true\|false}`). Soft-disable only: it flips `disabled` in `progress/<username>.json` (never moves/deletes the file) — a disabled engineer is blocked from the tracker and hidden from default dashboard stats (surface them via the **Disabled** filter). |
 | Update a competency's tasks | Edit that competency's `public/curriculum.<id>.json` (keep task IDs prefixed `<id>-L<n>.T<m>`); push to `main` (CI validates, Pages redeploys the frontend). For the dashboard aggregate to reflect it, also `wrangler deploy` the Worker (it bundles the JSON). |

@@ -280,6 +280,63 @@ async function writeCompetency(
   throw new Error("unreachable");
 }
 
+/**
+ * Validate a unit-leader assignment. `null`/`undefined`/`""` clears it. Otherwise the
+ * value must be a GitHub-username-shaped string (≤ 39 chars) that isn't the target
+ * themselves (no self-lead). Not verified to be an existing engineer — the UI only
+ * offers existing engineers, and we avoid a directory read on every write (mirrors how
+ * competency validates against the bundled taxonomy only). Returns `{ value }` (value
+ * = username or undefined to clear), or null if the input is invalid.
+ */
+function validateLeader(input: unknown, targetUsername: string): { value: string | undefined } | null {
+  if (input === undefined || input === null || input === "") return { value: undefined };
+  if (typeof input !== "string") return null;
+  if (!/^[\w-]{1,39}$/.test(input)) return null;
+  if (input === targetUsername) return null; // no self-lead
+  return { value: input };
+}
+
+/**
+ * Read-modify-write an engineer's unit_leader with the same optimistic-concurrency
+ * retry as writeCompetency (re-read fresh SHA, re-apply, retry up to 4× on 409).
+ * Admin-only path, so it never stamps a display name.
+ */
+async function writeUnitLeader(
+  cfg: RepoConfig,
+  targetUsername: string,
+  leader: string | undefined,
+  setBy: string,
+  fetchFn: typeof fetch,
+): Promise<ProgressFile> {
+  const msg = `unit_leader(${targetUsername}) set by ${setBy}`;
+  const MAX_ATTEMPTS = 4;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const existing = await readJsonFile<ProgressFile>(cfg, progressPath(targetUsername), fetchFn);
+    const progress = existing?.data ?? emptyProgress(targetUsername);
+    const now = new Date().toISOString();
+    if (leader === undefined) delete progress.unit_leader;
+    else progress.unit_leader = leader;
+    progress.unit_leader_set_by = setBy;
+    progress.unit_leader_updated_at = now;
+    progress.updated_at = now;
+    try {
+      await writeJsonFile(cfg, progressPath(targetUsername), progress, existing?.sha ?? null, msg, fetchFn);
+      return progress;
+    } catch (e) {
+      const errStr = e instanceof Error ? e.message : String(e);
+      const isConflict = errStr.includes("writeJsonFile 409");
+      if (!isConflict || attempt === MAX_ATTEMPTS) {
+        console.error(`unit_leader write failed: target=${targetUsername} attempt=${attempt}/${MAX_ATTEMPTS} conflict=${isConflict} err=${errStr.slice(0, 300)}`);
+        throw e;
+      }
+      console.warn(`unit_leader 409 conflict: target=${targetUsername} attempt=${attempt}/${MAX_ATTEMPTS}, retrying`);
+      await new Promise((r) => setTimeout(r, 50 * attempt));
+    }
+  }
+  // Unreachable — loop either returns or throws.
+  throw new Error("unreachable");
+}
+
 /** POST /api/competencies — an engineer sets their own competency (single, or clears it). */
 export async function handleApiCompetencies(
   request: Request,
@@ -327,6 +384,28 @@ export async function handleApiUserCompetencies(
 
   const cfg = { owner: env.DATA_REPO_OWNER, repo: env.DATA_REPO_NAME, token: env.BOT_PAT };
   const progress = await writeCompetency(cfg, targetUsername, parsed.value, auth.username, fetchFn);
+  await env.AGGREGATE_CACHE?.delete(CACHE_KEY); // so the dashboard reflects the change on next load
+  return Response.json(progress);
+}
+
+/** POST /api/user/{username}/leader — an admin sets or clears an engineer's unit leader. */
+export async function handleApiUserLeader(
+  request: Request,
+  env: Env,
+  fetchFn: typeof fetch,
+  targetUsername: string,
+): Promise<Response> {
+  const auth = await requireSession(request, env);
+  if (auth instanceof Response) return auth;
+  if (!isAdmin(auth.username, env)) return new Response("forbidden", { status: 403 });
+
+  let body: { leader?: unknown };
+  try { body = await request.json(); } catch { return new Response("invalid json", { status: 400 }); }
+  const parsed = validateLeader(body.leader, targetUsername);
+  if (parsed === null) return new Response("invalid body", { status: 400 });
+
+  const cfg = { owner: env.DATA_REPO_OWNER, repo: env.DATA_REPO_NAME, token: env.BOT_PAT };
+  const progress = await writeUnitLeader(cfg, targetUsername, parsed.value, auth.username, fetchFn);
   await env.AGGREGATE_CACHE?.delete(CACHE_KEY); // so the dashboard reflects the change on next load
   return Response.json(progress);
 }

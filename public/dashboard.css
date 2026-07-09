@@ -1,5 +1,10 @@
 /* dashboard.css — dashboard-specific styles (shared shell comes from styles.css) */
 
+/* The dashboard is data-dense (KPI tiles, charts, a 7-column engineer table), so it
+   gets more width than the shared 920px container the tracker uses. Scoped to #admin
+   so the tracker/sign-in containers keep the narrower reading width. */
+#admin.container { max-width: 1200px; }
+
 /* ---- Admin tag variant ---- */
 .topbar .brand .tag.admin {
   background: #7c3aed;
@@ -247,6 +252,7 @@
 /* ---- Engineer table toolbar ---- */
 .toolbar {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 14px;
 }
@@ -269,6 +275,17 @@
   cursor: pointer;
 }
 .filter-pill.active { background: #0f172a; color: white; border-color: #0f172a; }
+.leader-filter {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  color: #475569;
+  font-family: inherit;
+  cursor: pointer;
+}
+.leader-filter:hover { border-color: #94a3b8; }
 
 /* ---- Competency scope selector (page-level) ---- */
 .comp-scope {
@@ -303,8 +320,8 @@
 }
 .comp-pill.active { background: #2563eb; color: white; border-color: #2563eb; }
 
-/* ---- Competency cell (table) — admin dropdown ---- */
-.comp-select {
+/* ---- Competency + unit-leader cells (table) — admin dropdowns ---- */
+.comp-select, .leader-select {
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
@@ -313,13 +330,18 @@
   color: #475569;
   font-family: inherit;
   cursor: pointer;
+  max-width: 160px;
 }
-.comp-select:hover { border-color: #94a3b8; }
-.comp-select:disabled { opacity: 0.5; cursor: default; }
+.comp-select:hover, .leader-select:hover { border-color: #94a3b8; }
+.comp-select:disabled, .leader-select:disabled { opacity: 0.5; cursor: default; }
 
 /* ---- Engineer table ---- */
+/* The 7-column table can't shrink past a readable width; below that it scrolls
+   horizontally inside this wrapper instead of overflowing the card / page. */
+.table-scroll { overflow-x: auto; }
 table.engineers {
   width: 100%;
+  min-width: 900px;
   border-collapse: collapse;
   font-size: 13px;
 }
@@ -333,12 +355,15 @@ table.engineers th {
   text-transform: uppercase;
   letter-spacing: 0.4px;
   border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
 }
 table.engineers th:last-child { text-align: right; }
 table.engineers td {
   padding: 12px;
   border-bottom: 1px solid #f1f5f9;
 }
+/* Keep the actions cell (Disable + View) and the date on one line each. */
+table.engineers td:last-child { white-space: nowrap; }
 table.engineers tr:hover td { background: #f8fafc; }
 table.engineers tr:last-child td { border-bottom: none; }
 
@@ -380,7 +405,7 @@ table.engineers tr:last-child td { border-bottom: none; }
 .pct-cell .pct-num { font-weight: 600; font-size: 12px; color: #1e293b; min-width: 36px; text-align: right; }
 
 /* ---- Last active cell ---- */
-.last-active { color: #64748b; font-size: 12px; }
+.last-active { color: #64748b; font-size: 12px; white-space: nowrap; }
 .last-active.stale { color: #d97706; font-weight: 600; }
 
 /* ---- Disabled engineers ---- */
@@ -429,3 +454,25 @@ tr.row-disabled .handle { color: #94a3b8; }
 .dash-tab { background:none; border:none; padding:8px 14px; font-size:14px; font-weight:600; color:#64748b; cursor:pointer; border-bottom:2px solid transparent; }
 .dash-tab:hover { color:#334155; }
 .dash-tab.active { color:#2563eb; border-bottom-color:#2563eb; }
+
+/* The certifications-tab engineers table also uses table.engineers (min-width:900),
+   so it scrolls horizontally on narrow screens instead of overflowing. */
+#cert-table { overflow-x: auto; }
+
+/* ---- Responsive: tablet & mobile ---- */
+/* Tablet and below: stack the two-column panels, drop KPIs to 2-up, let the
+   page header wrap. The engineer/cert tables scroll via .table-scroll / #cert-table. */
+@media (max-width: 1050px) {
+  #admin.container { padding: 20px 20px 32px; }
+  .two-col { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+  .page-head { flex-wrap: wrap; gap: 4px; }
+  .page-head .as-of, .as-of { align-self: flex-start; }
+}
+/* Phones: tighter padding, single-column KPIs, full-width search, cert tiles stack. */
+@media (max-width: 560px) {
+  #admin.container { padding: 16px 12px 28px; }
+  .kpis { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .toolbar .search { flex-basis: 100%; }
+  .cert-stats { grid-template-columns: 1fr; }
+}

@@ -34,11 +34,11 @@ async function loadPath(competencyId) {
 }
 
 let LEADER = "all";               // "all" | "__unassigned__" | a leader username
-const NO_LEADER = "__unassigned__";
+const LEADER_UNASSIGNED = "__unassigned__";
 
 function inLeaderScope(e) {
   if (LEADER === "all") return true;
-  if (LEADER === NO_LEADER) return !e.unit_leader;
+  if (LEADER === LEADER_UNASSIGNED) return !e.unit_leader;
   return e.unit_leader === LEADER;
 }
 
@@ -228,9 +228,9 @@ function populateLeaderFilter() {
     .sort((a, b) => leaderName(a).localeCompare(leaderName(b)));
   sel.innerHTML = `<option value="all">All unit leaders</option>`
     + leaders.map((u) => `<option value="${u}">${leaderName(u)}</option>`).join("")
-    + `<option value="${NO_LEADER}">Unassigned</option>`;
+    + `<option value="${LEADER_UNASSIGNED}">Unassigned</option>`;
   // Keep the current selection if it's still a valid option; else fall back to "all".
-  if (LEADER === "all" || LEADER === NO_LEADER || leaders.includes(LEADER)) sel.value = LEADER;
+  if (LEADER === "all" || LEADER === LEADER_UNASSIGNED || leaders.includes(LEADER)) sel.value = LEADER;
   else { LEADER = "all"; sel.value = "all"; }
 }
 

@@ -1,5 +1,10 @@
 /* dashboard.css — dashboard-specific styles (shared shell comes from styles.css) */
 
+/* The dashboard is data-dense (KPI tiles, charts, a 7-column engineer table), so it
+   gets more width than the shared 920px container the tracker uses. Scoped to #admin
+   so the tracker/sign-in containers keep the narrower reading width. */
+#admin.container { max-width: 1200px; }
+
 /* ---- Admin tag variant ---- */
 .topbar .brand .tag.admin {
   background: #7c3aed;

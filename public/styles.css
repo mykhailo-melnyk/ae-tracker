@@ -504,3 +504,51 @@ body.readonly .task .check:hover { background: inherit; }
 .fb-result.error { color: #b91c1c; }
 .fb-result.ok { color: #15803d; }
 .fb-result a { color: #2563eb; }
+
+/* ---- Page-level loading & error states ---- */
+.page-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 50vh;
+  color: #64748b;
+  font-size: 14px;
+}
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: none; }
+}
+.page-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 50vh;
+  text-align: center;
+  color: #475569;
+}
+.page-error .page-error-icon { font-size: 32px; }
+.page-error h2 { font-size: 18px; color: #0f172a; margin: 0; }
+.page-error p { margin: 0; color: #64748b; }
+.page-error-retry {
+  margin-top: 8px;
+  padding: 8px 20px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.page-error-retry:hover { background: #1d4ed8; }

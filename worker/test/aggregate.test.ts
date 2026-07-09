@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeAggregate, handleApiAggregate } from "../src/aggregate";
+import { computeAggregate, handleApiAggregate, CACHE_KEY } from "../src/aggregate";
 import type { ResolvedCurriculum } from "../src/curriculum";
 import { signSession } from "../src/session";
 
@@ -223,6 +223,34 @@ describe("computeAggregate", () => {
     expect(cc.engineers_ready).toBe(1);    // dana ready without the optional item
     const dana = agg.engineers.find((e) => e.username === "dana")!;
     expect(dana.certifications["claude-code"]).toEqual({ done: 2, total: 2, pct: 1, ready: true });
+  });
+
+  it("carries each engineer's unit_leader through to the aggregate", async () => {
+    const registry = registryOf({ web: WEB });
+    const files: Record<string, any> = {
+      "anna.json": { github_username: "anna", created_at: "2026-05-01T00:00:00Z",
+        updated_at: "2026-05-27T00:00:00Z", competency: "web", unit_leader: "ben", tasks: {} },
+      "ben.json": { github_username: "ben", created_at: "2026-05-01T00:00:00Z",
+        updated_at: "2026-05-27T00:00:00Z", competency: "web", tasks: {} },
+    };
+    const fetchMock = (async (url: string) => {
+      if (url.endsWith("/contents/progress")) {
+        return new Response(JSON.stringify([
+          { name: "anna.json", type: "file", path: "progress/anna.json" },
+          { name: "ben.json", type: "file", path: "progress/ben.json" },
+        ]), { headers: { "content-type": "application/json" } });
+      }
+      const name = url.split("/").pop()!;
+      return new Response(JSON.stringify({ sha: "s", content: btoa(JSON.stringify(files[name])), encoding: "base64" }),
+        { headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+    const agg = await computeAggregate(cfg, registry, fetchMock, new Date("2026-05-27T12:00:00Z"));
+    expect(agg.engineers.find((e) => e.username === "anna")!.unit_leader).toBe("ben");
+    expect(agg.engineers.find((e) => e.username === "ben")!.unit_leader).toBeUndefined();
+  });
+
+  it("uses the v7 cache key", () => {
+    expect(CACHE_KEY).toBe("aggregate-v7");
   });
 });
 

@@ -154,6 +154,14 @@ function competencyLabel(id) {
   return c ? c.label : id;
 }
 
+// Display name for a leader username, resolved from the engineers list (leaders are
+// themselves engineers). Falls back to the raw username, or "—" when unset.
+function leaderName(username) {
+  if (!username) return "—";
+  const e = AGG.engineers.find((x) => x.username === username);
+  return e ? (e.display_name || e.username) : username;
+}
+
 // Certifications-only engineers table (its own dashboard tab), scoped to the ONE
 // selected certification (#cert-pills). Fixed width regardless of how many certs
 // exist. Cross-cutting: NOT scoped by the competency pills. Disabled engineers excluded.
@@ -227,6 +235,11 @@ function renderTable() {
     const options = [`<option value=""${!e.competency ? " selected" : ""}>—</option>`]
       .concat(allComps.map((c) => `<option value="${c.id}"${e.competency === c.id ? " selected" : ""}>${c.label}</option>`))
       .join("");
+    const leaderOptions = [`<option value=""${!e.unit_leader ? " selected" : ""}>—</option>`]
+      .concat(AGG.engineers
+        .filter((o) => o.username !== e.username) // no self-lead
+        .map((o) => `<option value="${o.username}"${e.unit_leader === o.username ? " selected" : ""}>${o.display_name || o.username}</option>`))
+      .join("");
     const disabledBadge = e.disabled ? `<span class="disabled-badge">disabled</span>` : "";
     // Disable/Enable is a super-admin-only power (AGG.is_superadmin is stamped per-viewer).
     const toggleBtn = AGG.is_superadmin
@@ -241,12 +254,16 @@ function renderTable() {
       <td><div class="pct-cell"><div class="pct-bar"><div style="width:${Math.round(e.completion_pct * 100)}%"></div></div>
           <span class="pct-num">${Math.round(e.completion_pct * 100)}%</span></div></td>
       <td><select class="comp-select" data-user="${e.username}" data-prev="${e.competency || ""}">${options}</select></td>
+      <td><select class="leader-select" data-user="${e.username}" data-prev="${e.unit_leader || ""}">${leaderOptions}</select></td>
       <td><span class="last-active">${new Date(e.last_active).toLocaleDateString()}</span></td>
       <td style="text-align:right">${toggleBtn}<a href="tracker.html?as=${e.username}" style="color:#2563eb;font-weight:600">View →</a></td>
     </tr>`;
   }).join("");
   document.querySelectorAll(".comp-select").forEach((sel) => {
     sel.addEventListener("change", () => saveCompetency(sel));
+  });
+  document.querySelectorAll(".leader-select").forEach((sel) => {
+    sel.addEventListener("change", () => saveLeader(sel));
   });
   document.querySelectorAll(".disable-btn").forEach((btn) => {
     btn.addEventListener("click", () => toggleDisabled(btn));
@@ -299,6 +316,29 @@ async function saveCompetency(sel) {
     sel.value = sel.dataset.prev; // roll back the selection
     sel.disabled = false;
     alert("Could not save competency for " + username + ". Try again in a moment.");
+  }
+}
+
+async function saveLeader(sel) {
+  const username = sel.dataset.user;
+  const leader = sel.value;
+  sel.disabled = true;
+  try {
+    const res = await apiFetch(WORKER + "/api/user/" + encodeURIComponent(username) + "/leader", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ leader: leader || null }),
+    });
+    if (!res.ok) throw new Error("save failed: " + res.status);
+    const updated = await res.json();
+    const eng = AGG.engineers.find((e) => e.username === username);
+    if (eng) eng.unit_leader = updated.unit_leader;
+    sel.dataset.prev = updated.unit_leader || "";
+    sel.disabled = false;
+  } catch (e) {
+    sel.value = sel.dataset.prev; // roll back the selection
+    sel.disabled = false;
+    alert("Could not save unit leader for " + username + ". Try again in a moment.");
   }
 }
 

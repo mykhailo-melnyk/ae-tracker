@@ -36,3 +36,31 @@ function apiFetch(url, opts = {}) {
   if (t) headers.set("Authorization", "Bearer " + t);
   return fetch(url, { ...opts, headers, credentials: "include" });
 }
+
+// Page-level loading / error UI. Shared by app.js, cert.js, dashboard.js — every
+// page ships a visible-by-default #page-loader that init() clears once content is
+// ready, and routes fatal load errors here instead of wiping the page to a red <pre>.
+function hidePageLoader() {
+  document.getElementById("page-loader")?.remove();
+}
+
+function showPageError(err, onRetry) {
+  hidePageLoader();
+  document.getElementById("page-error")?.remove(); // drop a prior error card on retry
+  const card = document.createElement("div");
+  card.id = "page-error";
+  card.className = "page-error";
+  card.innerHTML = `
+    <div class="page-error-icon">⚠</div>
+    <h2>Couldn't load this page</h2>
+    <p>${(err && err.message) || "Something went wrong. Check your connection."}</p>
+  `;
+  if (onRetry) {
+    const btn = document.createElement("button");
+    btn.className = "page-error-retry";
+    btn.textContent = "Retry";
+    btn.addEventListener("click", () => { card.remove(); onRetry(); });
+    card.appendChild(btn);
+  }
+  document.body.appendChild(card);
+}

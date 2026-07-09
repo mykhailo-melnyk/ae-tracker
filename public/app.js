@@ -332,6 +332,7 @@ function showNoCompetency() {
 async function init() {
   MANIFEST = await loadManifest();
   const result = await loadProgress();
+  hidePageLoader();
   if (result.unauthenticated) {
     // A stale/expired token may be sitting in localStorage; drop it so we don't keep
     // sending a dead Bearer header.
@@ -341,7 +342,7 @@ async function init() {
     return;
   }
   if (result.forbidden) {
-    document.body.innerHTML = "<pre style='padding:24px;color:#b91c1c'>Forbidden — admins only.</pre>";
+    showPageError(new Error("Forbidden — admins only."), null);
     return;
   }
   PROGRESS = result.progress;
@@ -388,5 +389,5 @@ async function init() {
 }
 
 init().catch((e) => {
-  document.body.innerHTML = "<pre style='padding:24px;color:#b91c1c'>" + e.message + "</pre>";
+  showPageError(e, () => init());
 });

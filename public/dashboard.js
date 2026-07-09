@@ -428,6 +428,7 @@ function wireTabs() {
 
 async function init() {
   const [agg, cur] = await Promise.all([loadAgg(), loadCurriculum()]);
+  hidePageLoader();
   AGG = agg;
   CUR = cur;
   if (!AGG) return;
@@ -456,5 +457,5 @@ async function renderAll() {
 }
 
 init().catch((e) => {
-  document.body.innerHTML = "<pre style='padding:24px;color:#b91c1c'>" + e.message + "</pre>";
+  showPageError(e, () => init());
 });

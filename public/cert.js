@@ -130,6 +130,7 @@ async function toggleItem(itemId) {
 
 async function init() {
   const res = await apiFetch(WORKER + "/api/me");
+  hidePageLoader();
   if (res.status === 401) {
     clearAuthToken();
     document.getElementById("signed-out").classList.remove("hidden");
@@ -159,5 +160,5 @@ async function init() {
 }
 
 init().catch((e) => {
-  document.body.innerHTML = "<pre style='padding:24px;color:#b91c1c'>" + e.message + "</pre>";
+  showPageError(e, () => init());
 });

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { handleApiMe, handleApiMark, handleApiUser, handleApiCompetencies, handleApiUserCompetencies, handleApiUserDisabled } from "../src/api";
+import { handleApiMe, handleApiMark, handleApiUser, handleApiCompetencies, handleApiUserCompetencies, handleApiUserDisabled, handleApiUserLeader } from "../src/api";
 import { signSession } from "../src/session";
 
 const ENV = {
@@ -523,5 +523,107 @@ describe("/api/user/:username/competencies (admin override)", () => {
     const res = await handleApiUserCompetencies(req, env, CUR, fetchMock, "anna");
     expect(res.status).toBe(200);
     expect(JSON.parse(atob(JSON.parse(putBody!).content)).display_name).toBe("Anna Smith"); // unchanged
+  });
+});
+
+describe("/api/user/:username/leader (admin only)", () => {
+  const ADMIN_ENV = { ...ENV, ADMIN_USERNAMES: "mykhailo-melnyk" } as any;
+
+  it("returns 403 when caller is not an admin", async () => {
+    const session = await signSession("randomguy", ENV.SESSION_SECRET, 3600);
+    const req = new Request("https://w.example/api/user/anna/leader", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ leader: "ben" }),
+    });
+    const res = await handleApiUserLeader(req, ADMIN_ENV, globalThis.fetch, "anna");
+    expect(res.status).toBe(403);
+  });
+
+  it("an admin assigns a unit leader and is recorded as the setter", async () => {
+    const session = await signSession("mykhailo-melnyk", ENV.SESSION_SECRET, 3600);
+    const calls: any[] = [];
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      calls.push({ url, method: init?.method ?? "GET", body: init?.body });
+      if (init?.method === "PUT") return new Response(JSON.stringify({ content: { sha: "s" } }), { status: 200 });
+      return new Response("not found", { status: 404 });
+    }) as typeof fetch;
+    const req = new Request("https://w.example/api/user/anna/leader", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ leader: "ben" }),
+    });
+    const res = await handleApiUserLeader(req, ADMIN_ENV, fetchMock, "anna");
+    expect(res.status).toBe(200);
+    const put = calls.find((c) => c.method === "PUT")!;
+    expect(put.url).toContain("progress/anna.json");
+    const written = JSON.parse(atob(JSON.parse(put.body).content));
+    expect(written.unit_leader).toBe("ben");
+    expect(written.unit_leader_set_by).toBe("mykhailo-melnyk");
+    expect(written.unit_leader_updated_at).toBeTruthy();
+  });
+
+  it("clears the unit leader when given null", async () => {
+    const session = await signSession("mykhailo-melnyk", ENV.SESSION_SECRET, 3600);
+    const stored = { github_username: "anna", created_at: "x", updated_at: "y", unit_leader: "ben", tasks: {} };
+    let putBody: string | undefined;
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      if (init?.method === "PUT") { putBody = init.body as string; return new Response(JSON.stringify({ content: { sha: "s" } }), { status: 200 }); }
+      return new Response(JSON.stringify({ sha: "s", content: btoa(JSON.stringify(stored)), encoding: "base64" }),
+        { headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+    const req = new Request("https://w.example/api/user/anna/leader", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ leader: null }),
+    });
+    const res = await handleApiUserLeader(req, ADMIN_ENV, fetchMock, "anna");
+    expect(res.status).toBe(200);
+    expect(JSON.parse(atob(JSON.parse(putBody!).content)).unit_leader).toBeUndefined();
+  });
+
+  it("rejects self-assignment with 400", async () => {
+    const session = await signSession("mykhailo-melnyk", ENV.SESSION_SECRET, 3600);
+    const req = new Request("https://w.example/api/user/anna/leader", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ leader: "anna" }),
+    });
+    const res = await handleApiUserLeader(req, ADMIN_ENV, globalThis.fetch, "anna");
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects a malformed username with 400", async () => {
+    const session = await signSession("mykhailo-melnyk", ENV.SESSION_SECRET, 3600);
+    const req = new Request("https://w.example/api/user/anna/leader", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ leader: "not a username!" }),
+    });
+    const res = await handleApiUserLeader(req, ADMIN_ENV, globalThis.fetch, "anna");
+    expect(res.status).toBe(400);
+  });
+
+  it("retries on a 409 SHA-conflict and succeeds on re-read", async () => {
+    const session = await signSession("mykhailo-melnyk", ENV.SESSION_SECRET, 3600);
+    let putAttempts = 0;
+    const stored = { github_username: "anna", created_at: "x", updated_at: "y", tasks: {} };
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      if (init?.method === "PUT") {
+        putAttempts += 1;
+        if (putAttempts === 1) return new Response('{"message":"file does not match sha","status":"409"}', { status: 409 });
+        return new Response(JSON.stringify({ content: { sha: "new-sha" } }), { status: 200 });
+      }
+      return new Response(JSON.stringify({ sha: "fresh-sha", content: btoa(JSON.stringify(stored)), encoding: "base64" }),
+        { headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+    const req = new Request("https://w.example/api/user/anna/leader", {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ leader: "ben" }),
+    });
+    const res = await handleApiUserLeader(req, ADMIN_ENV, fetchMock, "anna");
+    expect(res.status).toBe(200);
+    expect(putAttempts).toBe(2);
   });
 });

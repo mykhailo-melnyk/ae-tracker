@@ -513,6 +513,7 @@ body.readonly .task .check:hover { background: inherit; }
   justify-content: center;
   gap: 16px;
   min-height: calc(100vh - 56px); /* fill the viewport below the ~53px topbar so content sits at the true center */
+  padding: 0 24px;
   color: #64748b;
   font-size: 14px;
 }
@@ -535,6 +536,7 @@ body.readonly .task .check:hover { background: inherit; }
   justify-content: center;
   gap: 12px;
   min-height: calc(100vh - 56px); /* fill the viewport below the ~53px topbar so content sits at the true center */
+  padding: 0 24px;
   text-align: center;
   color: #475569;
 }

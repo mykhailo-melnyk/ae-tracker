@@ -49,7 +49,7 @@ function showPageError(err, onRetry) {
   document.getElementById("page-error")?.remove(); // drop a prior error card on retry
   const card = document.createElement("div");
   card.id = "page-error";
-  card.className = "page-error container";
+  card.className = "page-error";
   card.innerHTML = `
     <div class="page-error-icon">⚠</div>
     <h2>Couldn't load this page</h2>

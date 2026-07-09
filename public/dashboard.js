@@ -33,11 +33,24 @@ async function loadPath(competencyId) {
   return composed;
 }
 
-// Active (non-disabled) engineers within the current competency scope. Every headline
-// number and the bars are derived from this set, so the whole dashboard rescopes when
-// SCOPE changes. Disabled engineers are excluded from all stats (as before).
+let LEADER = "all";               // "all" | "__unassigned__" | a leader username
+const NO_LEADER = "__unassigned__";
+
+function inLeaderScope(e) {
+  if (LEADER === "all") return true;
+  if (LEADER === NO_LEADER) return !e.unit_leader;
+  return e.unit_leader === LEADER;
+}
+
+// Active (non-disabled) engineers within the current competency + unit-leader scope.
+// Every headline number and the bars are derived from this set, so the whole dashboard
+// rescopes when SCOPE or LEADER changes. Disabled engineers are excluded from all stats
+// (as before).
 function scopedActive() {
-  return AGG.engineers.filter((e) => !e.disabled && (SCOPE === "all" || e.competency === SCOPE));
+  return AGG.engineers.filter((e) =>
+    !e.disabled
+    && (SCOPE === "all" || e.competency === SCOPE)
+    && inLeaderScope(e));
 }
 
 const STALL_MS = 14 * 86400_000;
@@ -116,7 +129,10 @@ async function renderLevelCompletion() {
       <div class="lvl-tasks">${taskRows}</div>
     </details>`;
   }).join("");
-  box.innerHTML = html;
+  const leaderNote = LEADER !== "all"
+    ? `<div class="empty-detail" style="margin-bottom:8px">Task detail reflects the whole competency, not the unit-leader filter.</div>`
+    : "";
+  box.innerHTML = leaderNote + html;
 }
 
 // The currently-selected certification (drives the readiness card + table). Certs are
@@ -206,6 +222,18 @@ function buildCompetencyPills() {
     + comps.map((c) => `<div class="comp-pill" data-comp="${c.id}">${c.label}</div>`).join("");
 }
 
+function populateLeaderFilter() {
+  const sel = document.getElementById("leader-filter");
+  const leaders = [...new Set(AGG.engineers.map((e) => e.unit_leader).filter(Boolean))]
+    .sort((a, b) => leaderName(a).localeCompare(leaderName(b)));
+  sel.innerHTML = `<option value="all">All unit leaders</option>`
+    + leaders.map((u) => `<option value="${u}">${leaderName(u)}</option>`).join("")
+    + `<option value="${NO_LEADER}">Unassigned</option>`;
+  // Keep the current selection if it's still a valid option; else fall back to "all".
+  if (LEADER === "all" || LEADER === NO_LEADER || leaders.includes(LEADER)) sel.value = LEADER;
+  else { LEADER = "all"; sel.value = "all"; }
+}
+
 function renderTable() {
   const filtered = AGG.engineers.filter((e) => {
     // The "Disabled" pill shows ONLY disabled engineers; every other view hides them.
@@ -223,6 +251,7 @@ function renderTable() {
       }
     }
     if (SCOPE !== "all" && e.competency !== SCOPE) return false;
+    if (!inLeaderScope(e)) return false;
     if (SEARCH) {
       const q = SEARCH.toLowerCase();
       return e.username.toLowerCase().includes(q)
@@ -334,6 +363,7 @@ async function saveLeader(sel) {
     const eng = AGG.engineers.find((e) => e.username === username);
     if (eng) eng.unit_leader = updated.unit_leader;
     sel.dataset.prev = updated.unit_leader || "";
+    populateLeaderFilter(); // a leader may have just appeared or disappeared from the pool
     sel.disabled = false;
   } catch (e) {
     sel.value = sel.dataset.prev; // roll back the selection
@@ -362,6 +392,10 @@ function wireFilters() {
   document.getElementById("search").addEventListener("input", (e) => {
     SEARCH = e.target.value;
     renderTable();
+  });
+  document.getElementById("leader-filter").addEventListener("change", (e) => {
+    LEADER = e.target.value;
+    renderAll(); // leader scope drives KPIs + bars + table, like the competency scope
   });
   document.getElementById("cert-search").addEventListener("input", (e) => {
     CERT_SEARCH = e.target.value;
@@ -403,6 +437,7 @@ async function init() {
   document.getElementById("who").innerHTML =
     `<a class="signout-link" href="${WORKER}/auth/logout" onclick="clearAuthToken()">Sign out</a>`;
   buildCompetencyPills();
+  populateLeaderFilter();
   buildCertPills();
   await renderAll();
   wireFilters();

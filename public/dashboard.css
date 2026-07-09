@@ -252,6 +252,7 @@
 /* ---- Engineer table toolbar ---- */
 .toolbar {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 14px;
 }
@@ -335,8 +336,12 @@
 .comp-select:disabled, .leader-select:disabled { opacity: 0.5; cursor: default; }
 
 /* ---- Engineer table ---- */
+/* The 7-column table can't shrink past a readable width; below that it scrolls
+   horizontally inside this wrapper instead of overflowing the card / page. */
+.table-scroll { overflow-x: auto; }
 table.engineers {
   width: 100%;
+  min-width: 900px;
   border-collapse: collapse;
   font-size: 13px;
 }
@@ -449,3 +454,25 @@ tr.row-disabled .handle { color: #94a3b8; }
 .dash-tab { background:none; border:none; padding:8px 14px; font-size:14px; font-weight:600; color:#64748b; cursor:pointer; border-bottom:2px solid transparent; }
 .dash-tab:hover { color:#334155; }
 .dash-tab.active { color:#2563eb; border-bottom-color:#2563eb; }
+
+/* The certifications-tab engineers table also uses table.engineers (min-width:900),
+   so it scrolls horizontally on narrow screens instead of overflowing. */
+#cert-table { overflow-x: auto; }
+
+/* ---- Responsive: tablet & mobile ---- */
+/* Tablet and below: stack the two-column panels, drop KPIs to 2-up, let the
+   page header wrap. The engineer/cert tables scroll via .table-scroll / #cert-table. */
+@media (max-width: 1050px) {
+  #admin.container { padding: 20px 20px 32px; }
+  .two-col { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+  .page-head { flex-wrap: wrap; gap: 4px; }
+  .page-head .as-of, .as-of { align-self: flex-start; }
+}
+/* Phones: tighter padding, single-column KPIs, full-width search, cert tiles stack. */
+@media (max-width: 560px) {
+  #admin.container { padding: 16px 12px 28px; }
+  .kpis { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .toolbar .search { flex-basis: 100%; }
+  .cert-stats { grid-template-columns: 1fr; }
+}

@@ -434,9 +434,11 @@ async function init() {
   if (!AGG) return;
   document.getElementById("admin").classList.remove("hidden");
   document.getElementById("as-of").textContent = "As of " + new Date(AGG.as_of).toLocaleString();
-  // Topbar: sign-out link (admin identity is implicit from session — no need to fetch /api/me)
+  // Topbar: link back to the engineer's own tracker + sign-out (admin identity is
+  // implicit from session — no need to fetch /api/me)
   document.getElementById("who").innerHTML =
-    `<a class="signout-link" href="${WORKER}/auth/logout" onclick="clearAuthToken()">Sign out</a>`;
+    `<a class="dashboard-link" href="tracker.html">My tracker</a>
+     <a class="signout-link" href="${WORKER}/auth/logout" onclick="clearAuthToken()">Sign out</a>`;
   buildCompetencyPills();
   populateLeaderFilter();
   buildCertPills();

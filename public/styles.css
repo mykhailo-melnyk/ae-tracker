@@ -554,3 +554,46 @@ body.readonly .task .check:hover { background: inherit; }
   cursor: pointer;
 }
 .page-error-retry:hover { background: #1d4ed8; }
+
+/* ---- Cross-level step search ---- */
+.step-search { margin-top: 20px; }
+.step-search input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 14px;
+  font-size: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+}
+.step-search input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+.search-results {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 8px 32px;
+  margin-top: 20px;
+}
+.search-results:empty { display: none; }
+.search-results .search-head {
+  padding: 14px 0;
+  font-size: 13px;
+  color: #64748b;
+  border-bottom: 1px solid #e2e8f0;
+}
+.search-results .search-empty { padding: 20px 0; color: #64748b; font-size: 14px; }
+.task-level {
+  display: inline-block;
+  background: #eef2ff;
+  color: #3730a3;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  vertical-align: middle;
+}

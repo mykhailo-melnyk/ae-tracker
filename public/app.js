@@ -1,6 +1,7 @@
 const WORKER = window.WORKER_URL;
 let MANIFEST = null;       // curriculum.json — competency registry + shared L1–L5 framework
 let CURRICULUM = null;     // the engineer's composed path (manifest levels + their competency's tasks)
+let SEARCH_QUERY = "";     // current cross-level search text (empty = normal view)
 let PROGRESS = null;
 let FOCUS_LEVEL = null;
 let READONLY = false;
@@ -108,6 +109,68 @@ function formatEstimate(min) {
   return (Number.isInteger(hrs) ? hrs : hrs.toFixed(1)) + " hr";
 }
 
+// Shared task-row markup used by both the focus card and the search results.
+// opts.levelBadge (e.g. "L3") adds a "LEVEL 3" badge after the title;
+// opts.report (default true) emits the per-task "Report / suggest" button.
+function taskRowHtml(task, opts = {}) {
+  const { levelBadge = null, report = true } = opts;
+  const isDone = PROGRESS.tasks[task.id]?.done === true;
+  const badge = levelBadge ? ` <span class="task-level">LEVEL ${levelBadge.slice(1)}</span>` : "";
+  return `
+    <div class="task ${isDone ? "done" : ""}" data-task="${task.id}">
+      <div class="check"></div>
+      <div class="body">
+        <div class="title">${task.title} <span class="kind-tag ${task.kind}">${task.kind}</span>${task.estimated_minutes ? `<span class="task-est">· ${formatEstimate(task.estimated_minutes)}</span>` : ""}${badge}</div>
+        ${task.desc ? `<div class="desc">${task.desc}</div>` : ""}
+        ${task.link ? `<a class="external" href="${task.link}" target="_blank" rel="noopener">${task.link} ↗</a>` : ""}
+        ${(!READONLY && report) ? `<div><button type="button" class="task-report">⚑ Report / suggest</button></div>` : ""}
+      </div>
+    </div>`;
+}
+
+// Render the cross-level search view. Empty query => normal single-level view.
+// Non-empty => hide the pill bar + focus card and list matching tasks from every
+// level, each wired to toggleTask.
+function renderSearch() {
+  const results = document.getElementById("search-results");
+  const pillWrap = document.getElementById("pill-bar-wrap");
+  const focus = document.getElementById("focus-card");
+  const q = SEARCH_QUERY.trim().toLowerCase();
+  if (!CURRICULUM || !q) {
+    results.innerHTML = "";
+    if (CURRICULUM) { pillWrap.classList.remove("hidden"); focus.classList.remove("hidden"); }
+    return;
+  }
+  pillWrap.classList.add("hidden");
+  focus.classList.add("hidden");
+  const matches = [];
+  for (const lvl of CURRICULUM.levels) {
+    for (const task of lvl.tasks) {
+      const hay = (task.title + " " + (task.desc || "")).toLowerCase();
+      if (hay.includes(q)) matches.push({ task, levelId: lvl.id });
+    }
+  }
+  if (!matches.length) {
+    const empty = document.createElement("div");
+    empty.className = "search-empty";
+    empty.textContent = `No steps match “${SEARCH_QUERY.trim()}”.`; // textContent: query is user input
+    results.replaceChildren(empty);
+    return;
+  }
+  const rows = matches.map((m) => taskRowHtml(m.task, { levelBadge: m.levelId, report: false })).join("");
+  results.innerHTML =
+    `<div class="search-head">${matches.length} match${matches.length === 1 ? "" : "es"}</div>${rows}`;
+  results.querySelectorAll(".task").forEach((el) => {
+    el.querySelector(".check").addEventListener("click", () => toggleTask(el.dataset.task));
+  });
+}
+
+// Wire the search input once.
+function initSearch() {
+  const input = document.getElementById("step-search");
+  input.addEventListener("input", () => { SEARCH_QUERY = input.value; renderSearch(); });
+}
+
 function renderFocusCard() {
   const card = document.getElementById("focus-card");
   const lvl = CURRICULUM.levels.find((l) => l.id === FOCUS_LEVEL);
@@ -115,19 +178,7 @@ function renderFocusCard() {
   const done = tasksDoneInLevel(lvl);
   const total = lvl.tasks.length;
 
-  const taskHtml = lvl.tasks.map((task) => {
-    const isDone = PROGRESS.tasks[task.id]?.done === true;
-    return `
-      <div class="task ${isDone ? "done" : ""}" data-task="${task.id}">
-        <div class="check"></div>
-        <div class="body">
-          <div class="title">${task.title} <span class="kind-tag ${task.kind}">${task.kind}</span>${task.estimated_minutes ? `<span class="task-est">· ${formatEstimate(task.estimated_minutes)}</span>` : ""}</div>
-          ${task.desc ? `<div class="desc">${task.desc}</div>` : ""}
-          ${task.link ? `<a class="external" href="${task.link}" target="_blank" rel="noopener">${task.link} ↗</a>` : ""}
-          ${READONLY ? "" : `<div><button type="button" class="task-report">⚑ Report / suggest</button></div>`}
-        </div>
-      </div>`;
-  }).join("");
+  const taskHtml = lvl.tasks.map((task) => taskRowHtml(task)).join("");
 
   const hoursLine = (lvl.estimated_hours_min && lvl.estimated_hours_max)
     ? `<div class="level-hours">Estimated <strong>${lvl.estimated_hours_min}–${lvl.estimated_hours_max} hours</strong> to complete</div>`
@@ -232,6 +283,7 @@ async function toggleTask(taskId) {
   renderTotals();
   renderPillBar();
   renderFocusCard();
+  renderSearch();
   // Persist
   try {
     const res = await apiFetch(WORKER + "/api/mark", {
@@ -247,6 +299,7 @@ async function toggleTask(taskId) {
     renderTotals();
     renderPillBar();
     renderFocusCard();
+    renderSearch();
     alert("Could not save your change. Try again in a moment.");
   }
 }
@@ -310,6 +363,7 @@ async function renderPath() {
   document.getElementById("greeting-sub").textContent = lvl ? `Currently at: LEVEL ${lvl.id.slice(1)} — ${lvl.title}` : "";
   document.getElementById("totals").classList.remove("hidden");
   document.getElementById("pill-bar-wrap").classList.remove("hidden");
+  document.getElementById("step-search-wrap").classList.remove("hidden");
   renderTotals();
   renderPillBar();
   renderFocusCard();
@@ -321,6 +375,11 @@ function showNoCompetency() {
   CURRICULUM = null;
   document.getElementById("totals").classList.add("hidden");
   document.getElementById("pill-bar-wrap").classList.add("hidden");
+  document.getElementById("step-search-wrap").classList.add("hidden");
+  SEARCH_QUERY = "";
+  const searchInput = document.getElementById("step-search");
+  if (searchInput) searchInput.value = "";
+  renderSearch();
   document.getElementById("greeting-sub").textContent = READONLY
     ? "No competency selected"
     : "Pick your competency to start";
@@ -383,6 +442,7 @@ async function init() {
   }
 
   renderCompetencyPicker();
+  initSearch();
   // The learning path depends on the chosen competency — gate until one is picked.
   if (PROGRESS.competency) await renderPath();
   else showNoCompetency();

@@ -351,6 +351,10 @@ async function deleteEngineer(btn) {
     if (!res.ok) throw new Error("delete failed: " + res.status);
     // Drop the engineer locally so both the counts and the table update without a reload.
     AGG.engineers = AGG.engineers.filter((e) => e.username !== username);
+    // Clear anyone who had them as unit leader — the backend cascades this too, but do it
+    // locally so the leader filter/rows are consistent without a reload (no dangling ghost).
+    AGG.engineers.forEach((e) => { if (e.unit_leader === username) e.unit_leader = null; });
+    populateLeaderFilter();
     renderKpis();
     renderTable();
   } catch (e) {

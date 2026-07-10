@@ -513,6 +513,10 @@ describe("/api/user/:username/delete (super-admin only)", () => {
     const fetchMock = (async (url: string, init?: RequestInit) => {
       calls.push({ url, method: init?.method ?? "GET", body: init?.body });
       if (init?.method === "DELETE") return new Response(JSON.stringify({ commit: { sha: "c1" } }), { status: 200 });
+      // Directory listing (cascade scan for dangling unit_leader refs) — only ben, no reports.
+      if (url.endsWith("/contents/progress")) return new Response(JSON.stringify(
+        [{ name: "ben.json", type: "file", path: "progress/ben.json" }]),
+        { headers: { "content-type": "application/json" } });
       return new Response(JSON.stringify({ sha: "s1", content: btoa(JSON.stringify(stored)), encoding: "base64" }),
         { headers: { "content-type": "application/json" } });
     }) as typeof fetch;
@@ -521,11 +525,41 @@ describe("/api/user/:username/delete (super-admin only)", () => {
     const env = { ...SUPER_ENV, AGGREGATE_CACHE: { delete: async () => { cacheBusted = true; } } };
     const res = await handleApiUserDelete(delReq(session, "ben"), env, fetchMock, "ben");
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ deleted: true, username: "ben" });
+    expect(await res.json()).toEqual({ deleted: true, username: "ben", unassigned: [] });
     const del = calls.find((c) => c.method === "DELETE");
     expect(del.url).toContain("/contents/progress/ben.json");
     expect(JSON.parse(del.body).sha).toBe("s1");
     expect(cacheBusted).toBe(true);
+  });
+
+  it("clears a dangling unit_leader on engineers the deleted user led (cascade)", async () => {
+    const session = await signSession("sam", SUPER_ENV.SESSION_SECRET, 3600);
+    const lead = { github_username: "lead", created_at: "x", updated_at: "y", tasks: {} };
+    const report = { github_username: "report", created_at: "x", updated_at: "y", unit_leader: "lead", tasks: {} };
+    const puts: Array<{ url: string; body: any }> = [];
+    let leadDeleted = false;
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      if (init?.method === "DELETE") { leadDeleted = url.includes("/contents/progress/lead.json"); return new Response(JSON.stringify({ commit: { sha: "c" } }), { status: 200 }); }
+      if (init?.method === "PUT") { puts.push({ url, body: JSON.parse(init.body as string) }); return new Response(JSON.stringify({ content: { sha: "s2" } }), { status: 200 }); }
+      if (url.endsWith("/contents/progress")) return new Response(JSON.stringify([
+        { name: "lead.json", type: "file", path: "progress/lead.json" },
+        { name: "report.json", type: "file", path: "progress/report.json" },
+      ]), { headers: { "content-type": "application/json" } });
+      const stored = url.includes("report.json") ? report : lead;
+      return new Response(JSON.stringify({ sha: "s1", content: btoa(JSON.stringify(stored)), encoding: "base64" }),
+        { headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+
+    const res = await handleApiUserDelete(delReq(session, "lead"), SUPER_ENV, fetchMock, "lead");
+    expect(res.status).toBe(200);
+    expect((await res.json() as any).unassigned).toEqual(["report"]);
+    expect(leadDeleted).toBe(true);
+    // report's unit_leader was cleared and stamped with the acting super admin.
+    const reportPut = puts.find((p) => p.url.includes("report.json"));
+    expect(reportPut).toBeTruthy();
+    const written = JSON.parse(atob(reportPut!.body.content));
+    expect(written.unit_leader).toBeUndefined();
+    expect(written.unit_leader_set_by).toBe("sam");
   });
 
   it("retries a 409 stale-SHA conflict: re-reads the fresh sha then succeeds", async () => {
@@ -540,6 +574,10 @@ describe("/api/user/:username/delete (super-admin only)", () => {
         if (deleteAttempts === 1) return new Response("Conflict", { status: 409 });
         return new Response(JSON.stringify({ commit: { sha: "c2" } }), { status: 200 });
       }
+      // Directory listing (cascade scan) — only ben, no reports.
+      if (url.endsWith("/contents/progress")) return new Response(JSON.stringify(
+        [{ name: "ben.json", type: "file", path: "progress/ben.json" }]),
+        { headers: { "content-type": "application/json" } });
       // First read returns sha s1; after the conflict the re-read returns fresh sha s2.
       const sha = deleteAttempts === 0 ? "s1" : "s2";
       return new Response(JSON.stringify({ sha, content: btoa(JSON.stringify(stored)), encoding: "base64" }),

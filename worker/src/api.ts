@@ -1,6 +1,6 @@
 import type { Env } from "./index";
 import { verifySession, tokenFromRequest } from "./session";
-import { readJsonFile, writeJsonFile, createIssue, deleteFile, type RepoConfig } from "./github";
+import { readJsonFile, writeJsonFile, createIssue, deleteFile, listDirectory, type RepoConfig } from "./github";
 import { CACHE_KEY } from "./aggregate";
 import * as curriculum from "./curriculum";
 import type { ProgressFile } from "./types";
@@ -465,6 +465,34 @@ export async function handleApiUserDisabled(
 }
 
 /**
+ * Deleting an engineer would otherwise leave a *dangling* unit_leader reference on
+ * everyone that engineer led (their `unit_leader` still points at a username with no
+ * file). That ghost then re-appears in the dashboard's unit-leader filter and export.
+ * So before removing the file we scan `progress/` and clear `unit_leader` on every
+ * engineer who pointed at the deleted user, stamping the acting super admin. Reuses
+ * writeUnitLeader (with its own 409 retry). Returns the usernames cleared.
+ */
+async function clearDanglingLeader(
+  cfg: RepoConfig,
+  deletedUsername: string,
+  setBy: string,
+  fetchFn: typeof fetch,
+): Promise<string[]> {
+  const entries = await listDirectory(cfg, "progress", fetchFn);
+  const cleared: string[] = [];
+  for (const entry of entries) {
+    const username = entry.name.replace(/\.json$/, "");
+    if (username === deletedUsername) continue; // that file is being deleted anyway
+    const file = await readJsonFile<ProgressFile>(cfg, entry.path, fetchFn);
+    if (file?.data.unit_leader === deletedUsername) {
+      await writeUnitLeader(cfg, username, undefined, setBy, fetchFn);
+      cleared.push(username);
+    }
+  }
+  return cleared;
+}
+
+/**
  * POST /api/user/{username}/delete — a super admin PERMANENTLY deletes an engineer's
  * progress file (hard delete, for data-hygiene / GDPR removal). Irreversible: only the
  * data repo's git history retains the content afterward. Distinct from disable, which
@@ -486,16 +514,26 @@ export async function handleApiUserDelete(
   if (targetUsername === auth.username) return new Response("cannot delete yourself", { status: 403 });
 
   const cfg = { owner: env.DATA_REPO_OWNER, repo: env.DATA_REPO_NAME, token: env.BOT_PAT };
+  // Nothing to delete for someone who never started.
+  const existing = await readJsonFile<ProgressFile>(cfg, progressPath(targetUsername), fetchFn);
+  if (!existing) return new Response("no such engineer", { status: 404 });
+
+  // Clear dangling unit_leader references FIRST. If this throws, the target file is
+  // still present, so the operation is safely retryable (clearing is idempotent) rather
+  // than leaving orphaned reports behind.
+  const unassigned = await clearDanglingLeader(cfg, targetUsername, auth.username, fetchFn);
+
   const msg = `delete(${targetUsername}) by ${auth.username}`;
   const MAX_ATTEMPTS = 4;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    const existing = await readJsonFile<ProgressFile>(cfg, progressPath(targetUsername), fetchFn);
-    // Nothing to delete for someone who never started (or a racing delete already won).
-    if (!existing) return new Response("no such engineer", { status: 404 });
+    // attempt 1 reuses the read above; later attempts re-read for a fresh SHA.
+    const cur = attempt === 1 ? existing : await readJsonFile<ProgressFile>(cfg, progressPath(targetUsername), fetchFn);
+    // A racing delete already removed it — treat as done.
+    if (!cur) { await env.AGGREGATE_CACHE?.delete(CACHE_KEY); return Response.json({ deleted: true, username: targetUsername, unassigned }); }
     try {
-      await deleteFile(cfg, progressPath(targetUsername), existing.sha, msg, fetchFn);
+      await deleteFile(cfg, progressPath(targetUsername), cur.sha, msg, fetchFn);
       await env.AGGREGATE_CACHE?.delete(CACHE_KEY); // so the dashboard drops the row on next load
-      return Response.json({ deleted: true, username: targetUsername });
+      return Response.json({ deleted: true, username: targetUsername, unassigned });
     } catch (e) {
       const errStr = e instanceof Error ? e.message : String(e);
       const isConflict = errStr.includes("deleteFile 409");

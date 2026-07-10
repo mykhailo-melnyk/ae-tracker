@@ -597,3 +597,30 @@ body.readonly .task .check:hover { background: inherit; }
   letter-spacing: 0.5px;
   vertical-align: middle;
 }
+
+/* ---- Undo toast ---- */
+.toast {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #0f172a;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.35);
+  font-size: 14px;
+}
+#toast-undo {
+  background: none;
+  border: none;
+  color: #93c5fd;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+#toast-undo:hover { color: #bfdbfe; text-decoration: underline; }

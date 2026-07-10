@@ -95,3 +95,29 @@ Even if you're a **backend TypeScript** developer — still pick **Web**. It doe
 If you already picked **Backend** (or anything other than Web), just switch to **Web** in the path picker — your progress is saved by task, so you won't lose anything.
 
 Thanks! 🙌
+
+---
+
+## 5. Halfway nudge — celebrate the starters, invite the rest
+
+> Motivation check-in once about half the team has signed in (posted at 27 of 53 started).
+
+🎉 **We're halfway in — 27 of you are on the path!**
+
+Quick pulse check, and honestly a little celebration. 🥳
+
+In just a short time, **27 people have signed in and started the tracker** — that's more than half of us already taking the first steps. Some of you are already ticking through Level 1. That's exactly the habit we're building: small steps, real work, every day. 👏
+
+**If you're one of the 27 — thank you.** Keep the rhythm going: 15 minutes on your actual work beats a big push once a month. You're already proving this works.
+
+**If you haven't jumped in yet — this is your friendly nudge.** 🙂 No pressure, no grading, no catching up to do. The path is yours and it waits for you. All it takes this week:
+
+1. Open the tracker → **https://mykhailo-melnyk.github.io/ae-tracker/**
+2. **Sign in with GitHub** (one click) and **pick "Web"** as your path
+3. **Do the very first Level 1 task today** — that's it
+
+Remember: everyone has AI now. The difference isn't who *has* it — it's who **practices** with it. Starting is the whole game. 🚀
+
+**Stuck on access, sign-in, or anything at all?** Post it right here — that's what this channel is for, and we'll get you unblocked fast. 💬
+
+Let's get the rest of the team on the path together. 💪

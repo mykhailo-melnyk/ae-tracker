@@ -76,6 +76,21 @@ export async function writeJsonFile(
   return { sha: out.content.sha };
 }
 
+export async function deleteFile(
+  cfg: RepoConfig,
+  path: string,
+  sha: string,
+  message: string,
+  fetchFn: typeof fetch = fetch,
+): Promise<void> {
+  const res = await fetchFn(`${API}/repos/${cfg.owner}/${cfg.repo}/contents/${path}`, {
+    method: "DELETE",
+    headers: { ...headers(cfg.token), "content-type": "application/json" },
+    body: JSON.stringify({ message, sha }),
+  });
+  if (!res.ok) throw new Error(`deleteFile ${res.status}: ${await res.text()}`);
+}
+
 export async function createIssue(
   cfg: RepoConfig,
   issue: { title: string; body: string; labels?: string[]; assignees?: string[] },

@@ -1,6 +1,6 @@
 // worker/test/github.test.ts
 import { describe, it, expect } from "vitest";
-import { readJsonFile, writeJsonFile, listDirectory, createIssue } from "../src/github";
+import { readJsonFile, writeJsonFile, listDirectory, createIssue, deleteFile } from "../src/github";
 
 const cfg = { owner: "mykhailo-melnyk", repo: "ae-tracker-data", token: "tok" };
 
@@ -110,6 +110,31 @@ describe("createIssue", () => {
     await expect(
       createIssue(repoCfg, { title: "t", body: "b", labels: ["nope"] }, fetchMock),
     ).rejects.toThrow("createIssue 422");
+  });
+});
+
+describe("deleteFile", () => {
+  it("DELETEs the path with message + sha in the body and auth headers", async () => {
+    let captured: { url: string; init: RequestInit } | null = null;
+    const fetchMock = (async (url: string, init: RequestInit) => {
+      captured = { url, init };
+      return new Response(JSON.stringify({ commit: { sha: "c1" } }), { status: 200 });
+    }) as typeof fetch;
+
+    await deleteFile(cfg, "progress/anna.json", "old-sha", "delete(anna) by sam", fetchMock);
+
+    expect(captured!.url).toBe("https://api.github.com/repos/mykhailo-melnyk/ae-tracker-data/contents/progress/anna.json");
+    expect(captured!.init.method).toBe("DELETE");
+    expect((captured!.init.headers as Record<string, string>).authorization).toBe("Bearer tok");
+    const body = JSON.parse(captured!.init.body as string);
+    expect(body).toEqual({ message: "delete(anna) by sam", sha: "old-sha" });
+  });
+
+  it("throws with the status when GitHub rejects the delete (409 stale sha)", async () => {
+    const fetchMock = (async () => new Response("Conflict", { status: 409 })) as typeof fetch;
+    await expect(
+      deleteFile(cfg, "progress/anna.json", "stale", "msg", fetchMock),
+    ).rejects.toThrow("deleteFile 409");
   });
 });
 

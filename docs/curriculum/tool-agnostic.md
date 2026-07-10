@@ -24,6 +24,24 @@ None of that depends on Claude. It's how you *work* with an agent, not which age
 
 These are the part you'd relearn on a different tool — a day, not a level.
 
+## Keep your project instructions portable
+
+The one artifact worth setting up for portability from day one is your **project
+instructions** — the always-loaded file that tells the agent how your repo works.
+Claude Code reads `CLAUDE.md`; most other tools (Codex, OpenCode, …) read a
+tool-neutral **`AGENTS.md`**. Rather than maintain two copies that drift, keep a
+single LLM-agnostic `AGENTS.md` and make `CLAUDE.md` a symlink to it:
+
+```bash
+ln -s AGENTS.md CLAUDE.md
+```
+
+Now the same instructions load whichever agent a teammate — or client — happens to
+use, and there's only one file to edit. Write the content tool-agnostically too:
+describe *how the project works* (build, test, conventions, gotchas), not "which
+button to click in Claude Code," so nothing in it needs rewriting when the tool
+changes.
+
 ## The main alternatives
 
 - **OpenCode** — open-source and model-agnostic: it runs whatever model you point it at,

@@ -7,6 +7,7 @@ let FOCUS_LEVEL = null;
 let READONLY = false;
 let FB_TASK = null;    // task id the open feedback modal is scoped to (null = general)
 let FB_TYPE = "bug";   // currently selected feedback type
+let TOAST_TIMER = null; // pending auto-dismiss timeout for the undo toast
 
 async function loadManifest() {
   const res = await fetch("curriculum.json");
@@ -227,6 +228,24 @@ function closeFeedback() {
   document.getElementById("feedback-modal").classList.add("hidden");
 }
 
+// Show a non-blocking "Marked as done/not done · Undo" toast after a toggle
+// saves. Undo re-toggles the same task. One toast at a time; each call resets
+// the 5s auto-dismiss timer.
+function showUndoToast(taskId, done) {
+  const toast = document.getElementById("toast");
+  document.getElementById("toast-msg").textContent = done ? "Marked as done" : "Marked as not done";
+  const undo = document.getElementById("toast-undo");
+  undo.onclick = () => { hideToast(); toggleTask(taskId); };
+  toast.classList.remove("hidden");
+  if (TOAST_TIMER) clearTimeout(TOAST_TIMER);
+  TOAST_TIMER = setTimeout(hideToast, 5000);
+}
+
+function hideToast() {
+  if (TOAST_TIMER) { clearTimeout(TOAST_TIMER); TOAST_TIMER = null; }
+  document.getElementById("toast").classList.add("hidden");
+}
+
 async function submitFeedback() {
   const message = document.getElementById("fb-message").value.trim();
   const result = document.getElementById("fb-result");
@@ -293,6 +312,7 @@ async function toggleTask(taskId) {
     });
     if (!res.ok) throw new Error("mark failed: " + res.status);
     PROGRESS = await res.json();
+    showUndoToast(taskId, newDone);
   } catch (e) {
     // Roll back
     PROGRESS.tasks[taskId] = { done: currentlyDone };

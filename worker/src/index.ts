@@ -1,5 +1,5 @@
 import { handleLogin, handleCallback, handleLogout } from "./auth";
-import { handleApiMe, handleApiMark, handleApiUser, handleApiCompetencies, handleApiUserCompetencies, handleApiUserDisabled, handleApiUserLeader, handleApiFeedback } from "./api";
+import { handleApiMe, handleApiMark, handleApiUser, handleApiCompetencies, handleApiUserCompetencies, handleApiUserDisabled, handleApiUserLeader, handleApiUserDelete, handleApiFeedback } from "./api";
 import { handleApiAggregate } from "./aggregate";
 import * as curriculum from "./curriculum";
 import * as certifications from "./certifications";
@@ -71,6 +71,11 @@ export default {
     const disabledMatch = url.pathname.match(/^\/api\/user\/([\w-]+)\/disabled$/);
     if (disabledMatch) return withCors(
       await handleApiUserDisabled(request, env, fetch, disabledMatch[1]),
+      env, request,
+    );
+    const deleteMatch = url.pathname.match(/^\/api\/user\/([\w-]+)\/delete$/);
+    if (deleteMatch) return withCors(
+      await handleApiUserDelete(request, env, fetch, deleteMatch[1]),
       env, request,
     );
     const leaderMatch = url.pathname.match(/^\/api\/user\/([\w-]+)\/leader$/);

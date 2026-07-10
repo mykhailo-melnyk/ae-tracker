@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { handleApiMe, handleApiMark, handleApiUser, handleApiCompetencies, handleApiUserCompetencies, handleApiUserDisabled, handleApiUserLeader } from "../src/api";
+import { handleApiMe, handleApiMark, handleApiUser, handleApiCompetencies, handleApiUserCompetencies, handleApiUserDisabled, handleApiUserLeader, handleApiUserDelete } from "../src/api";
 import { signSession } from "../src/session";
 
 const ENV = {
@@ -466,6 +466,90 @@ describe("/api/user/:username/disabled (super-admin only)", () => {
     });
     const res = await handleApiUserDisabled(req, SUPER_ENV, globalThis.fetch, "ben");
     expect(res.status).toBe(400);
+  });
+});
+
+describe("/api/user/:username/delete (super-admin only)", () => {
+  const SUPER_ENV = { ...ENV, ADMIN_USERNAMES: "alice", SUPERADMIN_USERNAMES: "sam" } as any;
+
+  function delReq(session: string, target: string) {
+    return new Request(`https://w.example/api/user/${target}/delete`, {
+      method: "POST",
+      headers: { Cookie: `session=${session}`, "content-type": "application/json" },
+    });
+  }
+
+  it("returns 403 when caller is a plain engineer", async () => {
+    const session = await signSession("anna", SUPER_ENV.SESSION_SECRET, 3600);
+    const res = await handleApiUserDelete(delReq(session, "ben"), SUPER_ENV, globalThis.fetch, "ben");
+    expect(res.status).toBe(403);
+  });
+
+  it("returns 403 when caller is an admin but NOT a super admin", async () => {
+    const session = await signSession("alice", SUPER_ENV.SESSION_SECRET, 3600);
+    const res = await handleApiUserDelete(delReq(session, "ben"), SUPER_ENV, globalThis.fetch, "ben");
+    expect(res.status).toBe(403);
+  });
+
+  it("returns 403 when a super admin tries to delete themselves", async () => {
+    const session = await signSession("sam", SUPER_ENV.SESSION_SECRET, 3600);
+    // No fetch should happen — a self-delete is rejected before any read.
+    const fetchMock = (async () => { throw new Error("should not fetch"); }) as typeof fetch;
+    const res = await handleApiUserDelete(delReq(session, "sam"), SUPER_ENV, fetchMock, "sam");
+    expect(res.status).toBe(403);
+  });
+
+  it("returns 404 when the target engineer has no progress file", async () => {
+    const session = await signSession("sam", SUPER_ENV.SESSION_SECRET, 3600);
+    const fetchMock = (async () => new Response("not found", { status: 404 })) as typeof fetch;
+    const res = await handleApiUserDelete(delReq(session, "ghost"), SUPER_ENV, fetchMock, "ghost");
+    expect(res.status).toBe(404);
+  });
+
+  it("a super admin deletes an engineer: DELETEs the file with its sha and returns {deleted:true}", async () => {
+    const session = await signSession("sam", SUPER_ENV.SESSION_SECRET, 3600);
+    const stored = { github_username: "ben", created_at: "x", updated_at: "y", tasks: {} };
+    const calls: any[] = [];
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      calls.push({ url, method: init?.method ?? "GET", body: init?.body });
+      if (init?.method === "DELETE") return new Response(JSON.stringify({ commit: { sha: "c1" } }), { status: 200 });
+      return new Response(JSON.stringify({ sha: "s1", content: btoa(JSON.stringify(stored)), encoding: "base64" }),
+        { headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+
+    let cacheBusted = false;
+    const env = { ...SUPER_ENV, AGGREGATE_CACHE: { delete: async () => { cacheBusted = true; } } };
+    const res = await handleApiUserDelete(delReq(session, "ben"), env, fetchMock, "ben");
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ deleted: true, username: "ben" });
+    const del = calls.find((c) => c.method === "DELETE");
+    expect(del.url).toContain("/contents/progress/ben.json");
+    expect(JSON.parse(del.body).sha).toBe("s1");
+    expect(cacheBusted).toBe(true);
+  });
+
+  it("retries a 409 stale-SHA conflict: re-reads the fresh sha then succeeds", async () => {
+    const session = await signSession("sam", SUPER_ENV.SESSION_SECRET, 3600);
+    const stored = { github_username: "ben", created_at: "x", updated_at: "y", tasks: {} };
+    let deleteAttempts = 0;
+    let shaSeen: string | undefined;
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      if (init?.method === "DELETE") {
+        deleteAttempts++;
+        shaSeen = JSON.parse(init.body as string).sha;
+        if (deleteAttempts === 1) return new Response("Conflict", { status: 409 });
+        return new Response(JSON.stringify({ commit: { sha: "c2" } }), { status: 200 });
+      }
+      // First read returns sha s1; after the conflict the re-read returns fresh sha s2.
+      const sha = deleteAttempts === 0 ? "s1" : "s2";
+      return new Response(JSON.stringify({ sha, content: btoa(JSON.stringify(stored)), encoding: "base64" }),
+        { headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+
+    const res = await handleApiUserDelete(delReq(session, "ben"), SUPER_ENV, fetchMock, "ben");
+    expect(res.status).toBe(200);
+    expect(deleteAttempts).toBe(2);
+    expect(shaSeen).toBe("s2"); // second attempt used the re-read sha
   });
 });
 

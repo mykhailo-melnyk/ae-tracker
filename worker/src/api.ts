@@ -1,6 +1,6 @@
 import type { Env } from "./index";
 import { verifySession, tokenFromRequest } from "./session";
-import { readJsonFile, writeJsonFile, createIssue, type RepoConfig } from "./github";
+import { readJsonFile, writeJsonFile, createIssue, deleteFile, type RepoConfig } from "./github";
 import { CACHE_KEY } from "./aggregate";
 import * as curriculum from "./curriculum";
 import type { ProgressFile } from "./types";
@@ -457,6 +457,53 @@ export async function handleApiUserDisabled(
         throw e;
       }
       console.warn(`disabled 409 conflict: target=${targetUsername} attempt=${attempt}/${MAX_ATTEMPTS}, retrying`);
+      await new Promise((r) => setTimeout(r, 50 * attempt));
+    }
+  }
+  // Unreachable — loop either returns or throws.
+  throw new Error("unreachable");
+}
+
+/**
+ * POST /api/user/{username}/delete — a super admin PERMANENTLY deletes an engineer's
+ * progress file (hard delete, for data-hygiene / GDPR removal). Irreversible: only the
+ * data repo's git history retains the content afterward. Distinct from disable, which
+ * keeps the file. Same 409 optimistic-concurrency retry as the other write paths, since
+ * a concurrent /api/mark could move the SHA between the read and the delete.
+ */
+export async function handleApiUserDelete(
+  request: Request,
+  env: Env,
+  fetchFn: typeof fetch,
+  targetUsername: string,
+): Promise<Response> {
+  const auth = await requireSession(request, env);
+  if (auth instanceof Response) return auth;
+  if (!isSuperAdmin(auth.username, env)) return new Response("forbidden", { status: 403 });
+  // Deleting yourself mid-session leaves a confusing half-state and is almost always a
+  // mistake. Admin rights live in config, not the progress file, so there's no need to
+  // protect the admin tier otherwise.
+  if (targetUsername === auth.username) return new Response("cannot delete yourself", { status: 403 });
+
+  const cfg = { owner: env.DATA_REPO_OWNER, repo: env.DATA_REPO_NAME, token: env.BOT_PAT };
+  const msg = `delete(${targetUsername}) by ${auth.username}`;
+  const MAX_ATTEMPTS = 4;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const existing = await readJsonFile<ProgressFile>(cfg, progressPath(targetUsername), fetchFn);
+    // Nothing to delete for someone who never started (or a racing delete already won).
+    if (!existing) return new Response("no such engineer", { status: 404 });
+    try {
+      await deleteFile(cfg, progressPath(targetUsername), existing.sha, msg, fetchFn);
+      await env.AGGREGATE_CACHE?.delete(CACHE_KEY); // so the dashboard drops the row on next load
+      return Response.json({ deleted: true, username: targetUsername });
+    } catch (e) {
+      const errStr = e instanceof Error ? e.message : String(e);
+      const isConflict = errStr.includes("deleteFile 409");
+      if (!isConflict || attempt === MAX_ATTEMPTS) {
+        console.error(`delete failed: target=${targetUsername} attempt=${attempt}/${MAX_ATTEMPTS} conflict=${isConflict} err=${errStr.slice(0, 300)}`);
+        throw e;
+      }
+      console.warn(`delete 409 conflict: target=${targetUsername} attempt=${attempt}/${MAX_ATTEMPTS}, retrying`);
       await new Promise((r) => setTimeout(r, 50 * attempt));
     }
   }

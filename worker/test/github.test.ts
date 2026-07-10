@@ -26,6 +26,28 @@ describe("readJsonFile", () => {
     const fetchMock = (async () => new Response("server error", { status: 500 })) as typeof fetch;
     await expect(readJsonFile(cfg, "progress/x.json", fetchMock)).rejects.toThrow();
   });
+
+  it("retries transient GitHub errors (502) and succeeds", async () => {
+    let calls = 0;
+    const fetchMock = (async () => {
+      calls++;
+      if (calls < 3) return new Response("error code: 502\n", { status: 502 });
+      return new Response(JSON.stringify({
+        sha: "sha-ok", content: btoa('{"hello":"world"}'), encoding: "base64",
+      }), { headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+
+    const result = await readJsonFile(cfg, "progress/flaky.json", fetchMock);
+    expect(calls).toBe(3);
+    expect(result).toEqual({ sha: "sha-ok", data: { hello: "world" } });
+  });
+
+  it("gives up after repeated transient errors and throws", async () => {
+    let calls = 0;
+    const fetchMock = (async () => { calls++; return new Response("error code: 502\n", { status: 502 }); }) as typeof fetch;
+    await expect(readJsonFile(cfg, "progress/down.json", fetchMock)).rejects.toThrow("readJsonFile 502");
+    expect(calls).toBe(4); // MAX_GET_ATTEMPTS
+  });
 });
 
 describe("writeJsonFile", () => {

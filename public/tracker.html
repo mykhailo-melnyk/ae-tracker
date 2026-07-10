@@ -54,6 +54,11 @@
 
   <button type="button" id="feedback-open" class="feedback-fab hidden" title="Report a bug or suggest an improvement">⚑ Feedback</button>
 
+  <div id="toast" class="toast hidden" role="status" aria-live="polite">
+    <span id="toast-msg"></span>
+    <button type="button" id="toast-undo">Undo</button>
+  </div>
+
   <div id="feedback-modal" class="fb-overlay hidden">
     <div class="fb-dialog" role="dialog" aria-modal="true" aria-labelledby="fb-title">
       <button type="button" class="fb-close" id="fb-close" aria-label="Close">×</button>

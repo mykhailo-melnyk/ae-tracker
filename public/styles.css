@@ -615,6 +615,9 @@ body.readonly .task .check:hover { background: inherit; }
   box-shadow: 0 6px 20px rgba(15, 23, 42, 0.35);
   font-size: 14px;
 }
+/* .toast sets display:flex and is declared after the generic `.hidden`, so it
+   would win the source-order tie and stay visible; re-assert hiding here. */
+.toast.hidden { display: none; }
 #toast-undo {
   background: none;
   border: none;

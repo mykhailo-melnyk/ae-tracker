@@ -14,7 +14,7 @@
 - Tracker only (`tracker.html`/`app.js`/`styles.css`); cert page out of scope.
 - Toast shows only after a **successful** write; failed writes keep the existing rollback + `alert`, no toast.
 - One toast at a time; a new toggle replaces the message and resets the 5s timer.
-- Bottom-left placement (`left/bottom: 24px`, `z-index: 50`) to avoid the bottom-right feedback FAB.
+- Bottom-center placement (`left: 50%; transform: translateX(-50%); bottom: 24px`, `z-index: 50`) — conventional undo-snackbar spot, clear of the bottom-right feedback FAB.
 - Read-only views never show a toast (`toggleTask` early-returns on `READONLY`).
 - `app.js` has no automated test harness; verification is manual.
 
@@ -48,7 +48,8 @@ Append to `public/styles.css`:
 /* ---- Undo toast ---- */
 .toast {
   position: fixed;
-  left: 24px;
+  left: 50%;
+  transform: translateX(-50%);
   bottom: 24px;
   z-index: 50;
   display: flex;
@@ -76,7 +77,7 @@ Append to `public/styles.css`:
 - [ ] **Step 3: Verify it renders when un-hidden**
 
 Run `npx http-server public -p 8080 -c-1`. In devtools console on the tracker page, run `document.getElementById('toast').classList.remove('hidden')`.
-Expected: a dark toast appears bottom-left with an "Undo" text button; it does not overlap the bottom-right feedback button.
+Expected: a dark toast appears bottom-center with an "Undo" text button; it does not overlap the bottom-right feedback button.
 
 - [ ] **Step 4: Commit**
 
@@ -149,7 +150,7 @@ Leave the `catch` (rollback + `alert`) unchanged — no toast on failure.
 - [ ] **Step 4: Verify end to end**
 
 With `http-server` + `wrangler dev` running, sign in, pick a competency:
-1. Check a task → "Marked as done · Undo" toast appears bottom-left, disappears after ~5s.
+1. Check a task → "Marked as done · Undo" toast appears bottom-center, disappears after ~5s.
 2. Click Undo before it dismisses → task reverts, totals/pills update, a "Marked as not done" toast shows.
 3. Toggle 3 tasks in quick succession → only one toast visible, showing the last action; timer resets each time.
 4. (Optional) Go offline in devtools, toggle a task → error `alert` fires, no toast.
@@ -171,7 +172,7 @@ git commit -m "feat: wire undo toast into task toggle (#23)"
 ## Self-Review
 
 **Spec coverage:**
-- Toast markup/placement/z-index bottom-left → Task 1. ✓
+- Toast markup/placement/z-index bottom-center → Task 1. ✓
 - Shows after successful write only → Task 2 Step 3 (inside `try`, after `res.json()`). ✓
 - Message done/not-done → Task 2 Step 2. ✓
 - Undo re-toggles + hides → Task 2 Step 2 (`undo.onclick`). ✓

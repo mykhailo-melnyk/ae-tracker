@@ -49,9 +49,10 @@ in one click without any modal in the normal flow.
 - **Auto-dismiss:** the toast hides after 5s. A new toggle replaces the message
   and resets the timer (clear any pending timeout first). Module state holds the
   active timeout id.
-- **Placement:** fixed **bottom-left** (`left: 24px; bottom: 24px`) so it never
-  collides with the bottom-right feedback FAB; `z-index: 50` (above the FAB's
-  40).
+- **Placement:** fixed **bottom-center** (`left: 50%; transform:
+  translateX(-50%); bottom: 24px`) — the conventional spot for an undo snackbar
+  and the most discoverable; `z-index: 50` (above the FAB's 40). It sits clear
+  of the bottom-right feedback FAB and auto-dismisses in 5s.
 - **Read-only:** `toggleTask` already returns early when `READONLY`, so no toast
   is ever shown in read-only views. No extra guard needed.
 

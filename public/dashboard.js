@@ -274,6 +274,10 @@ function renderTable() {
     const toggleBtn = AGG.is_superadmin
       ? `<button class="disable-btn${e.disabled ? " enable" : ""}" data-user="${e.username}" data-disabled="${e.disabled ? "1" : "0"}">${e.disabled ? "Enable" : "Disable"}</button>`
       : "";
+    // Delete is a super-admin-only, irreversible hard delete (typed-username confirm).
+    const deleteBtn = AGG.is_superadmin
+      ? `<button class="delete-btn" data-user="${e.username}">Delete</button>`
+      : "";
     return `
     <tr${e.disabled ? ' class="row-disabled"' : ""}>
       <td><div class="who"><div class="avatar">${(e.display_name || e.username).slice(0, 2).toUpperCase()}</div>
@@ -285,7 +289,7 @@ function renderTable() {
       <td><select class="comp-select" data-user="${e.username}" data-prev="${e.competency || ""}">${options}</select></td>
       <td><select class="leader-select" data-user="${e.username}" data-prev="${e.unit_leader || ""}">${leaderOptions}</select></td>
       <td><span class="last-active">${new Date(e.last_active).toLocaleDateString()}</span></td>
-      <td style="text-align:right">${toggleBtn}<a href="tracker.html?as=${e.username}" style="color:#2563eb;font-weight:600">View →</a></td>
+      <td style="text-align:right">${toggleBtn}${deleteBtn}<a href="tracker.html?as=${e.username}" style="color:#2563eb;font-weight:600">View →</a></td>
     </tr>`;
   }).join("");
   document.querySelectorAll(".comp-select").forEach((sel) => {
@@ -296,6 +300,9 @@ function renderTable() {
   });
   document.querySelectorAll(".disable-btn").forEach((btn) => {
     btn.addEventListener("click", () => toggleDisabled(btn));
+  });
+  document.querySelectorAll(".delete-btn").forEach((btn) => {
+    btn.addEventListener("click", () => deleteEngineer(btn));
   });
 }
 
@@ -322,6 +329,33 @@ async function toggleDisabled(btn) {
   } catch (e) {
     btn.disabled = false;
     alert("Could not " + verb + " @" + username + ". Try again in a moment.");
+  }
+}
+
+async function deleteEngineer(btn) {
+  const username = btn.dataset.user;
+  const typed = prompt(
+    `This permanently deletes @${username}'s progress. This cannot be undone.\n\n`
+    + `Type the username "${username}" to confirm:`);
+  if (typed === null) return; // cancelled
+  if (typed.trim().replace(/^@/, "") !== username) {
+    alert("Username did not match — nothing was deleted.");
+    return;
+  }
+  btn.disabled = true;
+  try {
+    const res = await apiFetch(WORKER + "/api/user/" + encodeURIComponent(username) + "/delete", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+    });
+    if (!res.ok) throw new Error("delete failed: " + res.status);
+    // Drop the engineer locally so both the counts and the table update without a reload.
+    AGG.engineers = AGG.engineers.filter((e) => e.username !== username);
+    renderKpis();
+    renderTable();
+  } catch (e) {
+    btn.disabled = false;
+    alert("Could not delete @" + username + ". Try again in a moment.");
   }
 }
 

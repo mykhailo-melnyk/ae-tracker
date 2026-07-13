@@ -110,6 +110,78 @@ function formatEstimate(min) {
   return (Number.isInteger(hrs) ? hrs : hrs.toFixed(1)) + " hr";
 }
 
+// ---- Level-assessment launch (tasks flagged `assessment` in the curriculum) ----
+
+// The level an assessment task belongs to, or null if it isn't in the loaded path.
+function levelOfTask(taskId) {
+  for (const lvl of CURRICULUM.levels) {
+    if (lvl.tasks.some((t) => t.id === taskId)) return lvl;
+  }
+  return null;
+}
+
+// The assessment unlocks when every OTHER task in its level is done (the Worker
+// enforces the same rule server-side).
+function assessmentUnlocked(lvl) {
+  return lvl.tasks.filter((t) => !t.assessment).every((t) => PROGRESS.tasks[t.id]?.done);
+}
+
+// A plain link can't carry the Bearer session token (same Safari constraint that
+// motivated apiFetch), so the launcher is a button: ask the Worker for this
+// engineer's unique candidate link, then render it.
+function assessmentLaunchHtml(task) {
+  const lvl = levelOfTask(task.id);
+  const unlocked = lvl && assessmentUnlocked(lvl);
+  return `
+    <div class="assessment-launch">
+      <button type="button" class="assessment-start" ${unlocked ? "" : "disabled"}>Start assessment</button>
+      <span class="assessment-result">${unlocked ? "" : "Finish the level’s other tasks to unlock."}</span>
+    </div>`;
+}
+
+async function startAssessment(taskId, launchEl) {
+  const lvl = levelOfTask(taskId);
+  if (!lvl) return;
+  const btn = launchEl.querySelector(".assessment-start");
+  const result = launchEl.querySelector(".assessment-result");
+  btn.disabled = true;
+  result.textContent = "Getting your link…";
+  try {
+    const res = await apiFetch(WORKER + "/api/assessment", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ level: lvl.id }),
+    });
+    if (res.status === 409) {
+      const body = await res.json();
+      result.textContent = body.error === "level incomplete"
+        ? `Not yet — ${body.remaining} task${body.remaining === 1 ? "" : "s"} in this level still to go.`
+        : "Pick your competency first.";
+      btn.disabled = false;
+      return;
+    }
+    if (!res.ok) throw new Error("assessment failed: " + res.status);
+    const { url } = await res.json();
+    // Rendered as a link (not window.open) so popup blockers can't eat it.
+    result.innerHTML = `<a href="${url}" target="_blank" rel="noopener">Open your assessment ↗</a>`;
+  } catch (e) {
+    result.textContent = "Could not get your assessment link. Try again in a moment.";
+    btn.disabled = false;
+  }
+}
+
+// Wire Start-assessment buttons inside a just-rendered container.
+function wireAssessmentButtons(container) {
+  container.querySelectorAll(".task").forEach((el) => {
+    const launch = el.querySelector(".assessment-launch");
+    if (!launch) return;
+    launch.querySelector(".assessment-start").addEventListener("click", (e) => {
+      e.stopPropagation();
+      startAssessment(el.dataset.task, launch);
+    });
+  });
+}
+
 // Shared task-row markup used by both the focus card and the search results.
 // opts.levelBadge (e.g. "L3") adds a "LEVEL 3" badge after the title;
 // opts.report (default true) emits the per-task "Report / suggest" button.
@@ -124,6 +196,7 @@ function taskRowHtml(task, opts = {}) {
         <div class="title">${task.title} <span class="kind-tag ${task.kind}">${task.kind}</span>${task.estimated_minutes ? `<span class="task-est">· ${formatEstimate(task.estimated_minutes)}</span>` : ""}${badge}</div>
         ${task.desc ? `<div class="desc">${task.desc}</div>` : ""}
         ${task.link ? `<a class="external" href="${task.link}" target="_blank" rel="noopener">${task.link} ↗</a>` : ""}
+        ${(task.assessment && !READONLY) ? assessmentLaunchHtml(task) : ""}
         ${(!READONLY && report) ? `<div><button type="button" class="task-report">⚑ Report / suggest</button></div>` : ""}
       </div>
     </div>`;
@@ -164,6 +237,7 @@ function renderSearch() {
   results.querySelectorAll(".task").forEach((el) => {
     el.querySelector(".check").addEventListener("click", () => toggleTask(el.dataset.task));
   });
+  wireAssessmentButtons(results);
 }
 
 // Wire the search input once.
@@ -203,6 +277,7 @@ function renderFocusCard() {
     const rep = el.querySelector(".task-report");
     if (rep) rep.addEventListener("click", (e) => { e.stopPropagation(); openFeedback(el.dataset.task); });
   });
+  wireAssessmentButtons(card);
 }
 
 // ---- Feedback modal ----

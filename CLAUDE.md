@@ -65,7 +65,10 @@ The aggregate dashboard (`src/aggregate.ts`) lists the `progress/` directory, re
 A **generic certifications axis** parallel to the competency curriculum, for
 self-service prep toward external certification exams (Claude Code first). Like
 the curriculum, it is a **registry + path files**: `public/certifications.json`
-(the registry: `certifications[].{id,code,label,file}`) and one
+(the registry: `certifications[].{id,code,label,vendor,file}` plus a top-level
+`vendors` map of `{label}` per vendor, used to group certifications by vendor
+in the cert page's two-tier picker — vendor chips, then one pill card per
+certification of the selected vendor) and one
 `public/certification.<id>.json` per cert (`sections[].items[]`). **Progress
 reuses the existing store** — cert prep items are ordinary entries in
 `progress/<username>.json`'s `tasks` map, ticked via `POST /api/mark` (which
@@ -104,7 +107,7 @@ additionally needs a new static import in `worker/src/certifications.ts`.
 | Delete an engineer (permanent) | As a super admin, use the per-row **Delete** button on the dashboard (or `POST /api/user/<username>/delete`). Hard delete — removes `progress/<username>.json` entirely (self-delete blocked) and **cascades**: clears the `unit_leader` reference on anyone the deleted engineer led (else they'd dangle as a ghost leader in the filter/export). Irreversible; recoverable only via the `ae-tracker-data` repo's git history. Use **Disable** instead if you may need the data back. |
 | Update a competency's tasks | Edit that competency's `public/curriculum.<id>.json` (keep task IDs prefixed `<id>-L<n>.T<m>`); push to `main` (CI validates, Pages redeploys the frontend). For the dashboard aggregate to reflect it, also `wrangler deploy` the Worker (it bundles the JSON). |
 | Add a competency | Add `public/curriculum.<id>.json`, add an entry (with `file`) to `public/curriculum.json`'s `competencies`, add a static import for it in `worker/src/curriculum.ts`, then push (CI validates, Pages redeploys) and `wrangler deploy`. |
-| Add a certification | Add `public/certification.<id>.json`, add an entry (with `file`, short `code`) to `public/certifications.json`, add a static import in `worker/src/certifications.ts`, then push (CI validates, Pages redeploys) and `wrangler deploy`. |
+| Add a certification | Add `public/certification.<id>.json`, add an entry (with `file`, short `code`, `vendor` — add a new `vendors` entry too if it's a new vendor) to `public/certifications.json`, add a static import in `worker/src/certifications.ts`, then push (CI validates, Pages redeploys) and `wrangler deploy`. |
 | Update a cert's prep tasks | Edit that cert's `public/certification.<id>.json` (keep item ids `<code>.<section>.<n>`, ≤ 32 chars); push (CI validates, Pages redeploys). For the dashboard readiness to reflect it, also `wrangler deploy` (the Worker bundles the JSON). |
 | Validate the curriculum locally | `npm install ajv@8 ajv-formats@2 && node schema/validate-curriculum.mjs` (same check CI runs). |
 | Rotate the bot PAT | New fine-grained PAT scoped to `ae-tracker-data` (Contents R/W), `wrangler secret put BOT_PAT`, revoke old. |

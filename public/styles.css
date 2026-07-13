@@ -89,6 +89,15 @@ body {
   grid-template-columns: repeat(5, 1fr);
   gap: 10px;
 }
+.pill-bar.cert-pill-bar {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+.cert-pill-bar .pill { padding: 18px 16px; }
+.cert-pill-bar .pill-name {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
 .pill {
   background: white;
   border: 1.5px solid #e2e8f0;

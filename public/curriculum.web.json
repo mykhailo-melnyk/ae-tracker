@@ -154,6 +154,14 @@
           "desc": "Capstone deliverable: annotate an agent transcript — mark good vs bad AI behavior and say why — plus the AI-claims practical exam: quiz AI on a domain you know (including false-premise questions), predict correct-vs-guessing before verifying, then score yourself. Rubric, deliverables, and optional GLAT/MAILS references in the linked doc.",
           "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L1.md",
           "estimated_minutes": 60
+        },
+        {
+          "id": "web-L1.T20",
+          "kind": "checkpoint",
+          "title": "Level assessment: live L1 interview session",
+          "desc": "When every task above is done, click Start assessment to generate your unique assessment link, then schedule the live session with your interviewer. The assessment is taken live on a screen share; you will not see a score at the end. Tick this task done after your session.",
+          "assessment": true,
+          "estimated_minutes": 60
         }
       ]
     },
@@ -301,6 +309,14 @@
           "desc": "Capstone deliverable: take an AI-generated multi-file change and bring it to merge quality yourself — review the diff, fix the plausible-but-wrong parts, write the tests the AI missed, and simplify. A short SPACE-framework reflection is the supporting evidence. Rubric and deliverables in the linked doc.",
           "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L2.md",
           "estimated_minutes": 90
+        },
+        {
+          "id": "web-L2.T19",
+          "kind": "checkpoint",
+          "title": "Level assessment: live L2 interview session",
+          "desc": "When every task above is done, click Start assessment to generate your unique assessment link, then schedule the live session with your interviewer. The assessment is taken live on a screen share; you will not see a score at the end. Tick this task done after your session.",
+          "assessment": true,
+          "estimated_minutes": 60
         }
       ]
     },
@@ -401,6 +417,14 @@
           "desc": "Capstone deliverable: take a real backlog item touching more than 3 files and ship it Context → Spec → Plan → Implement, pushing back on the plan before approving. Hand in the spec, the approved plan, and the merged PR. Rubric and required evidence in the linked doc.",
           "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L3.md",
           "estimated_minutes": 120
+        },
+        {
+          "id": "web-L3.T13",
+          "kind": "checkpoint",
+          "title": "Level assessment: live L3 interview session",
+          "desc": "When every task above is done, click Start assessment to generate your unique assessment link, then schedule the live session with your interviewer. The assessment is taken live on a screen share; you will not see a score at the end. Tick this task done after your session.",
+          "assessment": true,
+          "estimated_minutes": 60
         }
       ]
     },
@@ -547,6 +571,14 @@
           "desc": "Capstone deliverable in two parts: ship a custom command or skill another engineer actually adopts, backed by a small eval suite that gates it; and complete the OWASP finbot CTF against an AI/agentic app. Rubric, deliverables, and links in the doc.",
           "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L4.md",
           "estimated_minutes": 180
+        },
+        {
+          "id": "web-L4.T19",
+          "kind": "checkpoint",
+          "title": "Level assessment: live L4 interview session",
+          "desc": "When every task above is done, click Start assessment to generate your unique assessment link, then schedule the live session with your interviewer. The assessment is taken live on a screen share; you will not see a score at the end. Tick this task done after your session.",
+          "assessment": true,
+          "estimated_minutes": 60
         }
       ]
     },
@@ -629,6 +661,14 @@
           "desc": "Capstone deliverable: build a verification harness for a real codebase area (eval suite, contract tests, or a small MCP server), show it catching a bad change before merge, and write the team rules that codify the lesson. The build counterpart to the architecture-partner reflection above. Rubric and deliverables in the linked doc.",
           "link": "https://github.com/mykhailo-melnyk/ae-tracker/blob/main/docs/curriculum/assessments/L5-capstone.md",
           "estimated_minutes": 180
+        },
+        {
+          "id": "web-L5.T11",
+          "kind": "checkpoint",
+          "title": "Level assessment: live L5 interview session",
+          "desc": "When every task above is done, click Start assessment to generate your unique assessment link, then schedule the live session with your interviewer. The assessment is taken live on a screen share; you will not see a score at the end. Tick this task done after your session.",
+          "assessment": true,
+          "estimated_minutes": 60
         }
       ]
     }

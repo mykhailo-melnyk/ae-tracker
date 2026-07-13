@@ -18,21 +18,11 @@ const registry = readJson(join(pub, "certifications.json"));
 if (!registry.version) fail("certifications.json: missing version");
 if (!Array.isArray(registry.certifications)) fail("certifications.json: certifications must be an array");
 
-if (typeof registry.vendors !== "object" || registry.vendors === null || Array.isArray(registry.vendors)) {
-  fail("certifications.json: vendors must be an object");
-}
-for (const [key, v] of Object.entries(registry.vendors ?? {})) {
-  if (typeof v.label !== "string" || !v.label) fail(`vendor "${key}": missing/invalid "label"`);
-}
-
 const seenIds = new Map(); // itemId -> cert id that owns it
 
 for (const cert of registry.certifications ?? []) {
-  for (const k of ["id", "code", "label", "file", "vendor"]) {
+  for (const k of ["id", "code", "label", "file"]) {
     if (typeof cert[k] !== "string" || !cert[k]) fail(`cert "${cert.id ?? "?"}": missing/invalid "${k}"`);
-  }
-  if (cert.vendor && !(registry.vendors && registry.vendors[cert.vendor])) {
-    fail(`cert "${cert.id}": vendor "${cert.vendor}" not found in registry vendors`);
   }
   if (!cert.file || !existsSync(join(pub, cert.file))) {
     fail(`cert "${cert.id}": file public/${cert.file} is missing`);

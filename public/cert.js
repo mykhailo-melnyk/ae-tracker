@@ -1,9 +1,7 @@
 const WORKER = window.WORKER_URL;
-let REGISTRY = null;      // certifications.json
-let PROGRESS = null;      // the engineer's progress file
-let CURRENT = null;       // the loaded path file for the focused certification
-let VENDOR_ID = null;     // selected vendor key (into REGISTRY.vendors)
-let VENDOR_CERTS = [];    // [{ meta, path }] for every certification of the selected vendor
+let REGISTRY = null;    // certifications.json
+let PROGRESS = null;    // the engineer's progress file
+let CURRENT = null;     // the loaded path file for the selected cert
 
 function formatEstimate(min) {
   if (min < 60) return min + " min";
@@ -28,62 +26,37 @@ function allItems(path) {
   return path.sections.flatMap((s) => s.items);
 }
 
-// Vendor picker — uses the tracker's competency-picker markup (.comp-label /
-// .comp-chips / .comp-chip.on), all defined under `.competency-picker` in
-// styles.css — the only stylesheet cert.html loads.
-function renderVendorPicker() {
+// Uses the tracker's competency-picker markup (.comp-label / .comp-chips / .comp-chip.on),
+// all defined under `.competency-picker` in styles.css — the only stylesheet cert.html loads.
+function renderPicker() {
   const box = document.getElementById("cert-picker");
-  const vendorIds = Object.keys(REGISTRY.vendors || {});
-  const chips = vendorIds.map((id) => {
-    const on = VENDOR_ID === id;
-    return `<button type="button" class="comp-chip ${on ? "on" : ""}" data-vendor="${id}">${REGISTRY.vendors[id].label}</button>`;
+  const certs = REGISTRY.certifications || [];
+  const chips = certs.map((c) => {
+    const on = CURRENT && CURRENT.certification === c.id;
+    return `<button type="button" class="comp-chip ${on ? "on" : ""}" data-cert="${c.id}">${c.label}</button>`;
   }).join("");
-  box.innerHTML = `<div class="comp-label">Vendor</div><div class="comp-chips">${chips}</div>`;
+  box.innerHTML = `<div class="comp-label">Certification</div><div class="comp-chips">${chips}</div>`;
   box.querySelectorAll(".comp-chip").forEach((el) =>
-    el.addEventListener("click", () => selectVendor(el.dataset.vendor)));
-}
-
-// Certification pill bar for the selected vendor — one .pill per certification,
-// mirroring the tracker's renderPillBar (app.js) for competency levels. VENDOR_CERTS
-// is fully loaded (every certification's path file) before this renders, so both
-// progress counts and exam.name are available without extra fetches per card.
-function renderCertPillBar() {
-  const bar = document.getElementById("cert-pill-bar");
-  bar.innerHTML = "";
-  for (const { meta, path } of VENDOR_CERTS) {
-    const items = allItems(path);
-    const done = items.filter((it) => PROGRESS.tasks[it.id]?.done).length;
-    const total = items.length;
-    const complete = total > 0 && done === total;
-    const isFocus = CURRENT && CURRENT.certification === meta.id;
-    const cls = complete ? "complete" : (isFocus ? "current" : "");
-    const pill = document.createElement("div");
-    pill.className = "pill " + cls;
-    pill.innerHTML = `
-      <div class="pill-name">${(path.exam && path.exam.name) || meta.label}</div>
-      <div class="pill-count">${complete ? "✓ " : ""}${done} / ${total}</div>
-      <div class="pill-bar-mini"><div style="width:${total ? (done / total) * 100 : 0}%"></div></div>
-    `;
-    pill.addEventListener("click", () => focusCert(meta.id));
-    bar.appendChild(pill);
-  }
+    el.addEventListener("click", () => selectCert(el.dataset.cert)));
 }
 
 function renderBanner() {
   const box = document.getElementById("cert-banner");
-  const parts = [];
-  if (CURRENT && CURRENT.exam && CURRENT.exam.name) {
-    // The pill card also shows this name, but truncates long ones with an
-    // ellipsis (.pill-name is nowrap) — this is the only place it's shown in full.
-    parts.push(`<div class="move-on">Prep path for: <strong>${CURRENT.exam.name}</strong></div>`);
-  }
   if (CURRENT && CURRENT.draft) {
     const note = CURRENT.exam && CURRENT.exam.notes ? CURRENT.exam.notes : "This path is a draft under review.";
-    parts.push(`<div class="move-on"><strong>Draft:</strong> ${note}</div>`);
+    box.innerHTML = `<div class="move-on"><strong>Draft:</strong> ${note}</div>`;
   } else if (CURRENT && CURRENT.exam && CURRENT.exam.notes) {
-    parts.push(`<div class="move-on">${CURRENT.exam.notes}</div>`);
+    box.innerHTML = `<div class="move-on">${CURRENT.exam.notes}</div>`;
+  } else {
+    box.innerHTML = "";
   }
-  box.innerHTML = parts.join("");
+}
+
+function renderTotals() {
+  const items = allItems(CURRENT);
+  const done = items.filter((it) => PROGRESS.tasks[it.id]?.done).length;
+  document.getElementById("cert-totals").innerHTML =
+    `<strong>${done}</strong> / ${items.length} items done`;
 }
 
 function renderBody() {
@@ -122,35 +95,14 @@ function renderBody() {
 }
 
 function renderCert() {
-  renderVendorPicker();
-  renderCertPillBar();
-  if (!CURRENT) {
-    document.getElementById("cert-banner").innerHTML = "";
-    document.getElementById("cert-body").innerHTML =
-      `<div class="empty-path">This vendor has no certification prep paths yet.</div>`;
-    return;
-  }
+  renderPicker();
   renderBanner();
+  renderTotals();
   renderBody();
 }
 
-// Loads every certification's path file for the given vendor in parallel, then
-// focuses the vendor's first certification (same zero-extra-click default the
-// page had with a single certification before this redesign).
-async function selectVendor(vendorId) {
-  VENDOR_ID = vendorId;
-  const certs = (REGISTRY.certifications || []).filter((c) => c.vendor === vendorId);
-  VENDOR_CERTS = await Promise.all(certs.map(async (meta) => ({ meta, path: await loadPath(meta.id) })));
-  CURRENT = VENDOR_CERTS.length ? VENDOR_CERTS[0].path : null;
-  renderCert();
-}
-
-// Switches the focused certification within the already-loaded VENDOR_CERTS —
-// no fetch needed, every vendor certification was loaded by selectVendor.
-function focusCert(certId) {
-  const entry = VENDOR_CERTS.find((v) => v.meta.id === certId);
-  if (!entry) return;
-  CURRENT = entry.path;
+async function selectCert(certId) {
+  CURRENT = await loadPath(certId);
   renderCert();
 }
 
@@ -158,7 +110,7 @@ async function toggleItem(itemId) {
   const currentlyDone = PROGRESS.tasks[itemId]?.done === true;
   const newDone = !currentlyDone;
   PROGRESS.tasks[itemId] = { done: newDone, at: new Date().toISOString() }; // optimistic
-  renderCertPillBar();
+  renderTotals();
   renderBody();
   try {
     const res = await apiFetch(WORKER + "/api/mark", {
@@ -170,7 +122,7 @@ async function toggleItem(itemId) {
     PROGRESS = await res.json();
   } catch (e) {
     PROGRESS.tasks[itemId] = { done: currentlyDone }; // roll back
-    renderCertPillBar();
+    renderTotals();
     renderBody();
     alert("Could not save your change. Try again in a moment.");
   }
@@ -203,8 +155,8 @@ async function init() {
 
   REGISTRY = await loadRegistry();
   document.getElementById("cert-app").classList.remove("hidden");
-  const firstVendor = Object.keys(REGISTRY.vendors || {})[0];
-  if (firstVendor) await selectVendor(firstVendor);
+  const first = (REGISTRY.certifications || [])[0];
+  if (first) await selectCert(first.id);
 }
 
 init().catch((e) => {

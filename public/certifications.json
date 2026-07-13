@@ -1,10 +1,14 @@
 {
   "version": "1.0",
+  "vendors": {
+    "anthropic": { "label": "Anthropic" }
+  },
   "certifications": [
     {
       "id": "claude-code",
       "code": "cc",
       "label": "Claude Code",
+      "vendor": "anthropic",
       "file": "certification.claude-code.json"
     }
   ]

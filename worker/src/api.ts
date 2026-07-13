@@ -195,6 +195,77 @@ export async function handleApiFeedback(
   }
 }
 
+/**
+ * POST /api/assessment — an engineer who finished a level requests their unique link for that
+ * level's assessment. The Worker verifies completion against the engineer's own path (every task
+ * in the level except the `assessment` launcher itself), then asks the assessment portal
+ * (server-to-server, shared secret) to create — or return the still-open — session for this
+ * engineer + level. Only ever requests a session for the AUTHENTICATED engineer; the portal
+ * returns a candidate URL, never assessment content.
+ */
+export async function handleApiAssessment(
+  request: Request,
+  env: Env,
+  fetchFn: typeof fetch = fetch,
+): Promise<Response> {
+  const auth = await requireSession(request, env);
+  if (auth instanceof Response) return auth;
+  const { username, displayName } = auth;
+
+  let body: { level?: unknown };
+  try { body = await request.json(); } catch { return new Response("invalid json", { status: 400 }); }
+  const level = body.level;
+  if (typeof level !== "string" || !/^L[1-5]$/.test(level)) return new Response("invalid body", { status: 400 });
+
+  // Integration is opt-in: without both env values the endpoint is off (mirrors how a missing
+  // FEEDBACK_PAT would break feedback — but fail explicitly instead of on the upstream call).
+  if (!env.ASSESSMENT_URL || !env.ASSESSMENT_SHARED_SECRET) {
+    return Response.json({ error: "assessment integration not configured" }, { status: 503 });
+  }
+
+  const cfg = { owner: env.DATA_REPO_OWNER, repo: env.DATA_REPO_NAME, token: env.BOT_PAT };
+  const existing = await readJsonFile<ProgressFile>(cfg, progressPath(username), fetchFn);
+  // Disabled engineers are locked out, same as the other self-serve endpoints.
+  if (existing?.data.disabled) return Response.json({ error: "disabled" }, { status: 403 });
+  const progress = existing?.data;
+
+  const path = curriculum.pathFor(progress?.competency);
+  if (!path) return Response.json({ error: "no competency selected" }, { status: 409 });
+  const lvl = path.levels.find((l) => l.id === level);
+  if (!lvl) return Response.json({ error: "unknown level" }, { status: 400 });
+
+  // Every task in the level must be done — except the assessment launcher itself.
+  const required = lvl.tasks.filter((t) => !t.assessment);
+  const remaining = required.filter((t) => progress?.tasks[t.id]?.done !== true).length;
+  if (remaining > 0) return Response.json({ error: "level incomplete", remaining }, { status: 409 });
+
+  const endpoint = env.ASSESSMENT_URL.replace(/\/+$/, "") + "/api/integrations/tracker/sessions";
+  let res: Response;
+  try {
+    res = await fetchFn(endpoint, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${env.ASSESSMENT_SHARED_SECRET}`,
+      },
+      body: JSON.stringify({ githubUsername: username, displayName, competency: progress?.competency, level }),
+    });
+  } catch (e) {
+    console.error(`assessment handoff unreachable: user=${username} level=${level} err=${e instanceof Error ? e.message : String(e)}`);
+    return Response.json({ error: "assessment service unavailable" }, { status: 502 });
+  }
+  if (!res.ok) {
+    console.error(`assessment handoff failed: user=${username} level=${level} status=${res.status}`);
+    return Response.json({ error: "assessment service unavailable" }, { status: 502 });
+  }
+  const data = await res.json() as { url?: unknown; reused?: unknown };
+  if (typeof data.url !== "string") {
+    console.error(`assessment handoff bad payload: user=${username} level=${level}`);
+    return Response.json({ error: "assessment service unavailable" }, { status: 502 });
+  }
+  return Response.json({ url: data.url, reused: data.reused === true });
+}
+
 function parseList(raw: string | undefined): string[] {
   return (raw ?? "").split(",").map((s) => s.trim()).filter(Boolean);
 }

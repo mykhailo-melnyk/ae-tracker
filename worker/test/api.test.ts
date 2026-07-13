@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { handleApiMe, handleApiMark, handleApiUser, handleApiCompetencies, handleApiUserCompetencies, handleApiUserDisabled, handleApiUserLeader, handleApiUserDelete } from "../src/api";
+import { handleApiMe, handleApiMark, handleApiUser, handleApiCompetencies, handleApiUserCompetencies, handleApiUserDisabled, handleApiUserLeader, handleApiUserDelete, handleApiAssessment } from "../src/api";
 import { signSession } from "../src/session";
+import { pathFor } from "../src/curriculum";
 
 const ENV = {
   SESSION_SECRET: "test-secret-32-bytes-long-padding-ok",
@@ -747,5 +748,143 @@ describe("/api/user/:username/leader (admin only)", () => {
     const res = await handleApiUserLeader(req, ADMIN_ENV, fetchMock, "anna");
     expect(res.status).toBe(200);
     expect(putAttempts).toBe(2);
+  });
+});
+
+describe("/api/assessment", () => {
+  const PORTAL = "https://assessment.example";
+  const SECRET = "portal-shared-secret";
+  const AENV = { ...ENV, ASSESSMENT_URL: PORTAL, ASSESSMENT_SHARED_SECRET: SECRET } as any;
+
+  // A progress file where every non-assessment task of the given web level is done.
+  // Uses the real bundled curriculum so the tests track content changes.
+  function completedLevelProgress(levelId: string, extra: Record<string, unknown> = {}) {
+    const lvl = pathFor("web")!.levels.find((l) => l.id === levelId)!;
+    const tasks: Record<string, { done: boolean; at: string }> = {};
+    for (const t of lvl.tasks) {
+      if (!t.assessment) tasks[t.id] = { done: true, at: "2026-07-01T00:00:00Z" };
+    }
+    return { github_username: "anna", created_at: "x", updated_at: "y", competency: "web", tasks, ...extra };
+  }
+
+  function progressResponse(progress: unknown): Response {
+    return new Response(JSON.stringify({ sha: "s1", content: btoa(JSON.stringify(progress)), encoding: "base64" }),
+      { headers: { "content-type": "application/json" } });
+  }
+
+  async function callAssessment(env: any, fetchMock: typeof fetch, level: unknown = "L1", displayName?: string) {
+    const session = await signSession("anna", ENV.SESSION_SECRET, 3600, displayName);
+    const req = new Request("https://w.example/api/assessment", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${session}`, "content-type": "application/json" },
+      body: JSON.stringify({ level }),
+    });
+    return handleApiAssessment(req, env, fetchMock);
+  }
+
+  it("returns 401 with no session", async () => {
+    const req = new Request("https://w.example/api/assessment", { method: "POST", body: "{}" });
+    const res = await handleApiAssessment(req, AENV, globalThis.fetch);
+    expect(res.status).toBe(401);
+  });
+
+  it("rejects an invalid or missing level with 400 (before any read or portal call)", async () => {
+    for (const bad of ["L0", "L6", "l1", 2, null]) {
+      const noFetch = (async (url: string) => { throw new Error(`unexpected fetch for level ${JSON.stringify(bad)}: ${url}`); }) as typeof fetch;
+      const res = await callAssessment(AENV, noFetch, bad);
+      expect(res.status, `level ${JSON.stringify(bad)}`).toBe(400);
+    }
+    // Missing level entirely
+    const session = await signSession("anna", ENV.SESSION_SECRET, 3600);
+    const req = new Request("https://w.example/api/assessment", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${session}`, "content-type": "application/json" },
+      body: "{}",
+    });
+    const res = await handleApiAssessment(req, AENV, globalThis.fetch);
+    expect(res.status).toBe(400);
+  });
+
+  it("returns 503 when the integration env is not configured", async () => {
+    const res = await callAssessment(ENV, globalThis.fetch);
+    expect(res.status).toBe(503);
+  });
+
+  it("returns 403 for a disabled engineer", async () => {
+    const fetchMock = (async () => progressResponse(completedLevelProgress("L1", { disabled: true }))) as typeof fetch;
+    const res = await callAssessment(AENV, fetchMock);
+    expect(res.status).toBe(403);
+  });
+
+  it("returns 409 when no competency is selected", async () => {
+    const fetchMock = (async () => progressResponse({ github_username: "anna", created_at: "x", updated_at: "y", tasks: {} })) as typeof fetch;
+    const res = await callAssessment(AENV, fetchMock);
+    expect(res.status).toBe(409);
+    expect((await res.json() as any).error).toBe("no competency selected");
+  });
+
+  it("returns 409 with the remaining count when the level is incomplete, and never calls the portal", async () => {
+    const progress = completedLevelProgress("L1");
+    const doneIds = Object.keys(progress.tasks);
+    delete progress.tasks[doneIds[0]];
+    delete progress.tasks[doneIds[1]];
+    const calls: string[] = [];
+    const fetchMock = (async (url: string) => { calls.push(url); return progressResponse(progress); }) as typeof fetch;
+    const res = await callAssessment(AENV, fetchMock);
+    expect(res.status).toBe(409);
+    const body = await res.json() as any;
+    expect(body.error).toBe("level incomplete");
+    expect(body.remaining).toBe(2);
+    expect(calls.some((u) => u.startsWith(PORTAL))).toBe(false);
+  });
+
+  it("relays the portal URL on success, sending the shared secret and engineer identity", async () => {
+    // Note: the assessment launcher task itself is NOT required — the level counts as
+    // complete when every other task is done.
+    let portalReq: { url: string; init?: RequestInit } | undefined;
+    const fetchMock = (async (url: string, init?: RequestInit) => {
+      if (url.startsWith(PORTAL)) {
+        portalReq = { url, init };
+        return Response.json({ url: "https://assessment.example/take/tok-1", sessionId: "tok-1", reused: false }, { status: 201 });
+      }
+      return progressResponse(completedLevelProgress("L2"));
+    }) as typeof fetch;
+    const res = await callAssessment(AENV, fetchMock, "L2", "Anna Smith");
+    expect(res.status).toBe(200);
+    const body = await res.json() as any;
+    expect(body.url).toBe("https://assessment.example/take/tok-1");
+    expect(body.reused).toBe(false);
+
+    expect(portalReq!.url).toBe(`${PORTAL}/api/integrations/tracker/sessions`);
+    const headers = portalReq!.init!.headers as Record<string, string>;
+    expect(headers.authorization).toBe(`Bearer ${SECRET}`);
+    const sent = JSON.parse(portalReq!.init!.body as string);
+    expect(sent).toEqual({ githubUsername: "anna", displayName: "Anna Smith", competency: "web", level: "L2" });
+  });
+
+  it("passes reused:true through when the portal returns the still-open session", async () => {
+    const fetchMock = (async (url: string) => {
+      if (url.startsWith(PORTAL)) {
+        return Response.json({ url: "https://assessment.example/take/tok-1", sessionId: "tok-1", reused: true }, { status: 200 });
+      }
+      return progressResponse(completedLevelProgress("L1"));
+    }) as typeof fetch;
+    const res = await callAssessment(AENV, fetchMock);
+    expect(res.status).toBe(200);
+    expect((await res.json() as any).reused).toBe(true);
+  });
+
+  it("returns 502 when the portal errors or is unreachable", async () => {
+    const erroring = (async (url: string) => {
+      if (url.startsWith(PORTAL)) return new Response("boom", { status: 500 });
+      return progressResponse(completedLevelProgress("L1"));
+    }) as typeof fetch;
+    expect((await callAssessment(AENV, erroring)).status).toBe(502);
+
+    const throwing = (async (url: string) => {
+      if (url.startsWith(PORTAL)) throw new Error("network down");
+      return progressResponse(completedLevelProgress("L1"));
+    }) as typeof fetch;
+    expect((await callAssessment(AENV, throwing)).status).toBe(502);
   });
 });

@@ -12,7 +12,9 @@ import backendPath from "../../public/curriculum.backend.json";
 
 export interface LevelTasks {
   id: string;
-  tasks: Array<{ id: string }>;
+  // `assessment` marks the level's assessment-launcher task (see /api/assessment), which is
+  // excluded from that endpoint's "level complete" requirement.
+  tasks: Array<{ id: string; assessment?: boolean }>;
 }
 
 // What the aggregate needs from a resolved path: the per-level task ids. Path files

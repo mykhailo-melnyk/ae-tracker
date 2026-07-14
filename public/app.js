@@ -162,8 +162,11 @@ async function startAssessment(taskId, launchEl) {
     }
     if (!res.ok) throw new Error("assessment failed: " + res.status);
     const { url } = await res.json();
-    // Rendered as a link (not window.open) so popup blockers can't eat it.
-    result.innerHTML = `<a href="${url}" target="_blank" rel="noopener">Open your assessment ↗</a>`;
+    // Same-tab redirect: popup blockers ignore same-tab navigation (unlike
+    // window.open after an await), and the link stays as a fallback for anyone
+    // who comes back to this tab.
+    result.innerHTML = `<a href="${url}" rel="noopener">Taking you to your assessment… ↗</a>`;
+    window.location.assign(url);
   } catch (e) {
     result.textContent = "Could not get your assessment link. Try again in a moment.";
     btn.disabled = false;

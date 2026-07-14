@@ -27,7 +27,7 @@ engineer (tracker.html)                Worker                        assessment 
                                                                    Authorization: Bearer <shared secret>
                                                                    {githubUsername, displayName, competency, level}
                                                                    creates/reuses session ◀─ {url}
-  link rendered ◀───────────────  {url}
+  redirected to url ◀────────────  {url}
 ```
 
 ## Non-goals
@@ -74,8 +74,10 @@ separate-least-privilege-secret pattern — this secret can only mint assessment
 
 Tasks flagged `assessment` render a **Start assessment** button instead of a plain link. A plain
 `<a href>` cannot carry the Bearer session token (the same Safari cross-site-cookie constraint
-that motivated `apiFetch`), so the button calls the endpoint via `apiFetch` and then renders the
-returned candidate URL as a link. When the level's other tasks aren't all done yet, the button is
+that motivated `apiFetch`), so the button calls the endpoint via `apiFetch` and then navigates to
+the returned candidate URL in the same tab (same-tab navigation is exempt from popup blockers; a
+fallback link is also rendered for anyone who navigates back). When the level's other tasks aren't
+all done yet, the button is
 disabled with a "finish the level first" hint (the Worker enforces this server-side regardless).
 Hidden in read-only (`?as=`) views.
 

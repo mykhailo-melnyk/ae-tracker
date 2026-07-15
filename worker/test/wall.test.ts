@@ -151,6 +151,17 @@ describe("computeWall", () => {
     expect(wall.cards.milestones.some((e) => e.username === "m")).toBe(false);
   });
 
+  it("celebrates starting a cert's prep in the last 7 days (first item), not old starts", async () => {
+    const files = {
+      "starter.json": prog("starter", { "cc.a.1": { done: true, at: "2026-07-13T00:00:00Z" } }),
+      "veteran.json": prog("veteran", { "cc.a.1": { done: true, at: "2026-06-01T00:00:00Z" } }),
+    };
+    const wall = await computeWall(cfg, registryOf({ web: WEB }), mockFetch(files), NOW, CERTS);
+    expect(wall.cards.cert_started).toContainEqual(
+      { username: "starter", display_name: "starter", cert_id: "claude-code", cert_label: "Claude Code" });
+    expect(wall.cards.cert_started.some((e) => e.username === "veteran")).toBe(false);
+  });
+
   it("excludes disabled engineers from every card", async () => {
     const files = {
       "ghost.json": prog("ghost", { "web-L1.T1": { done: true, at: "2026-07-14T00:00:00Z" } }, { disabled: true }),
@@ -172,7 +183,7 @@ describe("computeWall", () => {
   it("returns all-empty cards for an empty progress dir", async () => {
     const wall = await computeWall(cfg, registryOf({ web: WEB }), mockFetch({}), NOW, CERTS);
     expect(wall.cards).toEqual({
-      on_a_roll: [], leveled_up: [], cert_ready: [], longest_streak: [], just_started: [], welcome_back: [], milestones: [],
+      on_a_roll: [], leveled_up: [], cert_ready: [], longest_streak: [], just_started: [], welcome_back: [], milestones: [], cert_started: [],
     });
   });
 

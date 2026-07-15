@@ -32,6 +32,7 @@ export interface Wall {
     just_started: Array<{ username: string; display_name?: string }>;
     welcome_back: Array<{ username: string; display_name?: string; weeks_away: number }>;
     milestones: Array<{ username: string; display_name?: string; tasks: number }>;
+    cert_started: Array<{ username: string; display_name?: string; cert_id: string; cert_label: string }>;
   };
 }
 
@@ -90,6 +91,7 @@ export async function computeWall(
   const justStarted: Array<{ username: string; display_name?: string; _t: number }> = [];
   const welcomeBack: Array<{ username: string; display_name?: string; weeks_away: number; _t: number }> = [];
   const milestones: Array<{ username: string; display_name?: string; tasks: number; _t: number }> = [];
+  const certStarted: Array<{ username: string; display_name?: string; cert_id: string; cert_label: string; _t: number }> = [];
 
   for (const p of progresses) {
     if (p.disabled) continue;
@@ -123,6 +125,17 @@ export async function computeWall(
       if (times.some((n) => Number.isNaN(n))) continue;
       const readyAt = Math.max(...times);
       if (within7d(readyAt)) certReady.push({ username, display_name, cert_id: c.id, cert_label: c.label, _t: readyAt });
+    }
+
+    // cert_started — completed the FIRST prep item toward a cert within 7 days
+    for (const c of certDefs) {
+      const times = c.itemIds
+        .filter((id) => p.tasks[id]?.done)
+        .map((id) => Date.parse(p.tasks[id]?.at ?? ""))
+        .filter((n) => !Number.isNaN(n));
+      if (times.length === 0) continue;
+      const firstAt = Math.min(...times);
+      if (within7d(firstAt)) certStarted.push({ username, display_name, cert_id: c.id, cert_label: c.label, _t: firstAt });
     }
 
     // longest_streak — current consecutive-weeks run (>= 2)
@@ -170,6 +183,7 @@ export async function computeWall(
       just_started: strip(justStarted),
       welcome_back: strip(welcomeBack),
       milestones: strip(milestones),
+      cert_started: strip(certStarted),
     },
   };
 }

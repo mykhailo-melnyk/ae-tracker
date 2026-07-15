@@ -1,6 +1,6 @@
 // worker/test/github.test.ts
 import { describe, it, expect } from "vitest";
-import { readJsonFile, writeJsonFile, listDirectory, createIssue, deleteFile } from "../src/github";
+import { readJsonFile, writeJsonFile, listDirectory, createIssue, deleteFile, mapPool, readManyJsonFiles } from "../src/github";
 
 const cfg = { owner: "mykhailo-melnyk", repo: "ae-tracker-data", token: "tok" };
 
@@ -155,5 +155,59 @@ describe("listDirectory", () => {
     const fetchMock = (async () => new Response("not found", { status: 404 })) as typeof fetch;
     const result = await listDirectory(cfg, "progress", fetchMock);
     expect(result).toEqual([]);
+  });
+});
+
+describe("mapPool", () => {
+  it("preserves input order regardless of completion order", async () => {
+    const items = [30, 10, 20, 0, 5];
+    // Each item resolves after a delay proportional to its value, so completion
+    // order differs from input order; the result must still be in input order.
+    const result = await mapPool(items, 2, (n) =>
+      new Promise<number>((resolve) => setTimeout(() => resolve(n * 2), n)));
+    expect(result).toEqual([60, 20, 40, 0, 10]);
+  });
+
+  it("caps concurrency at the limit", async () => {
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const items = Array.from({ length: 10 }, (_, i) => i);
+    await mapPool(items, 3, async () => {
+      inFlight++;
+      maxInFlight = Math.max(maxInFlight, inFlight);
+      await new Promise((r) => setTimeout(r, 5));
+      inFlight--;
+    });
+    expect(maxInFlight).toBeLessThanOrEqual(3);
+  });
+
+  it("handles an empty list", async () => {
+    const result = await mapPool([], 4, async (x) => x);
+    expect(result).toEqual([]);
+  });
+});
+
+describe("readManyJsonFiles", () => {
+  const files: Record<string, unknown> = {
+    "progress/anna.json": { github_username: "anna" },
+    "progress/ben.json": { github_username: "ben" },
+  };
+  const fetchMock = (async (url: string) => {
+    const path = url.split("/contents/")[1];
+    if (path === "progress/missing.json") return new Response("not found", { status: 404 });
+    return new Response(JSON.stringify({
+      sha: "s", content: btoa(JSON.stringify(files[path])), encoding: "base64",
+    }), { headers: { "content-type": "application/json" } });
+  }) as typeof fetch;
+
+  it("reads all files, preserving order", async () => {
+    const result = await readManyJsonFiles(cfg, ["progress/anna.json", "progress/ben.json"], fetchMock);
+    expect(result).toEqual([{ github_username: "anna" }, { github_username: "ben" }]);
+  });
+
+  it("drops missing (404) files", async () => {
+    const result = await readManyJsonFiles(
+      cfg, ["progress/anna.json", "progress/missing.json", "progress/ben.json"], fetchMock);
+    expect(result).toEqual([{ github_username: "anna" }, { github_username: "ben" }]);
   });
 });

@@ -1,4 +1,4 @@
-import { listDirectory, readJsonFile, type RepoConfig } from "./github";
+import { listDirectory, readManyJsonFiles, type RepoConfig } from "./github";
 import type { ProgressFile } from "./types";
 import type { ResolvedCurriculum } from "./curriculum";
 
@@ -70,11 +70,7 @@ export async function computeAggregate(
   certRegistry: CertRegistry = EMPTY_CERT_REGISTRY,
 ): Promise<Aggregate> {
   const entries = await listDirectory(cfg, "progress", fetchFn);
-  const progresses: ProgressFile[] = [];
-  for (const e of entries) {
-    const result = await readJsonFile<ProgressFile>(cfg, e.path, fetchFn);
-    if (result) progresses.push(result.data);
-  }
+  const progresses = await readManyJsonFiles<ProgressFile>(cfg, entries.map((e) => e.path), fetchFn);
 
   const by_current_level: Record<string, number> = {};
   // by_task is keyed by globally-unique task ids (e.g. web-L1.T1), so paths never

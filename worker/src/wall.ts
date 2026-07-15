@@ -17,6 +17,11 @@ const EMPTY_CERT_REGISTRY: CertRegistry = { certList: () => [] };
 const DAY_MS = 86_400_000;
 const WEEK_MS = 7 * DAY_MS;
 
+// Round-number task-count landmarks celebrated when crossed. Sized to realistic
+// totals (a full path is ~67–77 tasks; +25 for the cert) — low, frequent early
+// rungs so newcomers get a milestone too, not just veterans.
+const MILESTONES = [10, 25, 50, 75, 100];
+
 export interface Wall {
   as_of: string;
   cards: {
@@ -26,6 +31,7 @@ export interface Wall {
     longest_streak: Array<{ username: string; display_name?: string; weeks: number }>;
     just_started: Array<{ username: string; display_name?: string }>;
     welcome_back: Array<{ username: string; display_name?: string; weeks_away: number }>;
+    milestones: Array<{ username: string; display_name?: string; tasks: number }>;
   };
 }
 
@@ -83,6 +89,7 @@ export async function computeWall(
   const longestStreak: Wall["cards"]["longest_streak"] = [];
   const justStarted: Array<{ username: string; display_name?: string; _t: number }> = [];
   const welcomeBack: Array<{ username: string; display_name?: string; weeks_away: number; _t: number }> = [];
+  const milestones: Array<{ username: string; display_name?: string; tasks: number; _t: number }> = [];
 
   for (const p of progresses) {
     if (p.disabled) continue;
@@ -136,6 +143,17 @@ export async function computeWall(
         welcomeBack.push({ username, display_name, weeks_away: Math.floor((recentStart - prior) / WEEK_MS), _t: recentStart });
       }
     }
+
+    // milestones — crossed a round-number total of completed tasks in the last 7 days.
+    // `before` = tasks completed before the window; a threshold m is crossed in-window
+    // when before < m <= total. Celebrate the highest one crossed; ts[m-1] is the
+    // completing tick (guaranteed within the window since before < m).
+    const before = ts.filter((t) => t < nowMs - WEEK_MS).length;
+    const crossed = MILESTONES.filter((m) => before < m && m <= ts.length);
+    if (crossed.length) {
+      const top = Math.max(...crossed);
+      milestones.push({ username, display_name, tasks: top, _t: ts[top - 1] });
+    }
   }
 
   const CAP = 8;
@@ -151,6 +169,7 @@ export async function computeWall(
       longest_streak: longestStreak.sort((a, b) => b.weeks - a.weeks).slice(0, CAP),
       just_started: strip(justStarted),
       welcome_back: strip(welcomeBack),
+      milestones: strip(milestones),
     },
   };
 }

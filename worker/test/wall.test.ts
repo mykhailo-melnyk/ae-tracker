@@ -134,6 +134,23 @@ describe("computeWall", () => {
     expect(wall.cards.welcome_back.some((e) => e.username === "newbie")).toBe(false);
   });
 
+  it("celebrates crossing a task-count milestone in the last 7 days (highest crossed)", async () => {
+    const tasks: Record<string, any> = {};
+    for (let i = 0; i < 48; i++) tasks[`old.${i}`] = { done: true, at: "2026-06-01T00:00:00Z" };
+    for (let i = 0; i < 5; i++) tasks[`new.${i}`] = { done: true, at: "2026-07-14T00:00:00Z" };
+    const files = { "m.json": prog("m", tasks) }; // 48 -> 53 total, crosses 50 this week
+    const wall = await computeWall(cfg, registryOf({ web: WEB }), mockFetch(files), NOW, CERTS);
+    expect(wall.cards.milestones).toContainEqual({ username: "m", display_name: "m", tasks: 50 });
+  });
+
+  it("does not celebrate a milestone crossed before the 7-day window", async () => {
+    const tasks: Record<string, any> = {};
+    for (let i = 0; i < 55; i++) tasks[`old.${i}`] = { done: true, at: "2026-06-01T00:00:00Z" };
+    const files = { "m.json": prog("m", tasks) }; // crossed 50 long ago, nothing recent
+    const wall = await computeWall(cfg, registryOf({ web: WEB }), mockFetch(files), NOW, CERTS);
+    expect(wall.cards.milestones.some((e) => e.username === "m")).toBe(false);
+  });
+
   it("excludes disabled engineers from every card", async () => {
     const files = {
       "ghost.json": prog("ghost", { "web-L1.T1": { done: true, at: "2026-07-14T00:00:00Z" } }, { disabled: true }),
@@ -155,7 +172,7 @@ describe("computeWall", () => {
   it("returns all-empty cards for an empty progress dir", async () => {
     const wall = await computeWall(cfg, registryOf({ web: WEB }), mockFetch({}), NOW, CERTS);
     expect(wall.cards).toEqual({
-      on_a_roll: [], leveled_up: [], cert_ready: [], longest_streak: [], just_started: [], welcome_back: [],
+      on_a_roll: [], leveled_up: [], cert_ready: [], longest_streak: [], just_started: [], welcome_back: [], milestones: [],
     });
   });
 

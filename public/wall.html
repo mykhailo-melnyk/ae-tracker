@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AE Tracker — Wall of recognition</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="wall.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand"><img class="brand-logo" src="assets/solvd-logo.svg" alt="Solvd"> AE Tracker <span class="tag">WALL</span></div>
+    <div class="user"><span id="who"></span></div>
+  </div>
+
+  <div id="page-loader" class="page-loader">
+    <div class="spinner"></div>
+    <p>Loading…</p>
+  </div>
+
+  <div id="wall" class="container hidden">
+    <div class="page-head">
+      <div><h1>Wall of recognition</h1><div class="sub">This week's wins across the AE pilot 🎉</div></div>
+      <div class="as-of" id="wall-asof"></div>
+    </div>
+    <div class="wall-grid" id="wall-grid"></div>
+  </div>
+
+  <script>
+    window.WORKER_URL = ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname)
+      ? "http://localhost:8787"
+      : "https://ae-tracker.mihael-melnyk.workers.dev";
+  </script>
+  <script src="auth.js"></script>
+  <script src="wall.js"></script>
+</body>
+</html>

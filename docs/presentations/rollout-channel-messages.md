@@ -121,3 +121,36 @@ Remember: everyone has AI now. The difference isn't who *has* it — it's who **
 **Stuck on access, sign-in, or anything at all?** Post it right here — that's what this channel is for, and we'll get you unblocked fast. 💬
 
 Let's get the rest of the team on the path together. 💪
+
+---
+
+## 6. New: the Wall of recognition 🏆
+
+> A light, celebratory post once people are actively ticking tasks — introduces the Wall + the personal panel. Reinforces the weekly-habit message.
+
+🏆 **New on the tracker: the Wall of recognition**
+
+Small addition I think you'll enjoy. There's now a **Wall** in the tracker that celebrates what people are getting done — a place to see the momentum we're building together. 🎉
+
+**What it is**
+Click **🏆 Wall** at the top of the tracker and you'll see cards celebrating recent wins across the team:
+- 🔥 **Top movers** — who finished the most tasks in the last 7 days
+- 💯 **Milestones** — people who just crossed 10 / 25 / 50 / 75 / 100 tasks
+- 📈 **Leveled up** — who completed a whole level
+- ⚡ **Longest streaks** — most weeks in a row with at least one task done
+- 👋 **Just started** & 🙌 **Welcome back** — a warm hello to new starters and to anyone coming back after a break
+
+**Here's the important part:** this is **not a leaderboard.** There's no bottom of the list, no ranking of everyone, no completion percentages on display. You can only ever *show up* on it — never be ranked last. It's here to celebrate progress and momentum, not to compete. 🙌
+
+**And it's personal, too.** On your own tracker page you'll now see a little panel with **your current streak**, **your next milestone** ("2 tasks from finishing Level 2"), and **your recent wins** — a quick nudge to keep going.
+
+**How do you get on the Wall? Just keep doing the work:**
+1. Tick off a task this week → you're a **Top mover**
+2. Do at least one task **each week** → build a **streak** ⚡
+3. Finish a level → get your **level-up** 📈
+
+This ties right back to the habit we're building: **small steps, every week.** Keeping a streak alive is literally one task a week. 🚀
+
+Curious how a card works? There's a short **"How the wall works"** FAQ right on the page.
+
+👉 Open it → **https://mykhailo-melnyk.github.io/ae-tracker/** (then **🏆 Wall** at the top). Let's keep the momentum going together. 💪

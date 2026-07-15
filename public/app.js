@@ -6,6 +6,80 @@ let PROGRESS = null;
 let FOCUS_LEVEL = null;
 let READONLY = false;
 let TOAST_TIMER = null; // pending auto-dismiss timeout for the undo toast
+let ON_WALL = false;        // does this engineer appear on any wall card this week?
+const DAY_MS = 86400000, WEEK_MS = 7 * DAY_MS;
+
+// Monday-aligned UTC week index — mirrors worker/src/wall.ts:weekIndex.
+function weekIndexJs(ms) { return Math.floor((Math.floor(ms / DAY_MS) + 3) / 7); }
+
+// Current consecutive-weeks streak + whether it's at risk (alive but not extended
+// this week yet). Computed from the engineer's own completed-task timestamps.
+function motivationStats() {
+  const ts = Object.values(PROGRESS.tasks)
+    .filter((t) => t.done && t.at)
+    .map((t) => new Date(t.at).getTime())
+    .filter((n) => !isNaN(n))
+    .sort((a, b) => a - b);
+  const weeks = new Set(ts.map(weekIndexJs));
+  const cw = weekIndexJs(Date.now());
+  let anchor = weeks.has(cw) ? cw : (weeks.has(cw - 1) ? cw - 1 : null);
+  let streak = 0;
+  if (anchor !== null) { for (let w = anchor; weeks.has(w); w--) streak++; }
+  return { streak, atRisk: anchor === cw - 1, ts };
+}
+
+// Title for a task id from the loaded path (null if not found).
+function taskTitleById(id) {
+  for (const lvl of (CURRICULUM ? CURRICULUM.levels : [])) {
+    const t = lvl.tasks.find((x) => x.id === id);
+    if (t) return t.title;
+  }
+  return null;
+}
+
+// Render the personal panel: streak, next milestone (nearest level), recent wins,
+// and an "on the wall" badge. Hidden for read-only viewers or before a path loads.
+function renderMotivation() {
+  const box = document.getElementById("motivation-panel");
+  if (READONLY || !CURRICULUM) { box.classList.add("hidden"); return; }
+
+  const { streak, atRisk } = motivationStats();
+  const streakLine = streak === 0
+    ? "Start a streak — finish a task this week."
+    : atRisk
+      ? `${streak}-week streak — tick one task this week to keep it 🔥`
+      : `${streak}-week streak 🔥`;
+
+  const cur = CURRICULUM.levels.find((l) => l.id === computeCurrentLevel());
+  const allDone = CURRICULUM.levels.every((l) => l.tasks.every((t) => PROGRESS.tasks[t.id]?.done));
+  const remaining = cur ? cur.tasks.filter((t) => !PROGRESS.tasks[t.id]?.done).length : 0;
+  const milestoneLine = allDone
+    ? "You've completed every level 🎉"
+    : `${remaining} task${remaining === 1 ? "" : "s"} from finishing ${cur.title}`;
+
+  const wins = Object.entries(PROGRESS.tasks)
+    .filter(([, v]) => v.done && v.at)
+    .sort((a, b) => new Date(b[1].at) - new Date(a[1].at))
+    .slice(0, 3)
+    .map(([id]) => taskTitleById(id))
+    .filter(Boolean);
+  const winsLine = wins.length
+    ? wins.map((w) => `“${w}”`).join(", ")
+    : "No completed tasks yet — your first one starts the momentum.";
+
+  const wallBadge = ON_WALL
+    ? `<a class="motiv-wall-badge" href="wall.html">🎉 You're on the wall this week</a>`
+    : "";
+
+  box.innerHTML = `
+    ${wallBadge}
+    <div class="motiv-tiles">
+      <div class="motiv-tile"><div class="motiv-icon">🔥</div><div><div class="motiv-label">Your streak</div><div class="motiv-text">${streakLine}</div></div></div>
+      <div class="motiv-tile"><div class="motiv-icon">🎯</div><div><div class="motiv-label">Next milestone</div><div class="motiv-text">${milestoneLine}</div></div></div>
+      <div class="motiv-tile"><div class="motiv-icon">🏅</div><div><div class="motiv-label">Recent wins</div><div class="motiv-text">${winsLine}</div></div></div>
+    </div>`;
+  box.classList.remove("hidden");
+}
 
 async function loadManifest() {
   const res = await fetch("curriculum.json");
@@ -241,6 +315,7 @@ async function toggleTask(taskId) {
     if (!res.ok) throw new Error("mark failed: " + res.status);
     PROGRESS = await res.json();
     showUndoToast(taskId, newDone);
+    renderMotivation();
   } catch (e) {
     // Roll back
     PROGRESS.tasks[taskId] = { done: currentlyDone };
@@ -315,6 +390,7 @@ async function renderPath() {
   renderTotals();
   renderPillBar();
   renderFocusCard();
+  renderMotivation();
 }
 
 // No competency yet: hide the path UI and prompt the engineer to pick one (or, for an
@@ -388,6 +464,16 @@ async function init() {
   if (!READONLY) {
     document.getElementById("feedback-open").classList.remove("hidden"); // reveal the floating button
     initFeedback();
+    // Best-effort: light up the "on the wall" badge if this engineer appears anywhere.
+    apiFetch(WORKER + "/api/wall")
+      .then((r) => r.ok ? r.json() : null)
+      .then((wall) => {
+        if (!wall) return;
+        const me = PROGRESS.github_username;
+        ON_WALL = Object.values(wall.cards).some((list) => list.some((e) => e.username === me));
+        renderMotivation();
+      })
+      .catch(() => {}); // non-fatal — the badge just stays hidden
   }
 
   renderCompetencyPicker();

@@ -19,7 +19,7 @@ const CARDS = [
     line: (e) => `${e.count} task${e.count === 1 ? "" : "s"} this week` },
   { key: "leveled_up", icon: "📈", title: "Leveled up",
     empty: "No level-ups this week — yours could be next.",
-    line: (e) => `reached ${e.level}` },
+    line: (e) => `completed ${e.level}` },
   { key: "cert_ready", icon: "🎓", title: "Cert-ready",
     empty: "No new cert-ready engineers this week.",
     line: (e) => `ready for ${e.cert_label}` },

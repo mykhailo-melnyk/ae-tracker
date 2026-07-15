@@ -637,3 +637,19 @@ body.readonly .task .check:hover { background: inherit; }
   padding: 0;
 }
 #toast-undo:hover { color: #bfdbfe; text-decoration: underline; }
+
+/* ---- Personal motivation panel (tracker) ---- */
+.motiv { margin: 0 4px 16px; }
+.motiv-wall-badge {
+  display: inline-block; margin-bottom: 10px; padding: 6px 12px; border-radius: 999px;
+  background: linear-gradient(135deg, #2563eb, #7c3aed); color: #fff; font-size: 13px;
+  font-weight: 600; text-decoration: none;
+}
+.motiv-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.motiv-tile {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px;
+}
+.motiv-icon { font-size: 20px; line-height: 1.2; }
+.motiv-label { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: #94a3b8; font-weight: 700; }
+.motiv-text { font-size: 14px; color: #0f172a; margin-top: 2px; }

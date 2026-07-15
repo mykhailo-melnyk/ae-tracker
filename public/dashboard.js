@@ -306,6 +306,58 @@ function renderTable() {
   });
 }
 
+// "Needs a nudge": quiet (14+ days) non-disabled engineers, grouped by unit leader,
+// scoped by the unit-leader filter. Built entirely from aggregate data — no new fetch.
+function renderNudge() {
+  const box = document.getElementById("nudge-list");
+  const now = Date.now();
+  const quiet = AGG.engineers
+    .filter((e) => !e.disabled && inLeaderScope(e))
+    .filter((e) => now - new Date(e.last_active).getTime() >= STALL_MS)
+    .map((e) => ({ e, days: Math.floor((now - new Date(e.last_active).getTime()) / 86400000) }));
+
+  if (!quiet.length) {
+    box.innerHTML = `<div class="empty-detail">Everyone's active — nothing to nudge 🎉</div>`;
+    return;
+  }
+
+  const groups = new Map();
+  for (const item of quiet) {
+    const key = item.e.unit_leader || LEADER_UNASSIGNED;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(item);
+  }
+  const keys = [...groups.keys()].sort((a, b) => {
+    if (a === LEADER_UNASSIGNED) return 1;
+    if (b === LEADER_UNASSIGNED) return -1;
+    return leaderName(a).localeCompare(leaderName(b));
+  });
+
+  box.innerHTML = keys.map((key) => {
+    const rows = groups.get(key).sort((a, b) => b.days - a.days);
+    const heading = key === LEADER_UNASSIGNED ? "Unassigned" : leaderName(key);
+    const items = rows.map(({ e, days }) => `
+      <div class="nudge-row">
+        <div class="who"><div class="avatar">${(e.display_name || e.username).slice(0, 2).toUpperCase()}</div>
+          <div><div class="name">${e.display_name || e.username}</div><div class="handle">@${e.username}</div></div></div>
+        <span class="level-chip ${e.current_level}">${e.current_level}</span>
+        <span class="nudge-comp">${competencyLabel(e.competency)}</span>
+        <span class="nudge-away">quiet ${days} day${days === 1 ? "" : "s"}</span>
+        <button class="nudge-copy" data-handle="@${e.username}">Copy @handle</button>
+      </div>`).join("");
+    return `<div class="nudge-group"><h4 class="nudge-leader">${heading} <span class="nudge-count">${rows.length}</span></h4>${items}</div>`;
+  }).join("");
+
+  box.querySelectorAll(".nudge-copy").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      navigator.clipboard?.writeText(btn.dataset.handle);
+      const orig = btn.textContent;
+      btn.textContent = "Copied ✓";
+      setTimeout(() => { btn.textContent = orig; }, 1500);
+    });
+  });
+}
+
 async function toggleDisabled(btn) {
   const username = btn.dataset.user;
   const next = btn.dataset.disabled !== "1"; // currently disabled? then we're enabling
@@ -450,16 +502,15 @@ function wireFilters() {
   });
 }
 
-// Top-level view switch: "Level progress" (competency/level) vs "Certifications".
-// Cert and level data are kept on separate tabs so they never mix in one view.
+// Top-level view switch across all dashboard tabs.
 function wireTabs() {
+  const views = ["levels", "certs", "nudge"];
   document.querySelectorAll(".dash-tab").forEach((el) => {
     el.addEventListener("click", () => {
       document.querySelectorAll(".dash-tab").forEach((t) => t.classList.remove("active"));
       el.classList.add("active");
       const view = el.dataset.view;
-      document.getElementById("view-levels").classList.toggle("hidden", view !== "levels");
-      document.getElementById("view-certs").classList.toggle("hidden", view !== "certs");
+      for (const v of views) document.getElementById("view-" + v).classList.toggle("hidden", v !== view);
     });
   });
 }
@@ -494,6 +545,7 @@ async function renderAll() {
   renderCertReadiness();
   renderCertTable();
   renderTable();
+  renderNudge();
 }
 
 init().catch((e) => {

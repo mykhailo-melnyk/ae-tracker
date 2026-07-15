@@ -6,6 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A self-service progress tracker for engineers working through a 5-level agentic-engineering curriculum. Engineers tick off tasks on a static page; admins see aggregate adoption on a dashboard. Canonical curriculum source is the `solvdinc/agentic-engineering` knowledge base (`meta/specs/`, `meta/plans/`); copies under `docs/` here are kept for self-containment.
 
+## Working on this repo
+
+**Always create a dedicated branch before starting any work** — code, docs, or config. Never commit directly to `main`. Branch from up-to-date `main` at the start of a task, do the work there, and open a PR to merge back. This applies to every task, however small (including doc-only and spec/plan work).
+
 ## Commands
 
 All worker commands run from `worker/`:

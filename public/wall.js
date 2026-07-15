@@ -1,0 +1,71 @@
+const WORKER = window.WORKER_URL;
+
+async function loadWall() {
+  const res = await apiFetch(WORKER + "/api/wall");
+  if (res.status === 401) { window.location = "tracker.html"; return null; }
+  if (!res.ok) throw new Error("wall failed: " + res.status);
+  return res.json();
+}
+
+function who(entry) {
+  const avatar = `<img class="wall-avatar" src="https://github.com/${encodeURIComponent(entry.username)}.png" alt="" loading="lazy">`;
+  return `${avatar}<span class="wall-name">${entry.display_name || entry.username}</span>`;
+}
+
+// Card definitions: order, icon, title, per-entry line, and a warm empty state.
+const CARDS = [
+  { key: "on_a_roll", icon: "🔥", title: "Top movers",
+    empty: "No bursts of activity yet in the last 7 days — be the first 👀",
+    line: (e) => `${e.count} task${e.count === 1 ? "" : "s"} in the last 7 days` },
+  { key: "milestones", icon: "💯", title: "Milestones",
+    empty: "No milestones crossed in the last 7 days — one's always around the corner.",
+    line: (e) => `hit ${e.tasks} tasks` },
+  { key: "leveled_up", icon: "📈", title: "Leveled up",
+    empty: "No level-ups in the last 7 days — yours could be next.",
+    line: (e) => `completed ${e.level}` },
+  { key: "longest_streak", icon: "⚡", title: "Longest streaks",
+    empty: "No multi-week streaks yet — start one this week.",
+    line: (e) => `${e.weeks}-week streak` },
+  { key: "just_started", icon: "👋", title: "Just started",
+    empty: "No new starters in the last 7 days.",
+    line: () => "just started" },
+  { key: "welcome_back", icon: "🙌", title: "Welcome back",
+    empty: "Nobody's returned in the last 7 days — yet.",
+    line: (e) => `back after ${e.weeks_away} week${e.weeks_away === 1 ? "" : "s"}` },
+  // Certification cards last — the transformation is early, so cert activity is
+  // still sparse; leading with the curriculum cards keeps the wall lively.
+  { key: "cert_ready", icon: "🎓", title: "Cert-ready",
+    empty: "No new cert-ready engineers in the last 7 days.",
+    line: (e) => `ready for ${e.cert_label}` },
+  { key: "cert_started", icon: "🚀", title: "Cert-prep started",
+    empty: "No new cert-prep starts in the last 7 days.",
+    line: (e) => `started ${e.cert_label} prep` },
+];
+
+function renderWall(wall) {
+  const grid = document.getElementById("wall-grid");
+  grid.innerHTML = CARDS.map((c) => {
+    const list = wall.cards[c.key] || [];
+    const body = list.length
+      ? list.map((e) => `<li class="wall-entry">${who(e)}<span class="wall-line">${c.line(e)}</span></li>`).join("")
+      : `<li class="wall-empty">${c.empty}</li>`;
+    return `<section class="wall-card">
+      <h2 class="wall-card-title"><span class="wall-icon">${c.icon}</span>${c.title}</h2>
+      <ul class="wall-list">${body}</ul>
+    </section>`;
+  }).join("");
+}
+
+async function init() {
+  const wall = await loadWall();
+  hidePageLoader();
+  if (!wall) return;
+  document.getElementById("wall").classList.remove("hidden");
+  document.getElementById("wall-asof").textContent = "As of " + new Date(wall.as_of).toLocaleString();
+  document.getElementById("who").innerHTML =
+    `<a class="dashboard-link" href="tracker.html">My tracker</a>
+     <a class="signout-link" href="${WORKER}/auth/logout" onclick="clearAuthToken()">Sign out</a>`;
+  renderWall(wall);
+}
+
+init().catch((e) => showPageError(e, () => init()));

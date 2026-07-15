@@ -33,6 +33,7 @@
     <div class="dash-tabs">
       <button class="dash-tab active" data-view="levels">Level progress</button>
       <button class="dash-tab" data-view="certs">Certifications</button>
+      <button class="dash-tab" data-view="nudge">Needs a nudge</button>
     </div>
 
     <div id="view-levels">
@@ -87,6 +88,14 @@
           <input class="search" id="cert-search" placeholder="🔍 Search by name or GitHub handle…">
         </div>
         <div id="cert-table"></div>
+      </div>
+    </div>
+
+    <div id="view-nudge" class="hidden">
+      <div class="card">
+        <div class="card-head"><h3>Engineers who've gone quiet</h3></div>
+        <div class="card-sub">14+ days since last activity, grouped by unit leader · respects the unit-leader filter</div>
+        <div id="nudge-list"></div>
       </div>
     </div>
   </div>

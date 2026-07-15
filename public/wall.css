@@ -16,3 +16,15 @@
 .wall-name { font-weight: 600; font-size: 14px; }
 .wall-line { color: #64748b; font-size: 13px; margin-left: auto; text-align: right; }
 .wall-empty { color: #94a3b8; font-size: 13px; font-style: italic; }
+
+/* FAQ accordion — native <details>, no JS */
+.faq { margin-top: 32px; }
+.faq-title { font-size: 16px; margin-bottom: 12px; }
+.faq-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 8px; padding: 0 16px; }
+.faq-item summary { cursor: pointer; padding: 12px 0; font-weight: 600; font-size: 14px; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after { content: "+"; color: #94a3b8; font-weight: 700; font-size: 18px; line-height: 1; }
+.faq-item[open] summary::after { content: "\2013"; }
+.faq-body { padding: 0 0 14px; color: #475569; font-size: 14px; }
+.faq-body ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+.faq-body strong { color: #0f172a; }

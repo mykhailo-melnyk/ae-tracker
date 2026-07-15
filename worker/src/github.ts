@@ -106,6 +106,51 @@ export async function createIssue(
   return { url: out.html_url };
 }
 
+// Bounded-concurrency map: runs `worker` over `items` with at most `limit` in
+// flight, preserving input order in the result. Used to fan out per-engineer
+// reads (aggregate/wall) without a serial round-trip per file, while staying
+// well under GitHub's secondary rate limits. `worker` must not throw — swallow
+// per-item errors and return a sentinel (e.g. null) if you want to skip failures.
+export async function mapPool<T, R>(
+  items: readonly T[],
+  limit: number,
+  worker: (item: T, index: number) => Promise<R>,
+): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let next = 0;
+  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    for (;;) {
+      const i = next++;
+      if (i >= items.length) return;
+      results[i] = await worker(items[i], i);
+    }
+  });
+  await Promise.all(runners);
+  return results;
+}
+
+// Reads many JSON files concurrently (bounded), preserving order. Files that are
+// missing (404 → null) or fail to read are dropped from the result. This is the
+// fan-out primitive behind the aggregate and wall computes. Default concurrency
+// is 6 to match Cloudflare's cap of 6 simultaneous outbound connections per
+// invocation — a higher pool would just queue behind that limit.
+export async function readManyJsonFiles<T = unknown>(
+  cfg: RepoConfig,
+  paths: readonly string[],
+  fetchFn: typeof fetch = fetch,
+  concurrency = 6,
+): Promise<T[]> {
+  const results = await mapPool(paths, concurrency, async (path) => {
+    try {
+      return await readJsonFile<T>(cfg, path, fetchFn);
+    } catch (e) {
+      console.warn(`readManyJsonFiles skip ${path}: ${e instanceof Error ? e.message : String(e)}`);
+      return null;
+    }
+  });
+  return results.filter((r): r is JsonFile<T> => r !== null).map((r) => r.data);
+}
+
 export interface DirEntry { name: string; path: string; }
 
 export async function listDirectory(

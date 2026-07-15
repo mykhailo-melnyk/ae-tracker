@@ -15,22 +15,22 @@ function who(entry) {
 // Card definitions: order, icon, title, per-entry line, and a warm empty state.
 const CARDS = [
   { key: "on_a_roll", icon: "🔥", title: "On a roll",
-    empty: "No bursts of activity yet this week — be the first 👀",
-    line: (e) => `${e.count} task${e.count === 1 ? "" : "s"} this week` },
+    empty: "No bursts of activity yet in the last 7 days — be the first 👀",
+    line: (e) => `${e.count} task${e.count === 1 ? "" : "s"} in the last 7 days` },
   { key: "leveled_up", icon: "📈", title: "Leveled up",
-    empty: "No level-ups this week — yours could be next.",
+    empty: "No level-ups in the last 7 days — yours could be next.",
     line: (e) => `completed ${e.level}` },
   { key: "cert_ready", icon: "🎓", title: "Cert-ready",
-    empty: "No new cert-ready engineers this week.",
+    empty: "No new cert-ready engineers in the last 7 days.",
     line: (e) => `ready for ${e.cert_label}` },
   { key: "longest_streak", icon: "⚡", title: "Longest streaks",
     empty: "No multi-week streaks yet — start one this week.",
     line: (e) => `${e.weeks}-week streak` },
   { key: "just_started", icon: "👋", title: "Just started",
-    empty: "No new starters this week.",
+    empty: "No new starters in the last 7 days.",
     line: () => "just started" },
   { key: "welcome_back", icon: "🙌", title: "Welcome back",
-    empty: "Nobody's returned this week — yet.",
+    empty: "Nobody's returned in the last 7 days — yet.",
     line: (e) => `back after ${e.weeks_away} week${e.weeks_away === 1 ? "" : "s"}` },
 ];
 

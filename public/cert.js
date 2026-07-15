@@ -103,6 +103,7 @@ function renderBody() {
             ${it.desc ? `<div class="desc">${it.desc}</div>` : ""}
             ${it.exam_note ? `<div class="exam-note">${it.exam_note}</div>` : ""}
             ${it.link ? `<a class="external" href="${it.link}" target="_blank" rel="noopener">${it.link} ↗</a>` : ""}
+            <div><button type="button" class="task-report">⚑ Report / suggest</button></div>
           </div>
         </div>`;
     }).join("");
@@ -117,8 +118,11 @@ function renderBody() {
   }).join("");
 
   body.innerHTML = examLink + sectionsHtml;
-  body.querySelectorAll(".task").forEach((el) =>
-    el.querySelector(".check").addEventListener("click", () => toggleItem(el.dataset.item)));
+  body.querySelectorAll(".task").forEach((el) => {
+    el.querySelector(".check").addEventListener("click", () => toggleItem(el.dataset.item));
+    const rep = el.querySelector(".task-report");
+    if (rep) rep.addEventListener("click", (e) => { e.stopPropagation(); openFeedback(el.dataset.item); });
+  });
 }
 
 function renderCert() {
@@ -203,6 +207,8 @@ async function init() {
 
   REGISTRY = await loadRegistry();
   document.getElementById("cert-app").classList.remove("hidden");
+  document.getElementById("feedback-open").classList.remove("hidden"); // reveal the floating button
+  initFeedback();
   const firstVendor = Object.keys(REGISTRY.vendors || {})[0];
   if (firstVendor) await selectVendor(firstVendor);
 }

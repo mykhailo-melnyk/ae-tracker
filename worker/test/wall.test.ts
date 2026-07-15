@@ -170,3 +170,51 @@ describe("computeWall", () => {
     }
   });
 });
+
+import { handleApiWall, WALL_CACHE_KEY } from "../src/wall";
+import { signSession } from "../src/session";
+
+describe("handleApiWall", () => {
+  const baseEnv = {
+    SESSION_SECRET: "test-secret-32-bytes-long-padding-ok",
+    DATA_REPO_OWNER: "x", DATA_REPO_NAME: "y", BOT_PAT: "t",
+  } as any;
+  const registry = registryOf({});
+
+  it("uses the wall-v1 cache key", () => {
+    expect(WALL_CACHE_KEY).toBe("wall-v1");
+  });
+
+  it("returns 401 without a session", async () => {
+    const req = new Request("https://w.example/api/wall");
+    const res = await handleApiWall(req, baseEnv, registry, globalThis.fetch, CERTS);
+    expect(res.status).toBe(401);
+  });
+
+  it("returns 200 for any signed-in user (not admin-gated)", async () => {
+    const session = await signSession("rando", baseEnv.SESSION_SECRET, 3600);
+    const fetchMock = (async (url: string) => {
+      if (url.endsWith("/contents/progress")) return new Response("[]", { headers: { "content-type": "application/json" } });
+      return new Response("not found", { status: 404 });
+    }) as typeof fetch;
+    const req = new Request("https://w.example/api/wall", { headers: { Cookie: `session=${session}` } });
+    const res = await handleApiWall(req, baseEnv, registry, fetchMock, CERTS);
+    expect(res.status).toBe(200);
+    const body = await res.json() as any;
+    expect(body.cards.on_a_roll).toEqual([]);
+  });
+
+  it("serves the cached body without recomputing", async () => {
+    const store = new Map<string, string>();
+    store.set("wall-v1", JSON.stringify({ as_of: "cached", cards: { on_a_roll: [{ username: "z" }] } }));
+    const kv = { get: async (k: string) => store.get(k) ?? null, put: async () => {} } as any;
+    const env = { ...baseEnv, AGGREGATE_CACHE: kv };
+    const session = await signSession("rando", env.SESSION_SECRET, 3600);
+    const throwFetch = (async () => { throw new Error("should not fetch when cached"); }) as typeof fetch;
+    const req = new Request("https://w.example/api/wall", { headers: { Cookie: `session=${session}` } });
+    const res = await handleApiWall(req, env, registry, throwFetch, CERTS);
+    expect(res.status).toBe(200);
+    const body = await res.json() as any;
+    expect(body.as_of).toBe("cached");
+  });
+});

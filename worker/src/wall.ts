@@ -1,6 +1,8 @@
 import { listDirectory, readJsonFile, type RepoConfig } from "./github";
 import type { ProgressFile } from "./types";
 import type { ResolvedCurriculum } from "./curriculum";
+import type { Env } from "./index";
+import { verifySession, tokenFromRequest } from "./session";
 
 // Structural registries (the ./curriculum and ./certifications modules satisfy these;
 // tests pass fakes) — mirrors aggregate.ts.
@@ -151,4 +153,35 @@ export async function computeWall(
       welcome_back: strip(welcomeBack),
     },
   };
+}
+
+export const WALL_CACHE_KEY = "wall-v1";
+const WALL_CACHE_TTL_SECONDS = 300;
+
+// The wall is for any signed-in engineer (NOT admin-gated). The payload is identical
+// for every viewer, so the cached body is returned verbatim (unlike the aggregate,
+// which stamps a per-viewer is_superadmin). Degrades gracefully without KV.
+export async function handleApiWall(
+  request: Request,
+  env: Env,
+  registry: CurriculumRegistry,
+  fetchFn: typeof fetch = fetch,
+  certRegistry: CertRegistry = EMPTY_CERT_REGISTRY,
+): Promise<Response> {
+  const token = tokenFromRequest(request);
+  if (!token) return new Response("unauthenticated", { status: 401 });
+  const session = await verifySession(token, env.SESSION_SECRET);
+  if (!session.valid || !session.username) return new Response("unauthenticated", { status: 401 });
+
+  if (env.AGGREGATE_CACHE) {
+    const cached = await env.AGGREGATE_CACHE.get(WALL_CACHE_KEY);
+    if (cached) return new Response(cached, { headers: { "content-type": "application/json" } });
+  }
+  const cfg = { owner: env.DATA_REPO_OWNER, repo: env.DATA_REPO_NAME, token: env.BOT_PAT };
+  const wall = await computeWall(cfg, registry, fetchFn, new Date(), certRegistry);
+  const body = JSON.stringify(wall);
+  if (env.AGGREGATE_CACHE) {
+    await env.AGGREGATE_CACHE.put(WALL_CACHE_KEY, body, { expirationTtl: WALL_CACHE_TTL_SECONDS });
+  }
+  return new Response(body, { headers: { "content-type": "application/json" } });
 }

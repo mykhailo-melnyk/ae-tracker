@@ -3,6 +3,7 @@ import { verifySession, tokenFromRequest } from "./session";
 import { readJsonFile, writeJsonFile, createIssue, deleteFile, listDirectory, type RepoConfig } from "./github";
 import { CACHE_KEY } from "./aggregate";
 import * as curriculum from "./curriculum";
+import * as certifications from "./certifications";
 import type { ProgressFile } from "./types";
 
 /** Just the slice of the curriculum the competency endpoints need to validate ids. */
@@ -148,13 +149,20 @@ export async function handleApiFeedback(
   if (typeof body.message !== "string") return new Response("invalid body", { status: 400 });
   const message = body.message.trim();
   if (message.length < 1 || message.length > 2000) return new Response("invalid body", { status: 400 });
-  let taskInfo: curriculum.TaskInfo | null = null;
+  // A scoped id may be a curriculum task or a certification prep item — try both.
+  // `enrichLine` becomes the issue's task/item detail line for whichever matched.
+  let taskId: string | undefined;
+  let enrichLine: string | undefined;
   if (body.task_id !== undefined) {
     if (typeof body.task_id !== "string" || body.task_id.length > 32) return new Response("invalid body", { status: 400 });
-    taskInfo = curriculum.taskInfo(body.task_id);
-    if (!taskInfo) return new Response("invalid body", { status: 400 });
+    const taskInfo = curriculum.taskInfo(body.task_id);
+    const certItem = taskInfo ? null : certifications.certItemInfo(body.task_id);
+    if (!taskInfo && !certItem) return new Response("invalid body", { status: 400 });
+    taskId = body.task_id;
+    enrichLine = taskInfo
+      ? `**Task:** ${taskId} — ${taskInfo.title} (Level ${taskInfo.level.slice(1)})`
+      : `**Certification:** ${certItem!.certLabel}\n**Item:** ${taskId} — ${certItem!.title} (${certItem!.sectionTitle})`;
   }
-  const taskId = taskInfo ? (body.task_id as string) : undefined;
 
   // Read the submitter's own progress (data repo / BOT_PAT) for the disabled-lock and
   // their competency. A disabled engineer is blocked from this self-write too.
@@ -174,7 +182,7 @@ export async function handleApiFeedback(
     `**From:** @${username} (${displayName || username})`,
     `**Competency:** ${compLabel}`,
   ];
-  if (taskInfo) lines.push(`**Task:** ${taskId} — ${taskInfo.title} (Level ${taskInfo.level.slice(1)})`);
+  if (enrichLine) lines.push(enrichLine);
   lines.push(`**Page:** ${request.headers.get("referer") || "—"}`);
   lines.push(`**Submitted:** ${new Date().toISOString()}`);
   const issueBody = `${lines.join("\n")}\n\n---\n\n${message}`;

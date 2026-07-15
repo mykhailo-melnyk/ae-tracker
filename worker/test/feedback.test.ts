@@ -15,6 +15,8 @@ const ENV = {
 
 // A real task id from the bundled web path (validated against the actual curriculum).
 const TASK_ID = "web-L1.T5";
+// A real cert prep-item id from the bundled Claude Code path (validated against the actual registry).
+const CERT_ITEM_ID = "cc.start.1";
 
 /**
  * Stub fetch that routes by URL: the progress read (data repo, Contents API) and the
@@ -105,6 +107,21 @@ describe("/api/feedback", () => {
     expect(sent.body).toContain("**Competency:** Web");
     expect(sent.body).toContain(`**Task:** ${TASK_ID} — Tool Setup Guide (Level 1)`);
     expect(sent.body).toContain("The link 404s for me");
+  });
+
+  it("creates a cert-item-scoped issue with certification enrichment", async () => {
+    const progress = { github_username: "anna", display_name: "Anna Smith", competency: "web", created_at: "x", updated_at: "y", tasks: {} };
+    const { fetchMock, record } = stub({ progress });
+    const res = await handleApiFeedback(
+      req(await session("anna", "Anna Smith"), { type: "improvement", message: "This section is unclear", task_id: CERT_ITEM_ID }),
+      ENV, fetchMock,
+    );
+    expect(res.status).toBe(200);
+    const sent = JSON.parse(record.find((c) => c.url.endsWith("/issues")).body as string);
+    expect(sent.title).toBe(`[improvement] ${CERT_ITEM_ID} — This section is unclear`);
+    expect(sent.body).toContain("**Certification:** Claude Code");
+    expect(sent.body).toContain(`**Item:** ${CERT_ITEM_ID} — Exam overview & how to study (How to use this path)`);
+    expect(sent.body).not.toContain("**Task:**");
   });
 
   it("creates a general (no-task) issue", async () => {

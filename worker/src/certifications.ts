@@ -16,12 +16,35 @@ export interface CertInfo {
 
 interface PathFile {
   certification: string;
-  sections: Array<{ id: string; items: Array<{ id: string; optional?: boolean }> }>;
+  sections: Array<{ id: string; title: string; items: Array<{ id: string; title: string; optional?: boolean }> }>;
 }
 
 const PATHS: Record<string, PathFile> = {};
 for (const p of [claudeCodePath] as PathFile[]) {
   PATHS[p.certification] = p;
+}
+
+// Flat item lookup across every cert path file, for the feedback endpoint: validate a
+// submitted cert item id and enrich the issue with its certification / section / title.
+// Mirrors curriculum.ts's TASK_INDEX.
+export interface CertItemInfo { certId: string; certLabel: string; sectionTitle: string; title: string; }
+const ITEM_INDEX: Record<string, CertItemInfo> = {};
+for (const p of [claudeCodePath] as PathFile[]) {
+  for (const sec of p.sections) {
+    for (const it of sec.items) {
+      ITEM_INDEX[it.id] = {
+        certId: p.certification,
+        certLabel: certLabel(p.certification) ?? p.certification,
+        sectionTitle: sec.title,
+        title: it.title,
+      };
+    }
+  }
+}
+
+/** A submitted cert item id's certification/section/title, or null if the id is unknown. */
+export function certItemInfo(itemId: string): CertItemInfo | null {
+  return ITEM_INDEX[itemId] ?? null;
 }
 
 const LIST: CertInfo[] = registry.certifications.map((c) => {

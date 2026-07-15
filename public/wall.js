@@ -14,7 +14,7 @@ function who(entry) {
 
 // Card definitions: order, icon, title, per-entry line, and a warm empty state.
 const CARDS = [
-  { key: "on_a_roll", icon: "🔥", title: "On a roll",
+  { key: "on_a_roll", icon: "🔥", title: "Top movers",
     empty: "No bursts of activity yet in the last 7 days — be the first 👀",
     line: (e) => `${e.count} task${e.count === 1 ? "" : "s"} in the last 7 days` },
   { key: "leveled_up", icon: "📈", title: "Leveled up",

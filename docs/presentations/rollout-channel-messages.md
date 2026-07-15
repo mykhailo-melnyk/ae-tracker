@@ -29,7 +29,7 @@ AI isn't a side tool anymore — it's now part of how we build software. And her
 📎 **Start with the video and the getting-started doc attached to this message** (about 5 minutes total).
 
 **Your ask this week — small, I promise:**
-1. Open the tracker → **https://mykhailo-melnyk.github.io/ae-tracker/**
+1. Open the tracker → **https://mykhailo-melnyk.github.io/ae-tracker/tracker.html**
 2. **Sign in with GitHub** (one click) and **pick your path** — Web / Mobile / Backend
 3. **Start Level 1** — do the very first task *today*
 
@@ -112,7 +112,7 @@ In just a short time, **27 people have signed in and started the tracker** — t
 
 **If you haven't jumped in yet — this is your friendly nudge.** 🙂 No pressure, no grading, no catching up to do. The path is yours and it waits for you. All it takes this week:
 
-1. Open the tracker → **https://mykhailo-melnyk.github.io/ae-tracker/**
+1. Open the tracker → **https://mykhailo-melnyk.github.io/ae-tracker/tracker.html**
 2. **Sign in with GitHub** (one click) and **pick "Web"** as your path
 3. **Do the very first Level 1 task today** — that's it
 
@@ -153,4 +153,4 @@ This ties right back to the habit we're building: **small steps, every week.** K
 
 Curious how a card works? There's a short **"How the wall works"** FAQ right on the page.
 
-👉 Open it → **https://mykhailo-melnyk.github.io/ae-tracker/** (then **🏆 Wall** at the top). Let's keep the momentum going together. 💪
+👉 Open it → **https://mykhailo-melnyk.github.io/ae-tracker/tracker.html** (then **🏆 Wall** at the top). Let's keep the momentum going together. 💪

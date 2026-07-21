@@ -32,6 +32,7 @@
                 "desc": { "type": "string" },
                 "link": { "type": "string", "format": "uri" },
                 "self_assessment": { "type": "boolean" },
+                "assessment": { "type": "boolean" },
                 "estimated_minutes": { "type": "integer", "minimum": 1 }
               }
             }

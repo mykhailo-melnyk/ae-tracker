@@ -64,6 +64,21 @@ The aggregate dashboard (`src/aggregate.ts`) lists the `progress/` directory, re
 
 `POST /api/feedback` (`handleApiFeedback` in `api.ts`) lets a signed-in engineer report a bug or suggest an improvement (per-task or general). It validates `{ type: "bug"|"improvement", message, task_id? }` (message ≤ 2000 chars; `task_id`, if present, must be a known curriculum ID), reads the submitter's progress for the disabled-lock and their competency, then opens a GitHub issue via `createIssue` (`github.ts`). Unlike every other write, this targets a **different repo and token**: the public code repo (`FEEDBACK_REPO_OWNER`/`FEEDBACK_REPO_NAME`) using a separate least-privilege secret **`FEEDBACK_PAT`** (Issues R/W), kept distinct from `BOT_PAT`. Issues carry a single `feedback` label (which **must pre-exist** in the repo — GitHub rejects unknown labels); the `[bug]`/`[improvement]` title prefix encodes the type. Every issue is auto-assigned to the comma-separated `FEEDBACK_ASSIGNEE` usernames (must be repo collaborators, else GitHub silently drops them). Submissions (including the `@username`) are publicly visible. The frontend entry points are the per-task "⚑ Report / suggest" link and a floating bottom-right "⚑ Feedback" button (`#feedback-open` in `tracker.html`, revealed for signed-in non-readonly engineers in `public/app.js`); both open the same modal.
 
+### Level-assessment handoff
+
+Each level's last task is an **assessment launcher** (`assessment: true` in the path file). Its
+**Start assessment** button calls `POST /api/assessment` (`handleApiAssessment` in `api.ts`) with
+`{level}`; the Worker verifies every *other* task in that level is done (the launcher excludes
+itself; 409 with a `remaining` count otherwise), then makes a **server-to-server** call to the
+assessment portal (`ASSESSMENT_URL` var + `ASSESSMENT_SHARED_SECRET` secret — a separate
+least-privilege secret, like `FEEDBACK_PAT`) which creates — or returns the engineer's still-open —
+session for that level and hands back their unique candidate URL. The Worker relays a URL only,
+never assessment content; the identity sent to the portal is always the **authenticated**
+engineer's (from the session token, never the request body). With `ASSESSMENT_URL` empty the
+endpoint answers 503 and the integration is off. The frontend launcher is a button (not a task
+`link`) because a plain anchor can't carry the Bearer token (see Auth above); it renders the
+returned URL as a link. See `docs/superpowers/specs/2026-07-13-assessment-handoff-design.md`.
+
 ### Certifications
 
 A **generic certifications axis** parallel to the competency curriculum, for
@@ -115,6 +130,7 @@ additionally needs a new static import in `worker/src/certifications.ts`.
 | Update a cert's prep tasks | Edit that cert's `public/certification.<id>.json` (keep item ids `<code>.<section>.<n>`, ≤ 32 chars); push (CI validates, Pages redeploys). For the dashboard readiness to reflect it, also `wrangler deploy` (the Worker bundles the JSON). |
 | Validate the curriculum locally | `npm install ajv@8 ajv-formats@2 && node schema/validate-curriculum.mjs` (same check CI runs). |
 | Rotate the bot PAT | New fine-grained PAT scoped to `ae-tracker-data` (Contents R/W), `wrangler secret put BOT_PAT`, revoke old. |
+| Enable the assessment handoff | Generate one secret (`openssl rand -hex 32`): set it as the portal's `TRACKER_SHARED_SECRET` and via `wrangler secret put ASSESSMENT_SHARED_SECRET`; set `ASSESSMENT_URL` in `worker/wrangler.toml`; `wrangler deploy`. Empty `ASSESSMENT_URL` = feature off. |
 | Set up / rotate the feedback PAT | Fine-grained PAT scoped **only** to `ae-tracker` (Issues R/W), `wrangler secret put FEEDBACK_PAT`, revoke old. Used by `/api/feedback`. |
 | Enable the feedback feature | Create a **`feedback` label** in the `ae-tracker` repo (one-time; the Issues API rejects unknown labels), set `FEEDBACK_PAT`, then `wrangler deploy`. |
 | Reset an engineer | Edit/delete `progress/<username>.json` in the `ae-tracker-data` repo. |

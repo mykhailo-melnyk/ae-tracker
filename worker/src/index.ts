@@ -1,5 +1,5 @@
 import { handleLogin, handleCallback, handleLogout } from "./auth";
-import { handleApiMe, handleApiMark, handleApiUser, handleApiCompetencies, handleApiUserCompetencies, handleApiUserDisabled, handleApiUserLeader, handleApiUserDelete, handleApiFeedback } from "./api";
+import { handleApiMe, handleApiMark, handleApiUser, handleApiCompetencies, handleApiUserCompetencies, handleApiUserDisabled, handleApiUserLeader, handleApiUserDelete, handleApiFeedback, handleApiAssessment } from "./api";
 import { handleApiAggregate } from "./aggregate";
 import { handleApiWall } from "./wall";
 import * as curriculum from "./curriculum";
@@ -20,6 +20,8 @@ export interface Env {
   FEEDBACK_REPO_NAME: string;
   FEEDBACK_PAT: string;
   FEEDBACK_ASSIGNEE?: string;  // comma-separated GitHub usernames auto-assigned to feedback issues
+  ASSESSMENT_URL?: string;     // assessment portal base URL; empty/unset = integration off
+  ASSESSMENT_SHARED_SECRET?: string;  // secret presented to the portal (wrangler secret put)
   AGGREGATE_CACHE?: KVNamespace;
 }
 
@@ -56,6 +58,7 @@ export default {
     if (url.pathname === "/api/me") return withCors(await handleApiMe(request, env), env, request);
     if (url.pathname === "/api/mark") return withCors(await handleApiMark(request, env), env, request);
     if (url.pathname === "/api/feedback") return withCors(await handleApiFeedback(request, env), env, request);
+    if (url.pathname === "/api/assessment") return withCors(await handleApiAssessment(request, env), env, request);
     if (url.pathname === "/api/competencies") return withCors(
       await handleApiCompetencies(request, env, curriculum.MANIFEST),
       env, request,

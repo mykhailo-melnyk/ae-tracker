@@ -407,6 +407,34 @@ body.readonly .task .check:hover { background: inherit; }
   border-radius: 12px;
 }
 
+/* ---- Level-assessment launch (tasks flagged `assessment`) ---- */
+.assessment-launch {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.assessment-start {
+  background: #2563eb;
+  border: none;
+  color: white;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.assessment-start:hover:not([disabled]) { background: #1d4ed8; }
+.assessment-start[disabled] {
+  background: #e2e8f0;
+  color: #94a3b8;
+  cursor: default;
+}
+.assessment-result { font-size: 12px; color: #64748b; }
+.assessment-result a { color: #2563eb; font-weight: 600; }
+
 /* ---- Feedback (per-task "Report" link + general button + modal) ---- */
 .task-report {
   margin-top: 8px;

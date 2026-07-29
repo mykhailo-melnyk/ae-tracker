@@ -119,8 +119,8 @@
         {
           "id": "mobile-L1.T17",
           "kind": "checkpoint",
-          "title": "Level assessment: live L1 interview session",
-          "desc": "When every task above is done, click Start assessment to generate your unique assessment link, then schedule the live session with your interviewer. The assessment is taken live on a screen share; you will not see a score at the end. Tick this task done after your session.",
+          "title": "Level assessment: L1 assessment",
+          "desc": "When every task above is done, click Start assessment to generate your unique assessment link. The assessment is self-paced: it opens with a hands-on capstone you build on your own time, followed by written questions, and the page stays open until you submit everything at once. You will not see a score at the end — results go to your team lead. The tracker ticks this task done automatically once you submit.",
           "assessment": true,
           "estimated_minutes": 60
         }
@@ -229,8 +229,8 @@
         {
           "id": "mobile-L2.T15",
           "kind": "checkpoint",
-          "title": "Level assessment: live L2 interview session",
-          "desc": "When every task above is done, click Start assessment to generate your unique assessment link, then schedule the live session with your interviewer. The assessment is taken live on a screen share; you will not see a score at the end. Tick this task done after your session.",
+          "title": "Level assessment: L2 assessment",
+          "desc": "When every task above is done, click Start assessment to generate your unique assessment link. The assessment is self-paced: it opens with a hands-on capstone you build on your own time, followed by written questions, and the page stays open until you submit everything at once. You will not see a score at the end — results go to your team lead. The tracker ticks this task done automatically once you submit.",
           "assessment": true,
           "estimated_minutes": 60
         }
@@ -311,8 +311,8 @@
         {
           "id": "mobile-L3.T11",
           "kind": "checkpoint",
-          "title": "Level assessment: live L3 interview session",
-          "desc": "When every task above is done, click Start assessment to generate your unique assessment link, then schedule the live session with your interviewer. The assessment is taken live on a screen share; you will not see a score at the end. Tick this task done after your session.",
+          "title": "Level assessment: L3 assessment",
+          "desc": "When every task above is done, click Start assessment to generate your unique assessment link. The assessment is self-paced: it opens with a hands-on capstone you build on your own time, followed by written questions, and the page stays open until you submit everything at once. You will not see a score at the end — results go to your team lead. The tracker ticks this task done automatically once you submit.",
           "assessment": true,
           "estimated_minutes": 60
         }
@@ -447,8 +447,8 @@
         {
           "id": "mobile-L4.T19",
           "kind": "checkpoint",
-          "title": "Level assessment: live L4 interview session",
-          "desc": "When every task above is done, click Start assessment to generate your unique assessment link, then schedule the live session with your interviewer. The assessment is taken live on a screen share; you will not see a score at the end. Tick this task done after your session.",
+          "title": "Level assessment: L4 assessment",
+          "desc": "When every task above is done, click Start assessment to generate your unique assessment link. The assessment is self-paced: it opens with a hands-on capstone you build on your own time, followed by written questions, and the page stays open until you submit everything at once. You will not see a score at the end — results go to your team lead. The tracker ticks this task done automatically once you submit.",
           "assessment": true,
           "estimated_minutes": 60
         }
@@ -520,8 +520,8 @@
         {
           "id": "mobile-L5.T10",
           "kind": "checkpoint",
-          "title": "Level assessment: live L5 interview session",
-          "desc": "When every task above is done, click Start assessment to generate your unique assessment link, then schedule the live session with your interviewer. The assessment is taken live on a screen share; you will not see a score at the end. Tick this task done after your session.",
+          "title": "Level assessment: L5 assessment",
+          "desc": "When every task above is done, click Start assessment to generate your unique assessment link. The assessment is self-paced: it opens with a hands-on capstone you build on your own time, followed by written questions, and the page stays open until you submit everything at once. You will not see a score at the end — results go to your team lead. The tracker ticks this task done automatically once you submit.",
           "assessment": true,
           "estimated_minutes": 60
         }

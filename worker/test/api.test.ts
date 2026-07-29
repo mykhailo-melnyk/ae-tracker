@@ -888,3 +888,128 @@ describe("/api/assessment", () => {
     expect((await callAssessment(AENV, throwing)).status).toBe(502);
   });
 });
+
+describe("/api/me assessment auto-tick", () => {
+  const PORTAL = "https://assessment.example";
+  const SECRET = "portal-shared-secret";
+  const AENV = { ...ENV, ASSESSMENT_URL: PORTAL, ASSESSMENT_SHARED_SECRET: SECRET } as any;
+
+  function level(id: string) {
+    return pathFor("web")!.levels.find((l) => l.id === id)!;
+  }
+  function launcherOf(id: string) {
+    return level(id).tasks.find((t) => t.assessment)!;
+  }
+  // Progress where every non-assessment task of L1 is done, launcher unticked.
+  function l1CompleteProgress(extra: Record<string, unknown> = {}) {
+    const tasks: Record<string, { done: boolean; at: string }> = {};
+    for (const t of level("L1").tasks) {
+      if (!t.assessment) tasks[t.id] = { done: true, at: "2026-07-01T00:00:00Z" };
+    }
+    return { github_username: "anna", created_at: "x", updated_at: "y", competency: "web", tasks, ...extra };
+  }
+  function progressResponse(progress: unknown): Response {
+    return new Response(JSON.stringify({ sha: "s1", content: btoa(JSON.stringify(progress)), encoding: "base64" }),
+      { headers: { "content-type": "application/json" } });
+  }
+  async function callMe(env: any, fetchMock: typeof fetch) {
+    const session = await signSession("anna", ENV.SESSION_SECRET, 3600);
+    const req = new Request("https://w.example/api/me", { headers: { Cookie: `session=${session}` } });
+    return handleApiMe(req, env, fetchMock);
+  }
+  // fetchMock factory: serves the progress file from github, answers portal status GETs,
+  // records portal calls and progress PUTs.
+  function mockFetch(progress: unknown, portalStatus: unknown, opts: { failPut?: boolean; portalDown?: boolean } = {}) {
+    const portalCalls: string[] = [];
+    const puts: Array<{ body: any }> = [];
+    const fn = (async (url: string, init?: RequestInit) => {
+      if (url.startsWith(PORTAL)) {
+        portalCalls.push(url);
+        if (opts.portalDown) return new Response("boom", { status: 502 });
+        return Response.json({ status: portalStatus, sessionId: "sess-1" });
+      }
+      if (init?.method === "PUT") {
+        puts.push({ body: JSON.parse(init.body as string) });
+        if (opts.failPut) return new Response('{"message":"sha mismatch"}', { status: 409 });
+        return new Response(JSON.stringify({ content: { sha: "new-sha" } }), { status: 200 });
+      }
+      return progressResponse(progress);
+    }) as typeof fetch;
+    return { fn, portalCalls, puts };
+  }
+
+  it("ticks the launcher when the portal reports the assessment submitted", async () => {
+    const { fn, portalCalls, puts } = mockFetch(l1CompleteProgress(), "submitted");
+    const res = await callMe(AENV, fn);
+    expect(res.status).toBe(200);
+    const body = await res.json() as any;
+    expect(body.tasks[launcherOf("L1").id]?.done).toBe(true);
+    expect(portalCalls).toHaveLength(1);
+    expect(portalCalls[0]).toContain("githubUsername=anna");
+    expect(portalCalls[0]).toContain("level=L1");
+    expect(puts).toHaveLength(1);
+    const saved = JSON.parse(atob(puts[0].body.content));
+    expect(saved.tasks[launcherOf("L1").id]?.done).toBe(true);
+    expect(puts[0].body.message).toContain("auto-tick");
+  });
+
+  it("also ticks when the assessment is already scored", async () => {
+    const { fn } = mockFetch(l1CompleteProgress(), "scored");
+    const body = await (await callMe(AENV, fn)).json() as any;
+    expect(body.tasks[launcherOf("L1").id]?.done).toBe(true);
+  });
+
+  it("does not tick while the session is merely created (not submitted)", async () => {
+    const { fn, puts } = mockFetch(l1CompleteProgress(), "created");
+    const body = await (await callMe(AENV, fn)).json() as any;
+    expect(body.tasks[launcherOf("L1").id]?.done).toBeUndefined();
+    expect(puts).toHaveLength(0);
+  });
+
+  it("never calls the portal when the integration is not configured", async () => {
+    const { fn, portalCalls } = mockFetch(l1CompleteProgress(), "submitted");
+    const res = await callMe(ENV, fn); // plain ENV: no ASSESSMENT_URL
+    expect(res.status).toBe(200);
+    expect(portalCalls).toHaveLength(0);
+  });
+
+  it("never calls the portal when no level has its launcher unlocked", async () => {
+    const partial = l1CompleteProgress();
+    delete (partial.tasks as any)[level("L1").tasks.filter((t) => !t.assessment)[0].id];
+    const { fn, portalCalls } = mockFetch(partial, "submitted");
+    await callMe(AENV, fn);
+    expect(portalCalls).toHaveLength(0);
+  });
+
+  it("skips levels whose launcher is already ticked", async () => {
+    const done = l1CompleteProgress();
+    (done.tasks as any)[launcherOf("L1").id] = { done: true, at: "2026-07-02T00:00:00Z" };
+    const { fn, portalCalls } = mockFetch(done, "submitted");
+    await callMe(AENV, fn);
+    expect(portalCalls).toHaveLength(0);
+  });
+
+  it("survives a portal outage: /api/me still returns 200, launcher unticked", async () => {
+    const { fn, puts } = mockFetch(l1CompleteProgress(), "submitted", { portalDown: true });
+    const res = await callMe(AENV, fn);
+    expect(res.status).toBe(200);
+    const body = await res.json() as any;
+    expect(body.tasks[launcherOf("L1").id]?.done).toBeUndefined();
+    expect(puts).toHaveLength(0);
+  });
+
+  it("still reflects the tick in the response when the progress write hits a stale sha", async () => {
+    const { fn } = mockFetch(l1CompleteProgress(), "submitted", { failPut: true });
+    const res = await callMe(AENV, fn);
+    expect(res.status).toBe(200);
+    const body = await res.json() as any;
+    // In-memory tick survives; persistence self-heals on the next read.
+    expect(body.tasks[launcherOf("L1").id]?.done).toBe(true);
+  });
+
+  it("does not auto-tick for a disabled engineer", async () => {
+    const { fn, portalCalls } = mockFetch(l1CompleteProgress({ disabled: true }), "submitted");
+    await callMe(AENV, fn);
+    expect(portalCalls).toHaveLength(0);
+  });
+});

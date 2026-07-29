@@ -42,6 +42,72 @@ function applyDisplayName(progress: ProgressFile, displayName?: string): boolean
   return true;
 }
 
+/**
+ * Auto-tick assessment-launcher tasks whose assessment has been submitted. Pull model: on the
+ * engineer's own progress read, for each level whose launcher is unlocked (every other task done)
+ * but not yet ticked, ask the assessment portal for the session status (server-to-server, same
+ * shared secret as /api/assessment). "submitted" or "scored" ticks the launcher in the progress
+ * file. Best-effort end to end: any portal or write failure just means the tick lands on a later
+ * read — this must never break /api/me. Returns the updated progress, or null when nothing
+ * changed.
+ */
+async function autoTickAssessments(
+  env: Env,
+  username: string,
+  progress: ProgressFile,
+  sha: string | null,
+  fetchFn: typeof fetch,
+): Promise<ProgressFile | null> {
+  if (!env.ASSESSMENT_URL || !env.ASSESSMENT_SHARED_SECRET) return null;
+  if (progress.disabled) return null;
+  const path = curriculum.pathFor(progress.competency);
+  if (!path) return null;
+
+  // Same eligibility as the launcher unlock: a session can only exist for a level the engineer
+  // completed, so these are the only levels worth asking the portal about (usually 0 or 1).
+  const eligible = path.levels.filter((lvl) => {
+    const launcher = lvl.tasks.find((t) => t.assessment);
+    if (!launcher || progress.tasks[launcher.id]?.done === true) return false;
+    return lvl.tasks.filter((t) => !t.assessment).every((t) => progress.tasks[t.id]?.done === true);
+  });
+  if (eligible.length === 0) return null;
+
+  const base = env.ASSESSMENT_URL.replace(/\/+$/, "") + "/api/integrations/tracker/sessions";
+  const tickedLevels: Array<{ levelId: string; taskId: string }> = [];
+  for (const lvl of eligible) {
+    try {
+      const res = await fetchFn(
+        `${base}?githubUsername=${encodeURIComponent(username)}&level=${encodeURIComponent(lvl.id)}`,
+        { headers: { authorization: `Bearer ${env.ASSESSMENT_SHARED_SECRET}` } },
+      );
+      if (!res.ok) continue;
+      const data = (await res.json()) as { status?: unknown };
+      if (data.status === "submitted" || data.status === "scored") {
+        const launcher = lvl.tasks.find((t) => t.assessment)!;
+        tickedLevels.push({ levelId: lvl.id, taskId: launcher.id });
+      }
+    } catch (e) {
+      console.warn(`assessment status check failed: user=${username} level=${lvl.id} err=${e instanceof Error ? e.message : String(e)}`);
+    }
+  }
+  if (tickedLevels.length === 0) return null;
+
+  const now = new Date().toISOString();
+  for (const t of tickedLevels) progress.tasks[t.taskId] = { done: true, at: now };
+  progress.updated_at = now;
+
+  const cfg = { owner: env.DATA_REPO_OWNER, repo: env.DATA_REPO_NAME, token: env.BOT_PAT };
+  const msg = `progress(${username}): auto-tick ${tickedLevels.map((t) => t.levelId).join(", ")} assessment (submitted)`;
+  try {
+    await writeJsonFile(cfg, progressPath(username), progress, sha, msg, fetchFn);
+  } catch (e) {
+    // A stale-SHA race (e.g. a concurrent mark) loses this write; the next read re-ticks and
+    // persists. Still return the ticked progress so THIS response reflects reality.
+    console.warn(`assessment auto-tick write skipped: user=${username} err=${e instanceof Error ? e.message : String(e)}`);
+  }
+  return progress;
+}
+
 export async function handleApiMe(
   request: Request,
   env: Env,
@@ -71,7 +137,8 @@ export async function handleApiMe(
       console.warn(`display-name backfill skipped for ${username}: ${e instanceof Error ? e.message : String(e)}`);
     }
   }
-  return Response.json({ ...progress, is_admin });
+  const ticked = await autoTickAssessments(env, username, progress, existing.sha, fetchFn);
+  return Response.json({ ...(ticked ?? progress), is_admin });
 }
 
 export async function handleApiMark(

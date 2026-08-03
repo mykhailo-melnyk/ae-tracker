@@ -14,7 +14,7 @@ ADMIN_USERNAMES = "mykhailo-melnyk,lucaskasprzyk,jackiehimel,venukanduri,arielle
 SUPERADMIN_USERNAMES = "mykhailo-melnyk"  # comma-separated; superset of admin — can disable/enable engineers
 FRONTEND_ORIGIN = "https://mykhailo-melnyk.github.io"
 FRONTEND_BASE_PATH = "/ae-tracker"  # path prefix where tracker.html lives — empty for local dev (override in .dev.vars)
-ASSESSMENT_URL = ""  # assessment portal base URL (e.g. https://ae-assessment.vercel.app); empty = handoff off. Needs the ASSESSMENT_SHARED_SECRET secret too.
+ASSESSMENT_URL = "https://ae-assessment-solvd.vercel.app"  # assessment portal base URL; empty = handoff off. Needs the ASSESSMENT_SHARED_SECRET secret too.
 
 # KV namespace for aggregate cache
 [[kv_namespaces]]

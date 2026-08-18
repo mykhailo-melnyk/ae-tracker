@@ -227,3 +227,42 @@ So this week: open the tracker, do **one** task. That's it.
 Haven't been in for a while? No catching up, no guilt — the path waits for you, exactly where you left it. 👉 **https://mykhailo-melnyk.github.io/ae-tracker/tracker.html**
 
 Let's get the momentum going again — together. 💪
+
+---
+
+## 10. Shout-out — celebrate progress across sections 🎉
+
+> **Dated one-off snapshot (data as of 2026-08-18).** A positive-only, celebrate-up
+> shout-out that spotlights ~15 distinct people across *different* categories (streaks,
+> level-ups, first assessments, cert prep, weekly movers) rather than a single ranking —
+> consistent with the Wall's no-leaderboard ethos (#6). **Not yet sent.**
+>
+> **The names below are a point-in-time snapshot — regenerate before reusing:** pull the
+> latest `progress/*.json` from the `mykhailo-melnyk/ae-tracker-data` repo and recompute
+> (streaks / level-ups / cert prep / last-7-day movers, mirroring `worker/src/wall.ts`).
+> `@Names` are GitHub display names — swap in Slack handles (or drop the `@`) when posting.
+
+🎉 **Shout-outs — the momentum is real**
+
+I went and looked at the tracker, and honestly? You've been busy while I was heads-down. Some genuine celebrating to do — across the board, not just one leaderboard. 👏
+
+🔥 **Streak royalty**
+@Vladislav Domorad is on a **9-week streak** — nine weeks in a row of showing up. 🤯 Right behind: @Oleksandr Babenko and @Franco Javier Danussi at **6 weeks** each. This is *exactly* the habit we're building.
+
+📈 **Level 1 — done and dusted**
+A whole crew has completed all of Level 1: @Vladislav Domorad, @Martin Daprotis, @Franco Javier Danussi, @Jackie Himel, @Ignacio Narvaja, @Oleksandr Babenko, @Fernando Camilotti Monteiro, @Daniel Wojno, @Diego Tsuyoshi. That's the foundation locked in. 💪
+
+🎓 **First through the new Level Assessment**
+Remember the Level assessments I just posted about? @Ignacio Narvaja and @Jackie Himel have *already* been through the Level 1 one. First ones across the line. 🏁
+
+📜 **Cert-prep trailblazer**
+@Andrei Valasevich is charging through the **Claude Code certification** prep — furthest along of anyone so far — with @Vladislav Domorad and @Martin Daprotis close behind. 🏅
+
+⚡ **On a roll this week**
+@Franco Javier Danussi, @Oleksandr Trykopa, @Andres Virga — most tasks ticked off in the last 7 days. Keep it rolling!
+
+**And together?** As a group we've completed **421 tasks** on the path. Every one of those is 15 minutes of real practice that's making someone faster with AI. 🚀
+
+Not on the list yet? No stress — the fastest way onto the next shout-out is one task this week. 👉 **https://mykhailo-melnyk.github.io/ae-tracker/tracker.html**
+
+Proud of this crew. Let's keep it going. 🙌

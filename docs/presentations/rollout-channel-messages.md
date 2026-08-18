@@ -154,3 +154,76 @@ This ties right back to the habit we're building: **small steps, every week.** K
 Curious how a card works? There's a short **"How the wall works"** FAQ right on the page.
 
 👉 Open it → **https://mykhailo-melnyk.github.io/ae-tracker/tracker.html** (then **🏆 Wall** at the top). Let's keep the momentum going together. 💪
+
+---
+
+## 7. Reactivation — welcome back + Level Assessments 🎓
+
+> Channel had gone quiet for ~a month. This reopens it and headlines the biggest
+> unannounced feature since the Wall: **Level Assessments** (live 2026-08-03) — every level
+> ends with a live, reviewer-run assessment; the L5 assessment delivers the capstone.
+> **✅ SENT — 2026-08-18.** Post #8 next (~2 days later), then #9 (later that week).
+
+👋 **We're back — and the path just got a real finish line**
+
+Hey team! It's been a little quiet here while we were shipping — thanks for your patience. 🙏 The tracker's been busy in the background, and there's a big new piece I've been waiting to show you.
+
+🎓 **New: Level Assessments**
+Until now you could tick your way through a level… and then what? Now every level ends with a real **Level assessment** — a live, one-on-one session that confirms you've actually got the skills, not just the checkmarks.
+
+**How it works:**
+1. Finish all the tasks in a level ✅
+2. The last task — **"Level assessment"** — unlocks. Hit **Start assessment** and the tracker checks you've completed the level, then generates *your* personal session link.
+3. You do the assessment live with a reviewer. Pass it, and that level is truly in the bag. 💪
+
+And the finale: the **Level 5 assessment delivers the capstone** — the real, applied proof of everything you've built along the way.
+
+**Nothing you've done is lost** — all your ticks are exactly where you left them. If you finished a level weeks ago, your **Start assessment** button is already waiting for you.
+
+This is the honest payoff for the daily habit: you don't just *feel* faster with AI — you can **show** it. 🚀
+
+👉 Jump back in → **https://mykhailo-melnyk.github.io/ae-tracker/tracker.html**
+
+Questions about the assessment, or stuck anywhere? **Post right here** — that's what this channel is for. 💬
+
+---
+
+## 8. Spotlight — Claude Code certification prep 📜
+
+> Follow-up (~2 days after #7). Certification prep was never announced in-channel.
+> **Not yet sent.**
+
+📜 **Did you know? There's a full Claude Code certification prep path in the tracker**
+
+Beyond the 5-level path, the tracker now has a dedicated **Certifications** area — self-service prep toward the **Claude Code certification** (Anthropic's official exam). 🎯
+
+It's the same simple idea as the main path: a checklist of prep topics you tick off as you go, at your own pace. No grading, no deadline — just a clear route from "I use Claude Code" to "I could pass the exam on it."
+
+**Why bother?**
+- It's a real, external credential you can put on your profile 🏅
+- The prep itself makes you sharper at the tool you're using every day
+- It stacks right on top of the habit you're already building
+
+👉 Open the tracker and look for the **Certifications** page → **https://mykhailo-melnyk.github.io/ae-tracker/tracker.html**
+
+Give it a look and tell me what you think — and if a prep topic is unclear or a link's broken, hit the **⚑ Report / suggest** flag and it comes straight to me. 🙌
+
+---
+
+## 9. Light weekly re-nudge ⚡
+
+> Gentle "keep the streak alive" pulse (later that week). Leans on the Wall (#6).
+> **Not yet sent.**
+
+⚡ **One task this week — that's the whole game**
+
+Quick, friendly nudge. 🙂 The thing that makes AI actually make you faster isn't a big push once in a while — it's **small steps, every week**. Fifteen minutes on your real work beats a marathon once a month, every time.
+
+So this week: open the tracker, do **one** task. That's it.
+- Keep your **streak** alive on the **🏆 Wall** ⚡
+- Inch toward your **next milestone** (it's on your personal panel)
+- Closer to your next **Level assessment** 🎓
+
+Haven't been in for a while? No catching up, no guilt — the path waits for you, exactly where you left it. 👉 **https://mykhailo-melnyk.github.io/ae-tracker/tracker.html**
+
+Let's get the momentum going again — together. 💪

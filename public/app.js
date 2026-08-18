@@ -218,6 +218,10 @@ async function startAssessment(taskId, launchEl) {
   const result = launchEl.querySelector(".assessment-result");
   btn.disabled = true;
   result.textContent = "Getting your link…";
+  // Opened synchronously inside the click gesture — a window.open after the
+  // await below would be swallowed by popup blockers.
+  const tab = window.open("", "_blank");
+  if (tab) tab.opener = null;
   try {
     const res = await apiFetch(WORKER + "/api/assessment", {
       method: "POST",
@@ -230,16 +234,18 @@ async function startAssessment(taskId, launchEl) {
         ? `Not yet — ${body.remaining} task${body.remaining === 1 ? "" : "s"} in this level still to go.`
         : "Pick your competency first.";
       btn.disabled = false;
+      tab?.close();
       return;
     }
     if (!res.ok) throw new Error("assessment failed: " + res.status);
     const { url } = await res.json();
-    // Same-tab redirect: popup blockers ignore same-tab navigation (unlike
-    // window.open after an await), and the link stays as a fallback for anyone
-    // who comes back to this tab.
-    result.innerHTML = `<a href="${url}" rel="noopener">Taking you to your assessment… ↗</a>`;
-    window.location.assign(url);
+    // The link stays as a fallback if the tab was blocked or gets closed.
+    result.innerHTML = `<a href="${url}" target="_blank" rel="noopener">Your assessment (opens in a new tab) ↗</a>`;
+    if (tab) tab.location = url;
+    else window.location.assign(url);
+    btn.disabled = false; // this tab stays put now — allow reopening the link
   } catch (e) {
+    tab?.close();
     result.textContent = "Could not get your assessment link. Try again in a moment.";
     btn.disabled = false;
   }
